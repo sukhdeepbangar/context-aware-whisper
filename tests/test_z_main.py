@@ -23,8 +23,24 @@ def _setup_macos_mocks():
         sys.modules['AVFAudio'] = MagicMock()
 
 
+def _setup_tkinter_mock():
+    """Set up mock for tkinter if not available."""
+    try:
+        import tkinter
+    except ImportError:
+        # Create mock tkinter module
+        mock_tk = MagicMock()
+        mock_tk.Tk = MagicMock()
+        mock_tk.Toplevel = MagicMock()
+        mock_tk.Canvas = MagicMock()
+        mock_tk.TclError = Exception
+        sys.modules['tkinter'] = mock_tk
+        sys.modules['_tkinter'] = MagicMock()
+
+
 # Set up mocks before importing main
 _setup_macos_mocks()
+_setup_tkinter_mock()
 from main import HandFreeApp, AppState, main
 
 

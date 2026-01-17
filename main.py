@@ -5,6 +5,7 @@ Main application entry point.
 Orchestrates hotkey detection, audio recording, transcription, and text output.
 """
 
+import logging
 import os
 import signal
 import sys
@@ -16,7 +17,14 @@ from dotenv import load_dotenv
 from handfree.audio_recorder import AudioRecorder
 from handfree.config import Config
 from handfree.transcriber import Transcriber
-from handfree.exceptions import TranscriptionError, OutputError
+from handfree.exceptions import (
+    TranscriptionError,
+    OutputError,
+    UIInitializationError,
+    HotkeyDetectorError,
+    OutputHandlerError,
+    PlatformNotSupportedError,
+)
 from handfree.ui import HandFreeUI
 from handfree.platform import (
     create_hotkey_detector,
@@ -24,6 +32,10 @@ from handfree.platform import (
     get_platform,
     get_default_hotkey_description,
 )
+
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 class AppState(Enum):
@@ -63,28 +75,71 @@ class HandFreeApp:
         # Load environment variables
         load_dotenv()
 
+        # Log platform detection
+        platform = get_platform()
+        logger.info(f"Platform detected: {platform}")
+
         # Store configuration
         self.language = language or os.environ.get("HANDFREE_LANGUAGE")
         self.use_paste = use_paste
         self.ui_enabled = ui_enabled
         self.history_enabled = history_enabled
 
-        # Initialize modules
+        # Initialize audio recorder
         self.recorder = AudioRecorder(sample_rate=sample_rate)
+        logger.debug(f"Audio recorder initialized (sample_rate={sample_rate})")
+
+        # Initialize transcriber
         self.transcriber = Transcriber(api_key=api_key)
-        self.output = create_output_handler(type_delay=type_delay)
+        logger.debug("Transcriber initialized")
 
-        # Initialize UI (with history support and position)
-        self.ui = HandFreeUI(
-            history_enabled=history_enabled,
-            indicator_position=ui_position
-        ) if ui_enabled else None
+        # Initialize output handler with error handling
+        try:
+            self.output = create_output_handler(type_delay=type_delay)
+            logger.info(f"Output handler initialized: {type(self.output).__name__}")
+        except PlatformNotSupportedError as e:
+            logger.error(f"Output handler initialization failed: {e}")
+            raise OutputHandlerError(
+                f"Cannot initialize output handler on {platform}: {e}\n"
+                "Ensure you have the required dependencies installed for your platform."
+            ) from e
 
-        # Initialize hotkey detector (platform-specific)
-        self.detector = create_hotkey_detector(
-            on_start=self.handle_start,
-            on_stop=self.handle_stop
-        )
+        # Initialize UI with graceful degradation
+        self.ui = None
+        if ui_enabled:
+            try:
+                self.ui = HandFreeUI(
+                    history_enabled=history_enabled,
+                    indicator_position=ui_position
+                )
+                logger.info(f"UI initialized (position={ui_position}, history={history_enabled})")
+            except Exception as e:
+                # UI failure is non-fatal - continue without UI
+                logger.warning(f"UI initialization failed, continuing without visual indicator: {e}")
+                print(f"[Warning] UI disabled: {e}")
+                self.ui = None
+
+        # Initialize hotkey detector with clear error messages
+        try:
+            self.detector = create_hotkey_detector(
+                on_start=self.handle_start,
+                on_stop=self.handle_stop
+            )
+            logger.info(f"Hotkey detector initialized: {type(self.detector).__name__}")
+        except PlatformNotSupportedError as e:
+            logger.error(f"Hotkey detector initialization failed: {e}")
+            raise HotkeyDetectorError(
+                f"Cannot initialize hotkey detector on {platform}: {e}\n"
+                "Supported platforms: macOS, Windows, Linux"
+            ) from e
+        except Exception as e:
+            logger.error(f"Hotkey detector initialization failed: {e}")
+            raise HotkeyDetectorError(
+                f"Failed to initialize hotkey detector: {e}\n"
+                "This may be due to missing system permissions or dependencies.\n"
+                "On macOS: Grant Accessibility permission in System Settings.\n"
+                "On Linux: Ensure you have X11 or proper Wayland permissions."
+            ) from e
 
         # Application state
         self._state = AppState.IDLE
@@ -248,16 +303,49 @@ class HandFreeApp:
         print("\nHandFree stopped. Goodbye!")
 
 
+def setup_logging(debug: bool = False) -> None:
+    """
+    Configure logging for the application.
+
+    Args:
+        debug: If True, enable debug-level logging
+    """
+    level = logging.DEBUG if debug else logging.INFO
+    format_str = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    date_format = "%Y-%m-%d %H:%M:%S"
+
+    logging.basicConfig(
+        level=level,
+        format=format_str,
+        datefmt=date_format
+    )
+
+    # Also log to file if in debug mode
+    if debug:
+        file_handler = logging.FileHandler("handfree.log")
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logging.Formatter(format_str, datefmt=date_format))
+        logging.getLogger().addHandler(file_handler)
+
+
 def main():
     """Main entry point."""
+    # Check for debug mode from environment
+    debug_mode = os.environ.get("HANDFREE_DEBUG", "").lower() in ("true", "1", "yes")
+    setup_logging(debug=debug_mode)
+
+    logger.info("HandFree starting...")
+
     # Load and validate configuration
     try:
         config = Config.from_env()
         warnings = config.validate()
         for warning in warnings:
             print(f"Warning: {warning}")
+            logger.warning(warning)
     except ValueError as e:
         print(f"Error: {e}")
+        logger.error(f"Configuration error: {e}")
         sys.exit(1)
 
     # Create application with validated config
@@ -272,12 +360,26 @@ def main():
             ui_position=config.ui_position,
             history_enabled=config.history_enabled
         )
+    except HotkeyDetectorError as e:
+        print(f"Error: {e}")
+        logger.error(f"Hotkey detector error: {e}")
+        sys.exit(1)
+    except OutputHandlerError as e:
+        print(f"Error: {e}")
+        logger.error(f"Output handler error: {e}")
+        sys.exit(1)
+    except PlatformNotSupportedError as e:
+        print(f"Error: {e}")
+        logger.error(f"Platform not supported: {e}")
+        sys.exit(1)
     except Exception as e:
         print(f"Error: Failed to initialize application: {e}")
+        logger.exception(f"Unexpected initialization error: {e}")
         sys.exit(1)
 
     # Set up signal handlers for graceful shutdown
     def signal_handler(sig, frame):
+        logger.info("Received shutdown signal")
         app.stop()
         sys.exit(0)
 
@@ -286,9 +388,11 @@ def main():
 
     # Run the application
     try:
+        logger.info("HandFree running")
         app.run()
     except Exception as e:
         print(f"Fatal error: {e}")
+        logger.exception(f"Fatal error during execution: {e}")
         app.stop()
         sys.exit(1)
 

@@ -48,3 +48,18 @@ class StorageError(HandFreeError):
 class PlatformNotSupportedError(HandFreeError):
     """Error when running on an unsupported platform."""
     pass
+
+
+class UIInitializationError(HandFreeError):
+    """Error when UI fails to initialize."""
+    pass
+
+
+class HotkeyDetectorError(HandFreeError):
+    """Error when hotkey detector fails to initialize or start."""
+    pass
+
+
+class OutputHandlerError(HandFreeError):
+    """Error when output handler fails to initialize."""
+    pass

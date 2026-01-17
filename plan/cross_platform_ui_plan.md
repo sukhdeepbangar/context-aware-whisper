@@ -230,9 +230,12 @@ This plan implements two features in priority order:
 - [ ] 5.2.4 Add keyboard shortcut hints in history panel
 
 ### Step 5.3: Error Handling
-- [ ] 5.3.1 Graceful degradation if UI fails to initialize
-- [ ] 5.3.2 Clear error messages for platform-specific features
-- [ ] 5.3.3 Log platform detection and selected handlers
+- [x] 5.3.1 Graceful degradation if UI fails to initialize
+- [x] 5.3.2 Clear error messages for platform-specific features
+- [x] 5.3.3 Log platform detection and selected handlers
+- [x] 5.3.4 Add new exception types (UIInitializationError, HotkeyDetectorError, OutputHandlerError)
+- [x] 5.3.5 Add debug mode via HANDFREE_DEBUG environment variable
+- [x] 5.3.6 Add 38 unit tests for error handling (test_error_handling.py)
 
 ### Step 5.4: Documentation
 - [ ] 5.4.1 Update README.md with cross-platform instructions
@@ -297,4 +300,4 @@ This plan implements two features in priority order:
 | Phase 2: Transcription History | Complete | JSONL-based storage, history panel UI, integrated with main app |
 | Phase 3: Platform Abstraction | Complete | Platform factory with macOS/Windows/Linux implementations, 43 new tests |
 | Phase 4: Windows/Linux Support | Complete | Implementations done, dependencies updated (4.4), pending: xdotool fallback (4.3.3), VM testing (4.5) |
-| Phase 5: Polish | In Progress | Step 5.1 (Configuration) complete with 75+ tests; remaining: UI refinements, error handling, documentation |
+| Phase 5: Polish | In Progress | Step 5.1 (Configuration) complete with 75+ tests; Step 5.3 (Error Handling) complete with 38 new tests; remaining: UI refinements (5.2), documentation (5.4), final testing (5.5) |
