@@ -43,3 +43,8 @@ class PermissionError(HandFreeError):
 class StorageError(HandFreeError):
     """Error related to data storage operations."""
     pass
+
+
+class PlatformNotSupportedError(HandFreeError):
+    """Error when running on an unsupported platform."""
+    pass

@@ -1,0 +1,132 @@
+"""
+macOS Hotkey Detector
+
+Detects Fn/Globe key press using macOS CGEvent tap.
+Hold Fn to record, release to transcribe.
+"""
+
+import subprocess
+import threading
+from typing import Callable, Optional
+
+import Quartz
+from Quartz import (
+    CGEventTapCreate, kCGSessionEventTap, kCGHeadInsertEventTap,
+    kCGEventTapOptionListenOnly, CGEventMaskBit, kCGEventFlagsChanged,
+    CFMachPortCreateRunLoopSource, CFRunLoopGetCurrent, CFRunLoopAddSource,
+    kCFRunLoopCommonModes, CFRunLoopRunInMode, kCFRunLoopDefaultMode,
+    CGEventGetFlags
+)
+
+from handfree.platform.base import HotkeyDetectorBase
+
+# Fn key constants
+FN_KEYCODE = 63
+FN_FLAG = 0x800000
+
+
+class MacOSHotkeyDetector(HotkeyDetectorBase):
+    """Detects Fn/Globe key for recording toggle using CGEvent tap."""
+
+    def __init__(self, on_start: Callable[[], None], on_stop: Callable[[], None]):
+        """
+        Initialize hotkey detector with start/stop callbacks.
+
+        Args:
+            on_start: Called when Fn key is pressed (start recording)
+            on_stop: Called when Fn key is released (stop recording)
+        """
+        super().__init__(on_start, on_stop)
+        self._tap = None
+        self._running = False
+        self._thread: Optional[threading.Thread] = None
+
+    def _show_indicator(self, recording: bool) -> None:
+        """Show visual indicator for recording state (like Whisper Flow)."""
+        # Use macOS notification for visual feedback
+        if recording:
+            title = "🎙️ Recording..."
+            message = "Speak now - release Fn to transcribe"
+        else:
+            title = "⏳ Transcribing..."
+            message = "Processing your speech"
+
+        def notify():
+            try:
+                # Use osascript for quick notification
+                script = f'display notification "{message}" with title "{title}"'
+                subprocess.run(
+                    ["osascript", "-e", script],
+                    capture_output=True,
+                    timeout=1
+                )
+            except Exception:
+                pass
+        threading.Thread(target=notify, daemon=True).start()
+
+    def _event_callback(self, proxy, event_type, event, refcon):
+        """Handle CGEvent callback for Fn key detection."""
+        keycode = Quartz.CGEventGetIntegerValueField(
+            event, Quartz.kCGKeyboardEventKeycode
+        )
+
+        # Only handle Fn key (keycode 63)
+        if keycode == FN_KEYCODE:
+            flags = CGEventGetFlags(event)
+            fn_pressed = (flags & FN_FLAG) != 0
+
+            if fn_pressed and not self._is_recording:
+                # Fn pressed - start recording, show indicator
+                self._is_recording = True
+                self.on_start()
+                self._show_indicator(recording=True)
+            elif not fn_pressed and self._is_recording:
+                # Fn released - stop recording, show transcribing indicator
+                self._is_recording = False
+                self._show_indicator(recording=False)
+                self.on_stop()
+
+        return event
+
+    def _run_loop(self) -> None:
+        """Run the CGEvent tap loop in a thread."""
+        mask = CGEventMaskBit(kCGEventFlagsChanged)
+
+        self._tap = CGEventTapCreate(
+            kCGSessionEventTap,
+            kCGHeadInsertEventTap,
+            kCGEventTapOptionListenOnly,
+            mask,
+            self._event_callback,
+            None
+        )
+
+        if self._tap is None:
+            print("Error: Failed to create event tap.")
+            print("Please grant Accessibility permission in System Settings.")
+            return
+
+        source = CFMachPortCreateRunLoopSource(None, self._tap, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopCommonModes)
+        Quartz.CGEventTapEnable(self._tap, True)
+
+        while self._running:
+            CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, False)
+
+    def get_hotkey_description(self) -> str:
+        """Get human-readable description of the hotkey."""
+        return "Fn/Globe key"
+
+    def start(self) -> None:
+        """Start listening for Fn key."""
+        self._running = True
+        self._thread = threading.Thread(target=self._run_loop, daemon=True)
+        self._thread.start()
+        print(f"Hotkey detector started. Hold {self.get_hotkey_description()} to record.")
+
+    def stop(self) -> None:
+        """Stop listening and clean up."""
+        self._running = False
+        if self._tap:
+            Quartz.CGEventTapEnable(self._tap, False)
+            self._tap = None

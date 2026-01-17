@@ -13,12 +13,16 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-from handfree.hotkey_detector import HotkeyDetector
 from handfree.audio_recorder import AudioRecorder
 from handfree.transcriber import Transcriber
-from handfree.output_handler import OutputHandler
 from handfree.exceptions import TranscriptionError, OutputError
 from handfree.ui import HandFreeUI
+from handfree.platform import (
+    create_hotkey_detector,
+    create_output_handler,
+    get_platform,
+    get_default_hotkey_description,
+)
 
 
 class AppState(Enum):
@@ -65,13 +69,13 @@ class HandFreeApp:
         # Initialize modules
         self.recorder = AudioRecorder(sample_rate=sample_rate)
         self.transcriber = Transcriber(api_key=api_key)
-        self.output = OutputHandler(type_delay=type_delay)
+        self.output = create_output_handler(type_delay=type_delay)
 
         # Initialize UI (with history support)
         self.ui = HandFreeUI(history_enabled=history_enabled) if ui_enabled else None
 
-        # Initialize hotkey detector (Fn/Globe key)
-        self.detector = HotkeyDetector(
+        # Initialize hotkey detector (platform-specific)
+        self.detector = create_hotkey_detector(
             on_start=self.handle_start,
             on_stop=self.handle_stop
         )
@@ -194,16 +198,20 @@ class HandFreeApp:
 
     def _print_banner(self) -> None:
         """Print welcome message and instructions."""
+        hotkey = self.detector.get_hotkey_description()
+        platform = get_platform()
+
         print("=" * 55)
         print("  HandFree - Speech-to-Text")
         print("=" * 55)
         print()
-        print("  Mode: Fn/Globe key (hold to record)")
+        print(f"  Platform: {platform}")
+        print(f"  Mode: {hotkey} (hold to record)")
         print()
         print("  Usage:")
-        print("    1. HOLD Fn key            -> Recording starts")
+        print(f"    1. HOLD {hotkey:<20} -> Recording starts")
         print("    2. Speak while holding")
-        print("    3. RELEASE Fn key         -> Transcribes & types")
+        print(f"    3. RELEASE {hotkey:<17} -> Transcribes & types")
         print()
         print("  The transcribed text will be:")
         print("    - Typed at the current cursor position")
