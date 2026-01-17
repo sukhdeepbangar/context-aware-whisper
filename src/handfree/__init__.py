@@ -20,6 +20,15 @@ from handfree.hotkey_detector import HotkeyDetector
 from handfree.output_handler import OutputHandler, get_clipboard_content
 from handfree.transcriber import Transcriber
 
+# UI modules (optional - may not be available if tkinter not installed)
+try:
+    from handfree.ui import HandFreeUI, RecordingIndicator
+    _UI_AVAILABLE = True
+except ImportError:
+    _UI_AVAILABLE = False
+    HandFreeUI = None
+    RecordingIndicator = None
+
 __version__ = "0.1.0"
 
 __all__ = [
@@ -36,4 +45,6 @@ __all__ = [
     "OutputHandler",
     "get_clipboard_content",
     "Transcriber",
+    "HandFreeUI",
+    "RecordingIndicator",
 ]

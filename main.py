@@ -18,6 +18,7 @@ from handfree.audio_recorder import AudioRecorder
 from handfree.transcriber import Transcriber
 from handfree.output_handler import OutputHandler
 from handfree.exceptions import TranscriptionError, OutputError
+from handfree.ui import HandFreeUI
 
 
 class AppState(Enum):
@@ -36,7 +37,9 @@ class HandFreeApp:
         language: Optional[str] = None,
         type_delay: float = 0.0,
         sample_rate: int = 16000,
-        use_paste: bool = False
+        use_paste: bool = False,
+        ui_enabled: bool = True,
+        history_enabled: bool = True
     ):
         """
         Initialize all components.
@@ -47,6 +50,8 @@ class HandFreeApp:
             type_delay: Delay between keystrokes in seconds.
             sample_rate: Audio sample rate in Hz.
             use_paste: If True, use clipboard paste instead of keystroke typing.
+            ui_enabled: If True, show visual UI indicator.
+            history_enabled: If True, save transcriptions to history database.
         """
         # Load environment variables
         load_dotenv()
@@ -54,11 +59,16 @@ class HandFreeApp:
         # Store configuration
         self.language = language or os.environ.get("HANDFREE_LANGUAGE")
         self.use_paste = use_paste
+        self.ui_enabled = ui_enabled
+        self.history_enabled = history_enabled
 
         # Initialize modules
         self.recorder = AudioRecorder(sample_rate=sample_rate)
         self.transcriber = Transcriber(api_key=api_key)
         self.output = OutputHandler(type_delay=type_delay)
+
+        # Initialize UI (with history support)
+        self.ui = HandFreeUI(history_enabled=history_enabled) if ui_enabled else None
 
         # Initialize hotkey detector (Fn/Globe key)
         self.detector = HotkeyDetector(
@@ -88,6 +98,11 @@ class HandFreeApp:
 
         print("\n[Recording] Started... Speak now.")
         self._state = AppState.RECORDING
+
+        # Update UI
+        if self.ui:
+            self.ui.set_state("recording")
+
         self.recorder.start_recording()
 
     def handle_stop(self) -> None:
@@ -100,12 +115,18 @@ class HandFreeApp:
 
         self._state = AppState.TRANSCRIBING
 
+        # Update UI
+        if self.ui:
+            self.ui.set_state("transcribing")
+
         # Get recorded audio
         audio_bytes = self.recorder.stop_recording()
 
         if not audio_bytes or duration < 0.1:
             print("[Warning] No audio recorded or too short")
             self._state = AppState.IDLE
+            if self.ui:
+                self.ui.set_state("error")
             return
 
         # Transcribe
@@ -120,15 +141,36 @@ class HandFreeApp:
                 try:
                     self.output.output(text, use_paste=self.use_paste)
                     print("[Output] Text copied to clipboard and typed")
+                    # Update UI - success
+                    if self.ui:
+                        self.ui.set_state("success")
+                        # Save to history
+                        self.ui.add_transcription(
+                            text=text,
+                            duration=duration,
+                            language=self.language
+                        )
                 except OutputError as e:
                     print(f"[Error] Output failed: {e}")
                     print("[Info] Text is still in clipboard - use Cmd+V to paste")
+                    # Update UI - error
+                    if self.ui:
+                        self.ui.set_state("error")
             else:
                 print("[Warning] No transcription returned (empty response)")
+                # Update UI - error
+                if self.ui:
+                    self.ui.set_state("error")
         except TranscriptionError as e:
             print(f"[Error] Transcription failed: {e}")
+            # Update UI - error
+            if self.ui:
+                self.ui.set_state("error")
         except Exception as e:
             print(f"[Error] Unexpected error during transcription: {e}")
+            # Update UI - error
+            if self.ui:
+                self.ui.set_state("error")
         finally:
             self._state = AppState.IDLE
 
@@ -137,6 +179,11 @@ class HandFreeApp:
         import time
 
         self._running = True
+
+        # Start UI
+        if self.ui:
+            self.ui.start()
+
         self.detector.start()
 
         self._print_banner()
@@ -180,6 +227,10 @@ class HandFreeApp:
         # Stop detector
         self.detector.stop()
 
+        # Stop UI
+        if self.ui:
+            self.ui.stop()
+
         print("\nHandFree stopped. Goodbye!")
 
 
@@ -203,6 +254,8 @@ def main():
     type_delay = float(os.environ.get("HANDFREE_TYPE_DELAY", "0"))
     sample_rate = int(os.environ.get("HANDFREE_SAMPLE_RATE", "16000"))
     use_paste = os.environ.get("HANDFREE_USE_PASTE", "").lower() in ("true", "1", "yes")
+    ui_enabled = os.environ.get("HANDFREE_UI_ENABLED", "true").lower() in ("true", "1", "yes")
+    history_enabled = os.environ.get("HANDFREE_HISTORY_ENABLED", "true").lower() in ("true", "1", "yes")
 
     # Create application
     try:
@@ -210,7 +263,9 @@ def main():
             language=language,
             type_delay=type_delay,
             sample_rate=sample_rate,
-            use_paste=use_paste
+            use_paste=use_paste,
+            ui_enabled=ui_enabled,
+            history_enabled=history_enabled
         )
     except Exception as e:
         print(f"Error: Failed to initialize application: {e}")

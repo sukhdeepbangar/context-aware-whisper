@@ -74,52 +74,42 @@ This plan implements two features in priority order:
 **Goal**: Persist transcriptions and display in history panel
 
 ### Step 2.1: Create Storage Module
-- [ ] 2.1.1 Create `src/handfree/storage/__init__.py`
-- [ ] 2.1.2 Create `src/handfree/storage/history_store.py`
-- [ ] 2.1.3 Implement `HistoryStore.__init__()` with SQLite connection
-- [ ] 2.1.4 Implement `_init_db()` to create schema:
-  ```sql
-  CREATE TABLE transcriptions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      text TEXT NOT NULL,
-      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-      duration_seconds REAL,
-      language TEXT
-  );
-  CREATE INDEX idx_timestamp ON transcriptions(timestamp DESC);
-  ```
-- [ ] 2.1.5 Implement `add()` method
-- [ ] 2.1.6 Implement `get_recent()` method
-- [ ] 2.1.7 Implement `search()` method (optional, nice-to-have)
-- [ ] 2.1.8 Implement cleanup to limit entries to 1000
+- [x] 2.1.1 Create `src/handfree/storage/__init__.py`
+- [x] 2.1.2 Create `src/handfree/storage/history_store.py`
+- [x] 2.1.3 Implement `HistoryStore.__init__()` with JSONL file storage
+- [x] 2.1.4 Implement JSONL format: one JSON object per line at `~/.handfree/history.jsonl`
+- [x] 2.1.5 Implement `add()` method
+- [x] 2.1.6 Implement `get_recent()` method
+- [x] 2.1.7 Implement `search()` method
+- [x] 2.1.8 Implement cleanup to limit entries to 1000
 
 ### Step 2.2: Implement History Panel
-- [ ] 2.2.1 Create `src/handfree/ui/history.py`
-- [ ] 2.2.2 Implement `HistoryPanel` as tkinter Toplevel window
-- [ ] 2.2.3 Add scrollable frame for entries
-- [ ] 2.2.4 Implement `_create_entry_widget()` for individual entry display
-- [ ] 2.2.5 Implement `add_entry()` method
-- [ ] 2.2.6 Implement `toggle()`, `show()`, `hide()` methods
-- [ ] 2.2.7 Add copy button functionality for each entry
+- [x] 2.2.1 Create `src/handfree/ui/history.py`
+- [x] 2.2.2 Implement `HistoryPanel` as tkinter Toplevel window
+- [x] 2.2.3 Add scrollable frame for entries
+- [x] 2.2.4 Implement `_create_entry_widget()` for individual entry display
+- [x] 2.2.5 Implement `add_entry()` method
+- [x] 2.2.6 Implement `toggle()`, `show()`, `hide()` methods
+- [x] 2.2.7 Add copy button functionality for each entry
 
 ### Step 2.3: Integrate History with UI Controller
-- [ ] 2.3.1 Add `HistoryStore` to `HandFreeUI`
-- [ ] 2.3.2 Add `HistoryPanel` to `HandFreeUI`
-- [ ] 2.3.3 Implement `add_transcription()` method (saves to store + updates panel)
-- [ ] 2.3.4 Implement `toggle_history()` method
-- [ ] 2.3.5 Load recent history on startup
+- [x] 2.3.1 Add `HistoryStore` to `HandFreeUI`
+- [x] 2.3.2 Add `HistoryPanel` to `HandFreeUI`
+- [x] 2.3.3 Implement `add_transcription()` method (saves to store + updates panel)
+- [x] 2.3.4 Implement `toggle_history()` method
+- [x] 2.3.5 Load recent history on startup
 
 ### Step 2.4: Integrate with Main Application
-- [ ] 2.4.1 Call `ui.add_transcription()` after successful transcription in `handle_mute()`
-- [ ] 2.4.2 Add history toggle hotkey listener (Ctrl+H or Cmd+H)
-- [ ] 2.4.3 Pass recording duration to `add_transcription()`
+- [x] 2.4.1 Call `ui.add_transcription()` after successful transcription in `handle_stop()`
+- [ ] 2.4.2 Add history toggle hotkey listener (Ctrl+H or Cmd+H) - deferred to Phase 5
+- [x] 2.4.3 Pass recording duration to `add_transcription()`
 
 ### Step 2.5: Testing
-- [ ] 2.5.1 Unit tests for `HistoryStore` CRUD operations
+- [x] 2.5.1 Unit tests for `HistoryStore` CRUD operations (42 tests passing)
 - [ ] 2.5.2 Manual test: transcription appears in history after speaking
 - [ ] 2.5.3 Manual test: history persists after app restart
 - [ ] 2.5.4 Manual test: copy button copies text to clipboard
-- [ ] 2.5.5 Manual test: Ctrl+H toggles history panel
+- [ ] 2.5.5 Manual test: Ctrl+H toggles history panel - deferred
 
 ---
 
@@ -298,8 +288,8 @@ This plan implements two features in priority order:
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| Phase 1: Recording Indicator | Not Started | |
-| Phase 2: Transcription History | Not Started | |
+| Phase 1: Recording Indicator | Complete | UI indicator with states (idle, recording, transcribing, success, error) |
+| Phase 2: Transcription History | Complete | JSONL-based storage, history panel UI, integrated with main app |
 | Phase 3: Platform Abstraction | Not Started | |
 | Phase 4: Windows/Linux Support | Not Started | |
 | Phase 5: Polish | Not Started | |

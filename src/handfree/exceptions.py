@@ -38,3 +38,8 @@ class OutputError(HandFreeError):
 class PermissionError(HandFreeError):
     """Error related to missing system permissions."""
     pass
+
+
+class StorageError(HandFreeError):
+    """Error related to data storage operations."""
+    pass
