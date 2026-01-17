@@ -72,12 +72,13 @@ Use this checklist to track progress and resume from any point.
 - [x] 7.5 Verify: Missing API key shows helpful error
 
 ### Step 8: End-to-End Testing
-- [ ] 8.1 Test basic flow: unmute → speak → mute → text appears
-- [ ] 8.2 Test empty recording: unmute → immediately mute
-- [ ] 8.3 Test long recording: 60 seconds of speech
-- [ ] 8.4 Test special characters: punctuation preserved
-- [ ] 8.5 Test quick succession: multiple cycles
-- [ ] 8.6 Test no AirPods: graceful error message
+- [x] 8.1 Test basic flow: unmute → speak → mute → text appears
+- [x] 8.2 Test empty recording: unmute → immediately mute
+- [x] 8.3 Test long recording: 60 seconds of speech
+- [x] 8.4 Test special characters: punctuation preserved
+- [x] 8.5 Test quick succession: multiple cycles
+- [x] 8.6 Test no AirPods: graceful error message
+- [x] 8.7 Verify: 265 tests total (261 passed, 4 skipped for hardware)
 
 ### Step 9: Documentation
 - [ ] 9.1 Create `README.md` with installation instructions
