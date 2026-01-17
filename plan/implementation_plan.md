@@ -81,10 +81,11 @@ Use this checklist to track progress and resume from any point.
 - [x] 8.7 Verify: 265 tests total (261 passed, 4 skipped for hardware)
 
 ### Step 9: Documentation
-- [ ] 9.1 Create `README.md` with installation instructions
-- [ ] 9.2 Document usage instructions
-- [ ] 9.3 Document permissions setup
-- [ ] 9.4 Document troubleshooting
+- [x] 9.1 Create `README.md` with installation instructions
+- [x] 9.2 Document usage instructions
+- [x] 9.3 Document permissions setup
+- [x] 9.4 Document troubleshooting
+- [x] 9.5 Verify: 44 documentation tests pass
 
 ---
 
