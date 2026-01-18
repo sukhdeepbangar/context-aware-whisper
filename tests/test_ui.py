@@ -230,37 +230,37 @@ class TestUIThreadSafety:
 
         ui = HandFreeUI()
 
-        # Mock threading to prevent actual thread creation
-        with patch('handfree.ui.app.threading.Thread') as mock_thread_class:
-            mock_thread = MagicMock()
-            mock_thread_class.return_value = mock_thread
+        with patch('handfree.ui.app.tk.Tk') as mock_tk:
+            mock_root = MagicMock()
+            mock_tk.return_value = mock_root
 
-            ui.start()
-            first_call_count = mock_thread_class.call_count
+            with patch('handfree.ui.app.RecordingIndicator'):
+                ui.start()
+                first_call_count = mock_tk.call_count
 
-            ui.start()  # Call again
-            second_call_count = mock_thread_class.call_count
+                ui.start()  # Call again
+                second_call_count = mock_tk.call_count
 
-            # Should not create another thread
+            # Should not create another root window
             assert first_call_count == second_call_count, "start() should be idempotent"
 
-    def test_ui_creates_daemon_thread(self):
-        """Test that UI thread is created as daemon."""
+    def test_ui_runs_on_main_thread(self):
+        """Test that UI creates tkinter root on main thread (required for macOS)."""
         from handfree.ui.app import HandFreeUI
 
         ui = HandFreeUI()
 
-        with patch('handfree.ui.app.threading.Thread') as mock_thread_class:
-            mock_thread = MagicMock()
-            mock_thread_class.return_value = mock_thread
+        with patch('handfree.ui.app.tk.Tk') as mock_tk:
+            mock_root = MagicMock()
+            mock_tk.return_value = mock_root
 
-            ui.start()
+            with patch('handfree.ui.app.RecordingIndicator'):
+                ui.start()
 
-            # Verify thread was created as daemon
-            mock_thread_class.assert_called_once()
-            call_kwargs = mock_thread_class.call_args[1]
-            assert call_kwargs['daemon'] is True, "UI thread should be daemon"
-            assert callable(call_kwargs['target']), "Thread should have target function"
+            # Verify Tk root was created directly (not in a thread)
+            mock_tk.assert_called_once()
+            # Verify root.withdraw() was called to hide root window
+            mock_root.withdraw.assert_called_once()
 
 
 class TestIndicatorPosition:

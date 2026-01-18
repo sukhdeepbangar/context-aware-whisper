@@ -49,30 +49,18 @@ class HandFreeUI:
 
     def start(self) -> None:
         """
-        Start the UI in a daemon thread.
+        Initialize the UI components on the main thread.
 
-        Creates tkinter root window and indicator, then runs mainloop.
+        On macOS, tkinter windows MUST be created on the main thread.
+        This method creates the UI but does NOT start the mainloop.
+        Call run_mainloop() to start the event loop.
         """
         if self._running:
             return
 
         self._running = True
 
-        # Start UI thread
-        self._ui_thread = threading.Thread(target=self._run_ui, daemon=True)
-        self._ui_thread.start()
-
-        # Give UI thread time to initialize
-        import time
-        time.sleep(0.2)
-
-    def _run_ui(self) -> None:
-        """
-        Run the tkinter UI in a separate thread.
-
-        This method runs in the daemon thread and should not be called directly.
-        """
-        # Create root window (hidden)
+        # Create root window (hidden) - MUST be on main thread for macOS
         self._root = tk.Tk()
         self._root.withdraw()  # Hide root window
 
@@ -96,7 +84,15 @@ class HandFreeUI:
                 self._history_store = None
                 self._history_panel = None
 
-        # Start event loop
+    def run_mainloop(self) -> None:
+        """
+        Run the tkinter mainloop on the current (main) thread.
+
+        This blocks until stop() is called.
+        """
+        if not self._root:
+            return
+
         try:
             self._root.mainloop()
         except Exception:

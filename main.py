@@ -252,7 +252,7 @@ class HandFreeApp:
 
         self._running = True
 
-        # Start UI
+        # Start UI (creates windows on main thread - required for macOS)
         if self.ui:
             self.ui.start()
 
@@ -261,8 +261,13 @@ class HandFreeApp:
         self._print_banner()
 
         # Run event loop
-        while self._running:
-            time.sleep(0.1)
+        if self.ui:
+            # Run tkinter mainloop on main thread (required for macOS)
+            self.ui.run_mainloop()
+        else:
+            # No UI - just sleep loop
+            while self._running:
+                time.sleep(0.1)
 
     def _print_banner(self) -> None:
         """Print welcome message and instructions."""
