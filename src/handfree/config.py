@@ -34,7 +34,7 @@ class Config:
     groq_api_key: Optional[str] = None
 
     # Transcriber selection
-    transcriber: str = "groq"  # "groq" or "local"
+    transcriber: str = "local"  # "groq" or "local"
 
     # Local transcription settings (whisper.cpp)
     whisper_model: str = "base.en"
@@ -45,7 +45,7 @@ class Config:
     type_delay: float = 0.0
     sample_rate: int = 16000
     use_paste: bool = False
-    skip_clipboard: bool = False  # If True, don't copy to clipboard
+    skip_clipboard: bool = True  # If True, don't copy to clipboard (use keystroke typing)
 
     # Optional with defaults - UI
     ui_enabled: bool = True
@@ -63,7 +63,7 @@ class Config:
 
         Environment Variables:
             GROQ_API_KEY: Required when HANDFREE_TRANSCRIBER=groq. Groq API key.
-            HANDFREE_TRANSCRIBER: Optional. Transcription backend: "groq" or "local" (default: groq).
+            HANDFREE_TRANSCRIBER: Optional. Transcription backend: "groq" or "local" (default: local).
             HANDFREE_WHISPER_MODEL: Optional. Whisper model for local transcription (default: base.en).
             HANDFREE_MODELS_DIR: Optional. Directory for whisper models (default: ~/.cache/whisper).
             HANDFREE_LANGUAGE: Optional. Language code for transcription (auto-detect if not set).
@@ -93,7 +93,7 @@ class Config:
             return value.lower() in ("true", "1", "yes")
 
         # Get transcriber setting first (needed to determine if GROQ_API_KEY is required)
-        transcriber = os.environ.get("HANDFREE_TRANSCRIBER", "groq").lower()
+        transcriber = os.environ.get("HANDFREE_TRANSCRIBER", "local").lower()
 
         # Get GROQ_API_KEY (required only for groq transcriber)
         groq_api_key = os.environ.get("GROQ_API_KEY")
@@ -115,7 +115,7 @@ class Config:
             type_delay=float(os.environ.get("HANDFREE_TYPE_DELAY", "0")),
             sample_rate=int(os.environ.get("HANDFREE_SAMPLE_RATE", "16000")),
             use_paste=parse_bool(os.environ.get("HANDFREE_USE_PASTE", ""), False),
-            skip_clipboard=parse_bool(os.environ.get("HANDFREE_SKIP_CLIPBOARD", ""), False),
+            skip_clipboard=parse_bool(os.environ.get("HANDFREE_SKIP_CLIPBOARD", "true"), True),
             ui_enabled=parse_bool(os.environ.get("HANDFREE_UI_ENABLED", "true"), True),
             ui_position=os.environ.get("HANDFREE_UI_POSITION", "top-center").lower(),
             history_enabled=parse_bool(os.environ.get("HANDFREE_HISTORY_ENABLED", "true"), True),

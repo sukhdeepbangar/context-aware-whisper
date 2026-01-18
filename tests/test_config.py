@@ -18,13 +18,12 @@ from hypothesis import given, strategies as st
 class TestConfigFromEnv:
     """Tests for Config.from_env() environment loading."""
 
-    def test_from_env_requires_api_key(self, monkeypatch):
-        """from_env() raises error without GROQ_API_KEY."""
-        # Store original value if any
-        original_key = os.environ.get("GROQ_API_KEY")
-
+    def test_from_env_requires_api_key_for_groq(self, monkeypatch):
+        """from_env() raises error without GROQ_API_KEY when transcriber is groq."""
         # Remove the key from the environment
         monkeypatch.delenv("GROQ_API_KEY", raising=False)
+        # Set transcriber to groq (which requires API key)
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "groq")
 
         # Mock load_dotenv to prevent it from reloading .env
         with patch('handfree.config.load_dotenv'):
@@ -34,6 +33,21 @@ class TestConfigFromEnv:
                 Config.from_env()
 
             assert "GROQ_API_KEY" in str(exc_info.value)
+
+    def test_from_env_no_api_key_ok_for_local(self, monkeypatch):
+        """from_env() works without GROQ_API_KEY when transcriber is local (default)."""
+        # Remove the key from the environment
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
+        # Local is now default, so no need to set it explicitly
+        monkeypatch.delenv("HANDFREE_TRANSCRIBER", raising=False)
+
+        # Mock load_dotenv to prevent it from reloading .env
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+
+            config = Config.from_env()
+            assert config.transcriber == "local"
+            assert config.groq_api_key is None
 
     def test_from_env_loads_api_key(self, monkeypatch):
         """from_env() loads GROQ_API_KEY correctly."""
@@ -46,10 +60,9 @@ class TestConfigFromEnv:
 
     def test_from_env_default_values(self, monkeypatch):
         """from_env() uses correct defaults when env vars not set."""
-        monkeypatch.setenv("GROQ_API_KEY", "test-key")
-        # Clear all optional env vars
-        for var in ["HANDFREE_LANGUAGE", "HANDFREE_TYPE_DELAY", "HANDFREE_SAMPLE_RATE",
-                    "HANDFREE_USE_PASTE", "HANDFREE_UI_ENABLED", "HANDFREE_UI_POSITION",
+        # Clear all optional env vars (no GROQ_API_KEY needed since local is default)
+        for var in ["GROQ_API_KEY", "HANDFREE_LANGUAGE", "HANDFREE_TYPE_DELAY", "HANDFREE_SAMPLE_RATE",
+                    "HANDFREE_USE_PASTE", "HANDFREE_SKIP_CLIPBOARD", "HANDFREE_UI_ENABLED", "HANDFREE_UI_POSITION",
                     "HANDFREE_HISTORY_ENABLED", "HANDFREE_HISTORY_MAX", "HANDFREE_HOTKEY",
                     "HANDFREE_TRANSCRIBER", "HANDFREE_WHISPER_MODEL", "HANDFREE_MODELS_DIR"]:
             monkeypatch.delenv(var, raising=False)
@@ -59,13 +72,14 @@ class TestConfigFromEnv:
 
         config = Config.from_env()
 
-        assert config.transcriber == "groq"
+        assert config.transcriber == "local"  # Default is now local
         assert config.whisper_model == "base.en"
         assert config.models_dir == os.path.expanduser("~/.cache/whisper")
         assert config.language is None
         assert config.type_delay == 0.0
         assert config.sample_rate == 16000
         assert config.use_paste is False
+        assert config.skip_clipboard is True  # Default is now True
         assert config.ui_enabled is True
         assert config.ui_position == "top-center"
         assert config.history_enabled is True
@@ -185,11 +199,11 @@ class TestConfigBooleanParsing:
         ("False", False),
         ("0", False),
         ("no", False),
-        ("", False),  # Empty string defaults to False
+        ("", True),  # Empty string defaults to True (new default)
     ])
     def test_skip_clipboard_boolean_parsing(self, value, expected, monkeypatch):
         """HANDFREE_SKIP_CLIPBOARD is parsed correctly."""
-        monkeypatch.setenv("GROQ_API_KEY", "test-key")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)  # Not needed for local transcriber
         monkeypatch.setenv("HANDFREE_SKIP_CLIPBOARD", value)
 
         from handfree.config import Config
@@ -452,15 +466,15 @@ class TestValidUIPositions:
 class TestTranscriberConfiguration:
     """Tests for transcriber selection configuration."""
 
-    def test_default_transcriber_is_groq(self, monkeypatch):
-        """Default transcriber is 'groq'."""
-        monkeypatch.setenv("GROQ_API_KEY", "test-key")
+    def test_default_transcriber_is_local(self, monkeypatch):
+        """Default transcriber is 'local'."""
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
         monkeypatch.delenv("HANDFREE_TRANSCRIBER", raising=False)
 
         from handfree.config import Config
 
         config = Config.from_env()
-        assert config.transcriber == "groq"
+        assert config.transcriber == "local"
 
     def test_can_set_transcriber_to_local(self, monkeypatch):
         """Transcriber can be set to 'local'."""

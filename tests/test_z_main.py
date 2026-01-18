@@ -177,7 +177,7 @@ class TestHandFreeAppStateMachine:
 
         app.recorder.stop_recording.assert_called_once()
         app.transcriber.transcribe.assert_called_once()
-        app.output.output.assert_called_once_with("Hello world", use_paste=False, skip_clipboard=False)
+        app.output.output.assert_called_once_with("Hello world", use_paste=False, skip_clipboard=True)
         assert app.state == AppState.IDLE
 
     def test_handle_stop_ignored_when_idle(self, app):
@@ -375,7 +375,7 @@ class TestHandFreeAppUsePaste:
 
         app.handle_stop()
 
-        app.output.output.assert_called_once_with("Hello", use_paste=True, skip_clipboard=False)
+        app.output.output.assert_called_once_with("Hello", use_paste=True, skip_clipboard=True)
 
 
 class TestMainFunction:
@@ -427,10 +427,11 @@ class TestConfigModule:
     """Tests for the config module."""
 
     @patch('handfree.config.load_dotenv')
-    def test_config_from_env_requires_api_key(self, mock_load_dotenv, monkeypatch):
-        """Config.from_env() raises error without API key."""
+    def test_config_from_env_requires_api_key_for_groq(self, mock_load_dotenv, monkeypatch):
+        """Config.from_env() raises error without API key when transcriber is groq."""
         # Ensure GROQ_API_KEY is not set
         monkeypatch.delenv("GROQ_API_KEY", raising=False)
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "groq")  # Explicitly use groq
 
         from handfree.config import Config
 
