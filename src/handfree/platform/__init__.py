@@ -114,7 +114,8 @@ def get_platform_error_message(platform: str, error_type: str) -> str:
 
 def create_hotkey_detector(
     on_start: Callable[[], None],
-    on_stop: Callable[[], None]
+    on_stop: Callable[[], None],
+    on_history_toggle: Callable[[], None] | None = None
 ) -> HotkeyDetectorBase:
     """
     Create a platform-appropriate hotkey detector.
@@ -122,6 +123,7 @@ def create_hotkey_detector(
     Args:
         on_start: Called when hotkey is pressed (start recording)
         on_stop: Called when hotkey is released (stop recording)
+        on_history_toggle: Called when history toggle hotkey is pressed (optional)
 
     Returns:
         Platform-specific HotkeyDetector instance
@@ -136,7 +138,7 @@ def create_hotkey_detector(
     if platform == "macos":
         try:
             from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
-            detector = MacOSHotkeyDetector(on_start, on_stop)
+            detector = MacOSHotkeyDetector(on_start, on_stop, on_history_toggle)
             logger.debug("Created MacOSHotkeyDetector")
             return detector
         except ImportError as e:
@@ -148,7 +150,7 @@ def create_hotkey_detector(
     elif platform == "windows":
         try:
             from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
-            detector = WindowsHotkeyDetector(on_start, on_stop)
+            detector = WindowsHotkeyDetector(on_start, on_stop, on_history_toggle)
             logger.debug("Created WindowsHotkeyDetector")
             return detector
         except ImportError as e:
@@ -160,7 +162,7 @@ def create_hotkey_detector(
     elif platform == "linux":
         try:
             from handfree.platform.linux.hotkey_detector import LinuxHotkeyDetector
-            detector = LinuxHotkeyDetector(on_start, on_stop)
+            detector = LinuxHotkeyDetector(on_start, on_stop, on_history_toggle)
             logger.debug("Created LinuxHotkeyDetector")
             return detector
         except ImportError as e:

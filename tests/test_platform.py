@@ -134,6 +134,8 @@ class TestHotkeyDetectorBase(unittest.TestCase):
                 pass
             def get_hotkey_description(self):
                 return "Test"
+            def get_history_toggle_description(self):
+                return "Test+H"
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -152,6 +154,8 @@ class TestHotkeyDetectorBase(unittest.TestCase):
                 pass
             def get_hotkey_description(self):
                 return "Test"
+            def get_history_toggle_description(self):
+                return "Test+H"
 
         detector = ConcreteDetector(lambda: None, lambda: None)
         self.assertFalse(detector.is_recording)
@@ -438,6 +442,109 @@ class TestPlatformNotSupportedError(unittest.TestCase):
             raise PlatformNotSupportedError("Test error message")
 
         self.assertEqual(str(context.exception), "Test error message")
+
+
+class TestHistoryToggleHotkey(unittest.TestCase):
+    """Tests for history toggle hotkey feature across platforms."""
+
+    def test_base_class_accepts_history_toggle_callback(self):
+        """Test HotkeyDetectorBase accepts on_history_toggle callback."""
+        class ConcreteDetector(HotkeyDetectorBase):
+            def start(self):
+                pass
+            def stop(self):
+                pass
+            def get_hotkey_description(self):
+                return "Test"
+            def get_history_toggle_description(self):
+                return "Test+H"
+
+        on_start = MagicMock()
+        on_stop = MagicMock()
+        on_history_toggle = MagicMock()
+        detector = ConcreteDetector(on_start, on_stop, on_history_toggle)
+
+        self.assertEqual(detector.on_start, on_start)
+        self.assertEqual(detector.on_stop, on_stop)
+        self.assertEqual(detector.on_history_toggle, on_history_toggle)
+
+    def test_base_class_history_toggle_optional(self):
+        """Test on_history_toggle callback is optional."""
+        class ConcreteDetector(HotkeyDetectorBase):
+            def start(self):
+                pass
+            def stop(self):
+                pass
+            def get_hotkey_description(self):
+                return "Test"
+            def get_history_toggle_description(self):
+                return "Test+H"
+
+        detector = ConcreteDetector(lambda: None, lambda: None)
+        self.assertIsNone(detector.on_history_toggle)
+
+    @patch('handfree.platform.macos.hotkey_detector.Quartz')
+    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    def test_macos_history_toggle_description(self, mock_tap_create, mock_quartz):
+        """Test MacOSHotkeyDetector returns correct history toggle description."""
+        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+
+        detector = MacOSHotkeyDetector(lambda: None, lambda: None)
+        self.assertEqual(detector.get_history_toggle_description(), "Cmd+H")
+
+    @patch('handfree.platform.macos.hotkey_detector.Quartz')
+    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    def test_macos_accepts_history_toggle_callback(self, mock_tap_create, mock_quartz):
+        """Test MacOSHotkeyDetector accepts on_history_toggle callback."""
+        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+
+        on_history_toggle = MagicMock()
+        detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history_toggle)
+        self.assertEqual(detector.on_history_toggle, on_history_toggle)
+
+    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    def test_windows_history_toggle_description(self, mock_keyboard):
+        """Test WindowsHotkeyDetector returns correct history toggle description."""
+        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+
+        detector = WindowsHotkeyDetector(lambda: None, lambda: None)
+        self.assertEqual(detector.get_history_toggle_description(), "Ctrl+H")
+
+    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    def test_windows_accepts_history_toggle_callback(self, mock_keyboard):
+        """Test WindowsHotkeyDetector accepts on_history_toggle callback."""
+        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+
+        on_history_toggle = MagicMock()
+        detector = WindowsHotkeyDetector(lambda: None, lambda: None, on_history_toggle)
+        self.assertEqual(detector.on_history_toggle, on_history_toggle)
+
+    @patch('handfree.platform.linux.hotkey_detector.keyboard')
+    def test_linux_history_toggle_description(self, mock_keyboard):
+        """Test LinuxHotkeyDetector returns correct history toggle description."""
+        from handfree.platform.linux.hotkey_detector import LinuxHotkeyDetector
+
+        detector = LinuxHotkeyDetector(lambda: None, lambda: None)
+        self.assertEqual(detector.get_history_toggle_description(), "Ctrl+H")
+
+    @patch('handfree.platform.linux.hotkey_detector.keyboard')
+    def test_linux_accepts_history_toggle_callback(self, mock_keyboard):
+        """Test LinuxHotkeyDetector accepts on_history_toggle callback."""
+        from handfree.platform.linux.hotkey_detector import LinuxHotkeyDetector
+
+        on_history_toggle = MagicMock()
+        detector = LinuxHotkeyDetector(lambda: None, lambda: None, on_history_toggle)
+        self.assertEqual(detector.on_history_toggle, on_history_toggle)
+
+    @patch.object(sys, 'platform', 'darwin')
+    def test_factory_passes_history_toggle_macos(self):
+        """Test factory passes on_history_toggle to macOS detector."""
+        on_history_toggle = MagicMock()
+        with patch('handfree.platform.macos.hotkey_detector.Quartz'):
+            detector = create_hotkey_detector(
+                lambda: None, lambda: None, on_history_toggle
+            )
+            self.assertEqual(detector.on_history_toggle, on_history_toggle)
 
 
 class TestPlatformConsistency(unittest.TestCase):

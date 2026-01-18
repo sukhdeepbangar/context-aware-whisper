@@ -17,18 +17,29 @@ class HotkeyDetectorBase(ABC):
     Each platform implements this to detect the hold-to-record hotkey:
     - macOS: Fn/Globe key (keycode 63) via CGEvent tap
     - Windows/Linux: Ctrl+Shift+Space via pynput
+
+    Additionally supports a secondary hotkey for toggling history panel:
+    - macOS: Cmd+H
+    - Windows/Linux: Ctrl+H
     """
 
-    def __init__(self, on_start: Callable[[], None], on_stop: Callable[[], None]):
+    def __init__(
+        self,
+        on_start: Callable[[], None],
+        on_stop: Callable[[], None],
+        on_history_toggle: Callable[[], None] | None = None
+    ):
         """
         Initialize hotkey detector with start/stop callbacks.
 
         Args:
             on_start: Called when hotkey is pressed (start recording)
             on_stop: Called when hotkey is released (stop recording)
+            on_history_toggle: Called when history toggle hotkey is pressed (optional)
         """
         self.on_start = on_start
         self.on_stop = on_stop
+        self.on_history_toggle = on_history_toggle
         self._is_recording = False
 
     @abstractmethod
@@ -55,6 +66,16 @@ class HotkeyDetectorBase(ABC):
     def is_recording(self) -> bool:
         """Whether recording is currently active."""
         return self._is_recording
+
+    @abstractmethod
+    def get_history_toggle_description(self) -> str:
+        """
+        Get human-readable description of the history toggle hotkey.
+
+        Returns:
+            Description like "Cmd+H" or "Ctrl+H"
+        """
+        pass
 
 
 class OutputHandlerBase(ABC):

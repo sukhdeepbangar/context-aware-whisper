@@ -3,6 +3,7 @@ macOS Hotkey Detector
 
 Detects Fn/Globe key press using macOS CGEvent tap.
 Hold Fn to record, release to transcribe.
+Also detects Cmd+H for history panel toggle.
 """
 
 import subprocess
@@ -13,6 +14,7 @@ import Quartz
 from Quartz import (
     CGEventTapCreate, kCGSessionEventTap, kCGHeadInsertEventTap,
     kCGEventTapOptionListenOnly, CGEventMaskBit, kCGEventFlagsChanged,
+    kCGEventKeyDown,
     CFMachPortCreateRunLoopSource, CFRunLoopGetCurrent, CFRunLoopAddSource,
     kCFRunLoopCommonModes, CFRunLoopRunInMode, kCFRunLoopDefaultMode,
     CGEventGetFlags
@@ -24,19 +26,29 @@ from handfree.platform.base import HotkeyDetectorBase
 FN_KEYCODE = 63
 FN_FLAG = 0x800000
 
+# History toggle hotkey constants
+H_KEYCODE = 4  # 'h' key on macOS
+CMD_FLAG = Quartz.kCGEventFlagMaskCommand  # Command key flag
+
 
 class MacOSHotkeyDetector(HotkeyDetectorBase):
     """Detects Fn/Globe key for recording toggle using CGEvent tap."""
 
-    def __init__(self, on_start: Callable[[], None], on_stop: Callable[[], None]):
+    def __init__(
+        self,
+        on_start: Callable[[], None],
+        on_stop: Callable[[], None],
+        on_history_toggle: Callable[[], None] | None = None
+    ):
         """
         Initialize hotkey detector with start/stop callbacks.
 
         Args:
             on_start: Called when Fn key is pressed (start recording)
             on_stop: Called when Fn key is released (stop recording)
+            on_history_toggle: Called when Cmd+H is pressed (toggle history)
         """
-        super().__init__(on_start, on_stop)
+        super().__init__(on_start, on_stop, on_history_toggle)
         self._tap = None
         self._running = False
         self._thread: Optional[threading.Thread] = None
@@ -65,14 +77,14 @@ class MacOSHotkeyDetector(HotkeyDetectorBase):
         threading.Thread(target=notify, daemon=True).start()
 
     def _event_callback(self, proxy, event_type, event, refcon):
-        """Handle CGEvent callback for Fn key detection."""
+        """Handle CGEvent callback for Fn key and Cmd+H detection."""
         keycode = Quartz.CGEventGetIntegerValueField(
             event, Quartz.kCGKeyboardEventKeycode
         )
+        flags = CGEventGetFlags(event)
 
-        # Only handle Fn key (keycode 63)
-        if keycode == FN_KEYCODE:
-            flags = CGEventGetFlags(event)
+        # Handle Fn key (keycode 63) for recording toggle
+        if keycode == FN_KEYCODE and event_type == kCGEventFlagsChanged:
             fn_pressed = (flags & FN_FLAG) != 0
 
             if fn_pressed and not self._is_recording:
@@ -86,11 +98,18 @@ class MacOSHotkeyDetector(HotkeyDetectorBase):
                 self._show_indicator(recording=False)
                 self.on_stop()
 
+        # Handle Cmd+H for history toggle
+        elif event_type == kCGEventKeyDown and keycode == H_KEYCODE:
+            cmd_pressed = (flags & CMD_FLAG) != 0
+            if cmd_pressed and self.on_history_toggle:
+                self.on_history_toggle()
+
         return event
 
     def _run_loop(self) -> None:
         """Run the CGEvent tap loop in a thread."""
-        mask = CGEventMaskBit(kCGEventFlagsChanged)
+        # Listen for both flag changes (Fn key) and key down events (Cmd+H)
+        mask = CGEventMaskBit(kCGEventFlagsChanged) | CGEventMaskBit(kCGEventKeyDown)
 
         self._tap = CGEventTapCreate(
             kCGSessionEventTap,
@@ -116,6 +135,10 @@ class MacOSHotkeyDetector(HotkeyDetectorBase):
     def get_hotkey_description(self) -> str:
         """Get human-readable description of the hotkey."""
         return "Fn/Globe key"
+
+    def get_history_toggle_description(self) -> str:
+        """Get human-readable description of the history toggle hotkey."""
+        return "Cmd+H"
 
     def start(self) -> None:
         """Start listening for Fn key."""

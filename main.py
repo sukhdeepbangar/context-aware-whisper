@@ -123,7 +123,8 @@ class HandFreeApp:
         try:
             self.detector = create_hotkey_detector(
                 on_start=self.handle_start,
-                on_stop=self.handle_stop
+                on_stop=self.handle_stop,
+                on_history_toggle=self.handle_history_toggle if self.ui else None
             )
             logger.info(f"Hotkey detector initialized: {type(self.detector).__name__}")
         except PlatformNotSupportedError as e:
@@ -239,6 +240,12 @@ class HandFreeApp:
         finally:
             self._state = AppState.IDLE
 
+    def handle_history_toggle(self) -> None:
+        """Called when user presses history toggle hotkey (Cmd+H / Ctrl+H)."""
+        if self.ui:
+            self.ui.toggle_history()
+            logger.debug("History panel toggled")
+
     def run(self) -> None:
         """Start the application and run the event loop."""
         import time
@@ -260,6 +267,7 @@ class HandFreeApp:
     def _print_banner(self) -> None:
         """Print welcome message and instructions."""
         hotkey = self.detector.get_hotkey_description()
+        history_hotkey = self.detector.get_history_toggle_description()
         platform = get_platform()
 
         print("=" * 55)
@@ -278,6 +286,8 @@ class HandFreeApp:
         print("    - Typed at the current cursor position")
         print("    - Copied to clipboard (as backup)")
         print()
+        if self.ui and self.history_enabled:
+            print(f"  Press {history_hotkey} to toggle history panel")
         print("  Press Ctrl+C to exit")
         print("=" * 55)
         print()

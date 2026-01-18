@@ -101,7 +101,7 @@ This plan implements two features in priority order:
 
 ### Step 2.4: Integrate with Main Application
 - [x] 2.4.1 Call `ui.add_transcription()` after successful transcription in `handle_stop()`
-- [ ] 2.4.2 Add history toggle hotkey listener (Ctrl+H or Cmd+H) - deferred to Phase 5
+- [x] 2.4.2 Add history toggle hotkey listener (Ctrl+H or Cmd+H)
 - [x] 2.4.3 Pass recording duration to `add_transcription()`
 
 ### Step 2.5: Testing
@@ -109,7 +109,7 @@ This plan implements two features in priority order:
 - [ ] 2.5.2 Manual test: transcription appears in history after speaking
 - [ ] 2.5.3 Manual test: history persists after app restart
 - [ ] 2.5.4 Manual test: copy button copies text to clipboard
-- [ ] 2.5.5 Manual test: Ctrl+H toggles history panel - deferred
+- [ ] 2.5.5 Manual test: Ctrl+H/Cmd+H toggles history panel
 
 ---
 
@@ -297,7 +297,7 @@ This plan implements two features in priority order:
 | Phase | Status | Notes |
 |-------|--------|-------|
 | Phase 1: Recording Indicator | Complete | UI indicator with states (idle, recording, transcribing, success, error) |
-| Phase 2: Transcription History | Complete | JSONL-based storage, history panel UI, integrated with main app |
+| Phase 2: Transcription History | Complete | JSONL-based storage, history panel UI, integrated with main app, history toggle hotkey (Cmd+H/Ctrl+H) |
 | Phase 3: Platform Abstraction | Complete | Platform factory with macOS/Windows/Linux implementations, 43 new tests |
 | Phase 4: Windows/Linux Support | Complete | All implementations done including xdotool/wtype fallback for Wayland (4.3.3), pending: VM testing (4.5) |
 | Phase 5: Polish | In Progress | Step 5.1 (Configuration) complete with 75+ tests; Step 5.2 (UI Refinements) complete with 29 new tests; Step 5.3 (Error Handling) complete with 38 new tests; remaining: documentation (5.4), final testing (5.5) |
