@@ -60,7 +60,7 @@ This document provides a detailed step-by-step guide to add local transcription 
 ### Phase 6: Documentation & Testing
 - [ ] 6.1 Update README.md with local transcription setup
 - [ ] 6.2 Add troubleshooting for common issues
-- [ ] 6.3 Create performance comparison tests
+- [x] 6.3 Create performance comparison tests
 - [ ] 6.4 Document model selection guidance
 - [ ] 6.5 Final end-to-end testing
 
