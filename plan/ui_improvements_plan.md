@@ -155,21 +155,29 @@ def type_text_instant(self, text: str) -> None:
 
 ---
 
-## Phase 2: Remove Sidebar Notification
+## Phase 2: Remove Sidebar Notification ✅ COMPLETED
 
 ### Step 2.1: Remove notification method and calls
 
-**File:** `src/handfree/platform/macos/hotkey_detector.py`
+**File:** `src/handfree/hotkey_detector.py` (non-platform-specific detector)
 
-**Tasks:**
-- [ ] Delete the entire `_show_indicator()` method (lines 56-77)
-- [ ] Delete `self._show_indicator(recording=True)` call (line 94)
-- [ ] Delete `self._show_indicator(recording=False)` call (line 98)
-- [ ] Remove `import subprocess` if no longer used
-- [ ] Remove `import threading` if no longer used (check if used elsewhere)
+**Note:** The `_show_indicator()` method was in the non-platform-specific `HotkeyDetector`
+class, not in the platform-specific `MacOSHotkeyDetector`.
+
+**Completed Tasks:**
+- [x] Delete the entire `_show_indicator()` method
+- [x] Delete `self._show_indicator(recording=True)` call
+- [x] Delete `self._show_indicator(recording=False)` call
+- [x] Remove `import subprocess` (no longer used)
+- [x] Updated comments to remove "show indicator" references
+- [x] Fixed existing tests in `test_macos_hotkey_detector.py` that incorrectly
+      tried to patch `_show_indicator` on `MacOSHotkeyDetector`
+- [x] Created comprehensive test suite `test_notification_removal.py`
+      (14 tests including property-based tests)
 
 **Verification:**
-- Run app, press Fn key - no notification should appear
+- All 834 tests pass
+- No notification should appear when Fn key is pressed
 - Only top-center indicator should be visible
 
 ---

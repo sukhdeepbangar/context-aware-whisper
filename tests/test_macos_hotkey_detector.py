@@ -147,9 +147,7 @@ class TestMacOSHotkeyDetectorEventCallback(unittest.TestCase):
         event = MockCGEvent(keycode=FN_KEYCODE)
         mock_get_flags.return_value = FN_FLAG  # Fn is pressed
 
-        # Patch the _show_indicator to prevent notification
-        with patch.object(detector, '_show_indicator'):
-            result = detector._event_callback(None, kCGEventFlagsChanged, event, None)
+        result = detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
         on_start.assert_called_once()
         self.assertTrue(detector.is_recording)
@@ -171,8 +169,7 @@ class TestMacOSHotkeyDetectorEventCallback(unittest.TestCase):
         event = MockCGEvent(keycode=FN_KEYCODE)
         mock_get_flags.return_value = 0  # Fn is released
 
-        with patch.object(detector, '_show_indicator'):
-            result = detector._event_callback(None, kCGEventFlagsChanged, event, None)
+        result = detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
         on_stop.assert_called_once()
         self.assertFalse(detector.is_recording)
@@ -191,8 +188,7 @@ class TestMacOSHotkeyDetectorEventCallback(unittest.TestCase):
         event = MockCGEvent(keycode=FN_KEYCODE)
         mock_get_flags.return_value = FN_FLAG  # Fn is pressed
 
-        with patch.object(detector, '_show_indicator'):
-            detector._event_callback(None, kCGEventFlagsChanged, event, None)
+        detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
         on_start.assert_not_called()  # Should not call start again
 
@@ -210,8 +206,7 @@ class TestMacOSHotkeyDetectorEventCallback(unittest.TestCase):
         event = MockCGEvent(keycode=FN_KEYCODE)
         mock_get_flags.return_value = 0  # Fn is released
 
-        with patch.object(detector, '_show_indicator'):
-            detector._event_callback(None, kCGEventFlagsChanged, event, None)
+        detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
         on_stop.assert_not_called()
 
@@ -400,21 +395,20 @@ class TestMacOSHotkeyDetectorStateMachine(unittest.TestCase):
         on_stop = MagicMock()
         detector = MacOSHotkeyDetector(on_start, on_stop)
 
-        with patch.object(detector, '_show_indicator'):
-            # Press Fn
-            event = MockCGEvent(keycode=FN_KEYCODE)
-            mock_get_flags.return_value = FN_FLAG
-            detector._event_callback(None, kCGEventFlagsChanged, event, None)
+        # Press Fn
+        event = MockCGEvent(keycode=FN_KEYCODE)
+        mock_get_flags.return_value = FN_FLAG
+        detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
-            self.assertTrue(detector.is_recording)
-            on_start.assert_called_once()
+        self.assertTrue(detector.is_recording)
+        on_start.assert_called_once()
 
-            # Release Fn
-            mock_get_flags.return_value = 0
-            detector._event_callback(None, kCGEventFlagsChanged, event, None)
+        # Release Fn
+        mock_get_flags.return_value = 0
+        detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
-            self.assertFalse(detector.is_recording)
-            on_stop.assert_called_once()
+        self.assertFalse(detector.is_recording)
+        on_stop.assert_called_once()
 
     @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
     @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
@@ -427,58 +421,19 @@ class TestMacOSHotkeyDetectorStateMachine(unittest.TestCase):
         on_stop = MagicMock()
         detector = MacOSHotkeyDetector(on_start, on_stop)
 
-        with patch.object(detector, '_show_indicator'):
-            for cycle in range(3):
-                event = MockCGEvent(keycode=FN_KEYCODE)
+        for cycle in range(3):
+            event = MockCGEvent(keycode=FN_KEYCODE)
 
-                # Press Fn
-                mock_get_flags.return_value = FN_FLAG
-                detector._event_callback(None, kCGEventFlagsChanged, event, None)
+            # Press Fn
+            mock_get_flags.return_value = FN_FLAG
+            detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
-                # Release Fn
-                mock_get_flags.return_value = 0
-                detector._event_callback(None, kCGEventFlagsChanged, event, None)
+            # Release Fn
+            mock_get_flags.return_value = 0
+            detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
         self.assertEqual(on_start.call_count, 3)
         self.assertEqual(on_stop.call_count, 3)
-
-
-class TestMacOSHotkeyDetectorShowIndicator(unittest.TestCase):
-    """Tests for visual indicator functionality."""
-
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.subprocess.run')
-    @patch('handfree.platform.macos.hotkey_detector.threading.Thread')
-    def test_show_indicator_recording(self, mock_thread_class, mock_run, mock_tap_create):
-        """Test show indicator for recording state."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
-
-        mock_thread = MagicMock()
-        mock_thread_class.return_value = mock_thread
-
-        detector = MacOSHotkeyDetector(lambda: None, lambda: None)
-        detector._show_indicator(recording=True)
-
-        mock_thread_class.assert_called_once()
-        mock_thread.start.assert_called_once()
-
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.subprocess.run')
-    @patch('handfree.platform.macos.hotkey_detector.threading.Thread')
-    def test_show_indicator_transcribing(self, mock_thread_class, mock_run, mock_tap_create):
-        """Test show indicator for transcribing state."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
-
-        mock_thread = MagicMock()
-        mock_thread_class.return_value = mock_thread
-
-        detector = MacOSHotkeyDetector(lambda: None, lambda: None)
-        detector._show_indicator(recording=False)
-
-        mock_thread_class.assert_called_once()
-        mock_thread.start.assert_called_once()
 
 
 class TestMacOSHotkeyDetectorRunLoop(unittest.TestCase):
@@ -584,17 +539,16 @@ class TestMacOSHotkeyDetectorEdgeCases(unittest.TestCase):
         on_stop = MagicMock()
         detector = MacOSHotkeyDetector(on_start, on_stop)
 
-        with patch.object(detector, '_show_indicator'):
-            for _ in range(10):
-                event = MockCGEvent(keycode=FN_KEYCODE)
+        for _ in range(10):
+            event = MockCGEvent(keycode=FN_KEYCODE)
 
-                # Press
-                mock_get_flags.return_value = FN_FLAG
-                detector._event_callback(None, kCGEventFlagsChanged, event, None)
+            # Press
+            mock_get_flags.return_value = FN_FLAG
+            detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
-                # Release
-                mock_get_flags.return_value = 0
-                detector._event_callback(None, kCGEventFlagsChanged, event, None)
+            # Release
+            mock_get_flags.return_value = 0
+            detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
         self.assertEqual(on_start.call_count, 10)
         self.assertEqual(on_stop.call_count, 10)
@@ -631,21 +585,20 @@ class TestMacOSHotkeyDetectorStateMachineHypothesis:
         on_stop = MagicMock()
         detector = MacOSHotkeyDetector(on_start, on_stop)
 
-        with patch.object(detector, '_show_indicator'):
-            for fn_pressed in fn_states:
-                event = MockCGEvent(keycode=FN_KEYCODE)
-                mock_get_flags.return_value = FN_FLAG if fn_pressed else 0
-                detector._event_callback(None, kCGEventFlagsChanged, event, None)
+        for fn_pressed in fn_states:
+            event = MockCGEvent(keycode=FN_KEYCODE)
+            mock_get_flags.return_value = FN_FLAG if fn_pressed else 0
+            detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
-            # Final state should match last Fn key state
-            # (only if transitions happened properly)
-            last_fn_pressed = fn_states[-1] if fn_states else False
-            if last_fn_pressed:
-                # If last press was Fn down, should be recording
-                assert detector.is_recording is True
-            else:
-                # If last press was Fn up, should not be recording
-                assert detector.is_recording is False
+        # Final state should match last Fn key state
+        # (only if transitions happened properly)
+        last_fn_pressed = fn_states[-1] if fn_states else False
+        if last_fn_pressed:
+            # If last press was Fn down, should be recording
+            assert detector.is_recording is True
+        else:
+            # If last press was Fn up, should not be recording
+            assert detector.is_recording is False
 
     @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
     @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
@@ -660,17 +613,16 @@ class TestMacOSHotkeyDetectorStateMachineHypothesis:
         on_stop = MagicMock()
         detector = MacOSHotkeyDetector(on_start, on_stop)
 
-        with patch.object(detector, '_show_indicator'):
-            for _ in range(num_cycles):
-                event = MockCGEvent(keycode=FN_KEYCODE)
+        for _ in range(num_cycles):
+            event = MockCGEvent(keycode=FN_KEYCODE)
 
-                # Press Fn
-                mock_get_flags.return_value = FN_FLAG
-                detector._event_callback(None, kCGEventFlagsChanged, event, None)
+            # Press Fn
+            mock_get_flags.return_value = FN_FLAG
+            detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
-                # Release Fn
-                mock_get_flags.return_value = 0
-                detector._event_callback(None, kCGEventFlagsChanged, event, None)
+            # Release Fn
+            mock_get_flags.return_value = 0
+            detector._event_callback(None, kCGEventFlagsChanged, event, None)
 
         assert on_start.call_count == num_cycles
         assert on_stop.call_count == num_cycles
