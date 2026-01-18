@@ -6,7 +6,6 @@ Hold Fn to record, release to transcribe.
 Also detects Cmd+H for history panel toggle.
 """
 
-import subprocess
 import threading
 from typing import Callable, Optional
 
@@ -53,29 +52,6 @@ class MacOSHotkeyDetector(HotkeyDetectorBase):
         self._running = False
         self._thread: Optional[threading.Thread] = None
 
-    def _show_indicator(self, recording: bool) -> None:
-        """Show visual indicator for recording state (like Whisper Flow)."""
-        # Use macOS notification for visual feedback
-        if recording:
-            title = "🎙️ Recording..."
-            message = "Speak now - release Fn to transcribe"
-        else:
-            title = "⏳ Transcribing..."
-            message = "Processing your speech"
-
-        def notify():
-            try:
-                # Use osascript for quick notification
-                script = f'display notification "{message}" with title "{title}"'
-                subprocess.run(
-                    ["osascript", "-e", script],
-                    capture_output=True,
-                    timeout=1
-                )
-            except Exception:
-                pass
-        threading.Thread(target=notify, daemon=True).start()
-
     def _event_callback(self, proxy, event_type, event, refcon):
         """Handle CGEvent callback for Fn key and Cmd+H detection."""
         keycode = Quartz.CGEventGetIntegerValueField(
@@ -88,14 +64,12 @@ class MacOSHotkeyDetector(HotkeyDetectorBase):
             fn_pressed = (flags & FN_FLAG) != 0
 
             if fn_pressed and not self._is_recording:
-                # Fn pressed - start recording, show indicator
+                # Fn pressed - start recording
                 self._is_recording = True
                 self.on_start()
-                self._show_indicator(recording=True)
             elif not fn_pressed and self._is_recording:
-                # Fn released - stop recording, show transcribing indicator
+                # Fn released - stop recording
                 self._is_recording = False
-                self._show_indicator(recording=False)
                 self.on_stop()
 
         # Handle Cmd+H for history toggle

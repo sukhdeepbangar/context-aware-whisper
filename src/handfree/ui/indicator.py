@@ -89,6 +89,9 @@ class RecordingIndicator:
         self.window.overrideredirect(True)  # No window decorations
         self.window.attributes("-topmost", True)  # Always on top
 
+        # Platform-specific focus prevention
+        self._setup_focus_prevention()
+
         # Platform-specific transparency setup
         self._setup_transparency()
 
@@ -107,6 +110,32 @@ class RecordingIndicator:
 
         # Position window on primary display
         self._position_window()
+
+    def _setup_focus_prevention(self) -> None:
+        """Configure platform-specific settings to prevent stealing focus."""
+        try:
+            if self._platform == "macos":
+                # macOS: Prevent window activation on show
+                # The window will appear but won't steal keyboard focus
+                self.window.wm_attributes('-modified', 0)
+                # Additional: set the window to not be activatable
+                # Note: This requires the window to be overrideredirect(True)
+                # which we already set in __init__
+            elif self._platform == "linux":
+                # Linux: Set window type to prevent focus
+                # This works with most window managers
+                try:
+                    self.window.attributes('-type', 'notification')
+                except tk.TclError:
+                    # Fallback: try splash type
+                    try:
+                        self.window.attributes('-type', 'splash')
+                    except tk.TclError:
+                        pass
+            # Windows: overrideredirect(True) is usually sufficient
+        except tk.TclError:
+            # If focus prevention fails, continue anyway
+            pass
 
     def _setup_transparency(self) -> None:
         """Configure platform-specific window transparency."""
@@ -325,9 +354,12 @@ class RecordingIndicator:
             self._schedule_flash_animation()
 
     def show(self) -> None:
-        """Show the indicator window."""
+        """Show the indicator window without stealing focus."""
         self.window.deiconify()
-        self.window.lift()
+        # Don't call lift() on macOS as it can steal focus from the active text field
+        # The -topmost attribute ensures the window stays on top without needing lift()
+        if self._platform != "macos":
+            self.window.lift()
 
     def hide(self) -> None:
         """Hide the indicator window."""
