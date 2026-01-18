@@ -60,7 +60,7 @@ class Config:
     custom_hotkey: Optional[str] = None
 
     # Text cleanup settings
-    text_cleanup: str = "standard"  # off, light, standard, aggressive
+    text_cleanup: str = "aggressive"  # off, light, standard, aggressive
     preserve_intentional: bool = True
 
     # Local LLM settings (for aggressive text cleanup on Apple Silicon)
@@ -134,7 +134,7 @@ class Config:
             history_enabled=parse_bool(os.environ.get("HANDFREE_HISTORY_ENABLED", "true"), True),
             history_max_entries=int(os.environ.get("HANDFREE_HISTORY_MAX", "1000")),
             custom_hotkey=os.environ.get("HANDFREE_HOTKEY"),
-            text_cleanup=os.environ.get("HANDFREE_TEXT_CLEANUP", "standard").lower(),
+            text_cleanup=os.environ.get("HANDFREE_TEXT_CLEANUP", "aggressive").lower(),
             preserve_intentional=parse_bool(os.environ.get("HANDFREE_PRESERVE_INTENTIONAL", "true"), True),
             local_model=os.environ.get(
                 "HANDFREE_LOCAL_MODEL",
