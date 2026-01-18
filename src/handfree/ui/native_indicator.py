@@ -27,11 +27,7 @@ try:
         NSFloatingWindowLevel,
         NSBackingStoreBuffered,
         NSScreen,
-        NSTimer,
-        NSRunLoop,
-        NSDefaultRunLoopMode,
     )
-    from Foundation import NSObject
     import objc
 except ImportError as e:
     raise ImportError(f"PyObjC is required for native_indicator: {e}")
@@ -51,7 +47,7 @@ class IndicatorView(NSView):
             return None
 
         self._state = "idle"
-        self._bar_heights = [4, 4, 4, 4]
+        self._bar_heights = [8, 12, 6, 10]  # Static varied heights
         self._bar_colors = [
             NSColor.colorWithRed_green_blue_alpha_(1.0, 0.23, 0.19, 1.0),  # #FF3B30
             NSColor.colorWithRed_green_blue_alpha_(1.0, 0.42, 0.36, 1.0),  # #FF6B5B
@@ -59,7 +55,6 @@ class IndicatorView(NSView):
             NSColor.colorWithRed_green_blue_alpha_(1.0, 0.42, 0.36, 1.0),  # #FF6B5B
         ]
         self._bg_color = NSColor.colorWithRed_green_blue_alpha_(0.11, 0.11, 0.12, 0.95)
-        self._animation_timer = None
 
         return self
 
@@ -79,7 +74,7 @@ class IndicatorView(NSView):
             self._draw_text("ERR", NSColor.colorWithRed_green_blue_alpha_(1.0, 0.23, 0.19, 1.0))
 
     def _draw_bars(self):
-        """Draw animated audio visualizer bars."""
+        """Draw audio visualizer bars (static for now to avoid timer issues)."""
         bounds = self.bounds()
         bar_width = 6
         bar_gap = 3
@@ -99,11 +94,6 @@ class IndicatorView(NSView):
         """Draw centered text."""
         bounds = self.bounds()
         font = NSFont.boldSystemFontOfSize_(10)
-        attrs = {
-            "NSFont": font,
-            "NSColor": color,
-        }
-        # Simple centered text drawing
         from AppKit import NSAttributedString, NSFontAttributeName, NSForegroundColorAttributeName
         attrs = {
             NSFontAttributeName: font,
@@ -118,33 +108,6 @@ class IndicatorView(NSView):
     def setState_(self, state):
         """Set the indicator state."""
         self._state = state
-        if state == "recording":
-            self._start_animation()
-        else:
-            self._stop_animation()
-        self.setNeedsDisplay_(True)
-
-    def _start_animation(self):
-        """Start bar animation."""
-        if self._animation_timer is not None:
-            return
-        self._animation_timer = NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
-            0.08, self, objc.selector(self._animate_, signature=b'v@:@'), None, True
-        )
-
-    def _stop_animation(self):
-        """Stop bar animation."""
-        if self._animation_timer is not None:
-            self._animation_timer.invalidate()
-            self._animation_timer = None
-        self._bar_heights = [4, 4, 4, 4]
-
-    def _animate_(self, timer):
-        """Animation callback."""
-        import random
-        for i in range(len(self._bar_heights)):
-            delta = random.randint(-3, 3)
-            self._bar_heights[i] = max(4, min(16, self._bar_heights[i] + delta))
         self.setNeedsDisplay_(True)
 
 
@@ -171,7 +134,6 @@ class NativeRecordingIndicator:
         self._current_state = "idle"
         self._panel: Optional[NSPanel] = None
         self._view: Optional[IndicatorView] = None
-        self._flash_timer: Optional[NSTimer] = None
 
         self._create_panel()
 
@@ -223,25 +185,11 @@ class NativeRecordingIndicator:
         """
         self._current_state = state
 
-        if self._flash_timer:
-            self._flash_timer.invalidate()
-            self._flash_timer = None
-
         if state == "idle":
             self.hide()
         else:
             self._view.setState_(state)
             self.show()
-
-            # Auto-hide after flash for success/error
-            if state in ("success", "error"):
-                self._flash_timer = NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
-                    1.5, self, objc.selector(self._flash_complete_, signature=b'v@:@'), None, False
-                )
-
-    def _flash_complete_(self, timer):
-        """Called when flash animation completes."""
-        self.set_state("idle")
 
     def show(self) -> None:
         """Show the indicator without stealing focus."""
@@ -253,11 +201,6 @@ class NativeRecordingIndicator:
 
     def destroy(self) -> None:
         """Clean up resources."""
-        if self._flash_timer:
-            self._flash_timer.invalidate()
-            self._flash_timer = None
-        if self._view:
-            self._view._stop_animation()
         if self._panel:
             self._panel.close()
 
