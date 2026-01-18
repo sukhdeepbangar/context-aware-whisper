@@ -13,13 +13,32 @@ from dotenv import load_dotenv
 # Valid UI position values
 VALID_UI_POSITIONS = ["top-center", "top-right", "top-left", "bottom-center", "bottom-right", "bottom-left"]
 
+# Valid transcriber backends
+VALID_TRANSCRIBERS = ["groq", "local"]
+
+# Valid whisper models (for local transcription)
+VALID_WHISPER_MODELS = [
+    "tiny", "tiny.en",
+    "base", "base.en",
+    "small", "small.en",
+    "medium", "medium.en",
+    "large-v1", "large-v2", "large-v3"
+]
+
 
 @dataclass
 class Config:
     """Application configuration from environment variables."""
 
-    # Required
-    groq_api_key: str
+    # Transcriber backend - Required if groq, Optional if local
+    groq_api_key: Optional[str] = None
+
+    # Transcriber selection
+    transcriber: str = "groq"  # "groq" or "local"
+
+    # Local transcription settings (whisper.cpp)
+    whisper_model: str = "base.en"
+    models_dir: str = field(default_factory=lambda: os.path.expanduser("~/.cache/whisper"))
 
     # Optional with defaults - Audio/Transcription
     language: Optional[str] = None  # Auto-detect if not set
@@ -42,7 +61,10 @@ class Config:
         Load configuration from environment variables.
 
         Environment Variables:
-            GROQ_API_KEY: Required. Groq API key for transcription.
+            GROQ_API_KEY: Required when HANDFREE_TRANSCRIBER=groq. Groq API key.
+            HANDFREE_TRANSCRIBER: Optional. Transcription backend: "groq" or "local" (default: groq).
+            HANDFREE_WHISPER_MODEL: Optional. Whisper model for local transcription (default: base.en).
+            HANDFREE_MODELS_DIR: Optional. Directory for whisper models (default: ~/.cache/whisper).
             HANDFREE_LANGUAGE: Optional. Language code for transcription (auto-detect if not set).
             HANDFREE_TYPE_DELAY: Optional. Delay between keystrokes in seconds (default: 0).
             HANDFREE_SAMPLE_RATE: Optional. Audio sample rate in Hz (default: 16000).
@@ -62,22 +84,31 @@ class Config:
         """
         load_dotenv()
 
-        groq_api_key = os.environ.get("GROQ_API_KEY")
-        if not groq_api_key:
-            raise ValueError(
-                "GROQ_API_KEY environment variable is required.\n"
-                "Set it in your .env file or export it:\n"
-                "  export GROQ_API_KEY=your_key_here"
-            )
-
         # Parse boolean environment variables
         def parse_bool(value: str, default: bool) -> bool:
             if not value:
                 return default
             return value.lower() in ("true", "1", "yes")
 
+        # Get transcriber setting first (needed to determine if GROQ_API_KEY is required)
+        transcriber = os.environ.get("HANDFREE_TRANSCRIBER", "groq").lower()
+
+        # Get GROQ_API_KEY (required only for groq transcriber)
+        groq_api_key = os.environ.get("GROQ_API_KEY")
+        if transcriber == "groq" and not groq_api_key:
+            raise ValueError(
+                "GROQ_API_KEY environment variable is required when using Groq transcription.\n"
+                "Set it in your .env file or export it:\n"
+                "  export GROQ_API_KEY=your_key_here\n\n"
+                "Or switch to local transcription:\n"
+                "  export HANDFREE_TRANSCRIBER=local"
+            )
+
         return cls(
             groq_api_key=groq_api_key,
+            transcriber=transcriber,
+            whisper_model=os.environ.get("HANDFREE_WHISPER_MODEL", "base.en"),
+            models_dir=os.environ.get("HANDFREE_MODELS_DIR", os.path.expanduser("~/.cache/whisper")),
             language=os.environ.get("HANDFREE_LANGUAGE"),
             type_delay=float(os.environ.get("HANDFREE_TYPE_DELAY", "0")),
             sample_rate=int(os.environ.get("HANDFREE_SAMPLE_RATE", "16000")),
@@ -100,6 +131,26 @@ class Config:
             ValueError: If configuration values are invalid.
         """
         warnings = []
+
+        # Validate transcriber backend
+        if self.transcriber not in VALID_TRANSCRIBERS:
+            raise ValueError(
+                f"HANDFREE_TRANSCRIBER must be one of: {', '.join(VALID_TRANSCRIBERS)}. "
+                f"Got: {self.transcriber}"
+            )
+
+        # Validate groq_api_key is present when using groq transcriber
+        if self.transcriber == "groq" and not self.groq_api_key:
+            raise ValueError(
+                "GROQ_API_KEY is required when HANDFREE_TRANSCRIBER=groq"
+            )
+
+        # Validate whisper model (for local transcription)
+        if self.transcriber == "local" and self.whisper_model not in VALID_WHISPER_MODELS:
+            raise ValueError(
+                f"HANDFREE_WHISPER_MODEL must be one of: {', '.join(VALID_WHISPER_MODELS)}. "
+                f"Got: {self.whisper_model}"
+            )
 
         if self.type_delay < 0:
             raise ValueError("HANDFREE_TYPE_DELAY must be non-negative")

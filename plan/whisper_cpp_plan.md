@@ -37,11 +37,11 @@ This document provides a detailed step-by-step guide to add local transcription 
 - [x] 2.8 Verify: Transcribe test audio locally (via unit tests with mocks)
 
 ### Phase 3: Configuration Updates
-- [ ] 3.1 Update `config.py` with new environment variables
-- [ ] 3.2 Add `HANDFREE_TRANSCRIBER` option (groq/local)
-- [ ] 3.3 Add `HANDFREE_WHISPER_MODEL` option
-- [ ] 3.4 Add `HANDFREE_MODELS_DIR` option
-- [ ] 3.5 Update `.env.example` with new options
+- [x] 3.1 Update `config.py` with new environment variables
+- [x] 3.2 Add `HANDFREE_TRANSCRIBER` option (groq/local)
+- [x] 3.3 Add `HANDFREE_WHISPER_MODEL` option
+- [x] 3.4 Add `HANDFREE_MODELS_DIR` option
+- [x] 3.5 Update `.env.example` with new options
 
 ### Phase 4: Main App Integration
 - [ ] 4.1 Update `main.py` to support transcriber selection

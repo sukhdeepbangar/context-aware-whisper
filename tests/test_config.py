@@ -50,13 +50,18 @@ class TestConfigFromEnv:
         # Clear all optional env vars
         for var in ["HANDFREE_LANGUAGE", "HANDFREE_TYPE_DELAY", "HANDFREE_SAMPLE_RATE",
                     "HANDFREE_USE_PASTE", "HANDFREE_UI_ENABLED", "HANDFREE_UI_POSITION",
-                    "HANDFREE_HISTORY_ENABLED", "HANDFREE_HISTORY_MAX", "HANDFREE_HOTKEY"]:
+                    "HANDFREE_HISTORY_ENABLED", "HANDFREE_HISTORY_MAX", "HANDFREE_HOTKEY",
+                    "HANDFREE_TRANSCRIBER", "HANDFREE_WHISPER_MODEL", "HANDFREE_MODELS_DIR"]:
             monkeypatch.delenv(var, raising=False)
 
         from handfree.config import Config
+        import os
 
         config = Config.from_env()
 
+        assert config.transcriber == "groq"
+        assert config.whisper_model == "base.en"
+        assert config.models_dir == os.path.expanduser("~/.cache/whisper")
         assert config.language is None
         assert config.type_delay == 0.0
         assert config.sample_rate == 16000
@@ -70,6 +75,9 @@ class TestConfigFromEnv:
     def test_from_env_loads_all_settings(self, monkeypatch):
         """from_env() loads all environment settings correctly."""
         monkeypatch.setenv("GROQ_API_KEY", "my-api-key")
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "groq")
+        monkeypatch.setenv("HANDFREE_WHISPER_MODEL", "small.en")
+        monkeypatch.setenv("HANDFREE_MODELS_DIR", "/custom/models")
         monkeypatch.setenv("HANDFREE_LANGUAGE", "es")
         monkeypatch.setenv("HANDFREE_TYPE_DELAY", "0.05")
         monkeypatch.setenv("HANDFREE_SAMPLE_RATE", "22050")
@@ -85,6 +93,9 @@ class TestConfigFromEnv:
         config = Config.from_env()
 
         assert config.groq_api_key == "my-api-key"
+        assert config.transcriber == "groq"
+        assert config.whisper_model == "small.en"
+        assert config.models_dir == "/custom/models"
         assert config.language == "es"
         assert config.type_delay == 0.05
         assert config.sample_rate == 22050
@@ -344,6 +355,9 @@ class TestConfigDataclass:
 
         required_fields = {
             "groq_api_key",
+            "transcriber",
+            "whisper_model",
+            "models_dir",
             "language",
             "type_delay",
             "sample_rate",
@@ -363,6 +377,9 @@ class TestConfigDataclass:
 
         config = Config(
             groq_api_key="test-key",
+            transcriber="groq",
+            whisper_model="small.en",
+            models_dir="/custom/models",
             language="en",
             type_delay=0.1,
             sample_rate=44100,
@@ -375,6 +392,9 @@ class TestConfigDataclass:
         )
 
         assert config.groq_api_key == "test-key"
+        assert config.transcriber == "groq"
+        assert config.whisper_model == "small.en"
+        assert config.models_dir == "/custom/models"
         assert config.language == "en"
         assert config.type_delay == 0.1
         assert config.sample_rate == 44100
@@ -406,6 +426,220 @@ class TestValidUIPositions:
         ]
 
         assert set(VALID_UI_POSITIONS) == set(expected)
+
+
+class TestTranscriberConfiguration:
+    """Tests for transcriber selection configuration."""
+
+    def test_default_transcriber_is_groq(self, monkeypatch):
+        """Default transcriber is 'groq'."""
+        monkeypatch.setenv("GROQ_API_KEY", "test-key")
+        monkeypatch.delenv("HANDFREE_TRANSCRIBER", raising=False)
+
+        from handfree.config import Config
+
+        config = Config.from_env()
+        assert config.transcriber == "groq"
+
+    def test_can_set_transcriber_to_local(self, monkeypatch):
+        """Transcriber can be set to 'local'."""
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "local")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
+
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+
+            config = Config.from_env()
+            assert config.transcriber == "local"
+
+    def test_local_transcriber_does_not_require_api_key(self, monkeypatch):
+        """Local transcriber doesn't require GROQ_API_KEY."""
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "local")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
+
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+
+            config = Config.from_env()
+            assert config.groq_api_key is None
+            config.validate()  # Should not raise
+
+    def test_groq_transcriber_requires_api_key(self, monkeypatch):
+        """Groq transcriber requires GROQ_API_KEY."""
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "groq")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
+
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+
+            with pytest.raises(ValueError) as exc_info:
+                Config.from_env()
+
+            assert "GROQ_API_KEY" in str(exc_info.value)
+
+    def test_transcriber_case_insensitive(self, monkeypatch):
+        """Transcriber setting is case-insensitive."""
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "LOCAL")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
+
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+
+            config = Config.from_env()
+            assert config.transcriber == "local"
+
+    def test_invalid_transcriber_fails_validation(self, monkeypatch):
+        """Invalid transcriber value fails validation."""
+        from handfree.config import Config
+
+        config = Config(transcriber="invalid", groq_api_key="test")
+
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+
+        assert "HANDFREE_TRANSCRIBER" in str(exc_info.value)
+
+    @pytest.mark.parametrize("transcriber", ["groq", "local"])
+    def test_valid_transcriber_values(self, transcriber, monkeypatch):
+        """Valid transcriber values pass validation."""
+        from handfree.config import Config
+
+        # groq requires api_key, local doesn't
+        api_key = "test-key" if transcriber == "groq" else None
+        config = Config(transcriber=transcriber, groq_api_key=api_key)
+        config.validate()  # Should not raise
+
+
+class TestWhisperModelConfiguration:
+    """Tests for whisper model configuration (local transcription)."""
+
+    def test_default_whisper_model(self, monkeypatch):
+        """Default whisper model is 'base.en'."""
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "local")
+        monkeypatch.delenv("HANDFREE_WHISPER_MODEL", raising=False)
+
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+
+            config = Config.from_env()
+            assert config.whisper_model == "base.en"
+
+    def test_can_set_whisper_model(self, monkeypatch):
+        """Whisper model can be set via environment variable."""
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "local")
+        monkeypatch.setenv("HANDFREE_WHISPER_MODEL", "small.en")
+
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+
+            config = Config.from_env()
+            assert config.whisper_model == "small.en"
+
+    @pytest.mark.parametrize("model", [
+        "tiny", "tiny.en",
+        "base", "base.en",
+        "small", "small.en",
+        "medium", "medium.en",
+        "large-v1", "large-v2", "large-v3"
+    ])
+    def test_valid_whisper_models(self, model):
+        """All valid whisper models pass validation."""
+        from handfree.config import Config
+
+        config = Config(transcriber="local", whisper_model=model)
+        config.validate()  # Should not raise
+
+    def test_invalid_whisper_model_fails_validation(self):
+        """Invalid whisper model fails validation."""
+        from handfree.config import Config
+
+        config = Config(transcriber="local", whisper_model="invalid-model")
+
+        with pytest.raises(ValueError) as exc_info:
+            config.validate()
+
+        assert "HANDFREE_WHISPER_MODEL" in str(exc_info.value)
+
+    def test_whisper_model_not_validated_for_groq(self):
+        """Whisper model validation is skipped for groq transcriber."""
+        from handfree.config import Config
+
+        # Invalid model but using groq - should not fail
+        config = Config(
+            transcriber="groq",
+            groq_api_key="test-key",
+            whisper_model="invalid-model"
+        )
+        config.validate()  # Should not raise
+
+
+class TestModelsDirectory:
+    """Tests for models directory configuration."""
+
+    def test_default_models_dir(self, monkeypatch):
+        """Default models directory is ~/.cache/whisper."""
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "local")
+        monkeypatch.delenv("HANDFREE_MODELS_DIR", raising=False)
+
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+            import os
+
+            config = Config.from_env()
+            assert config.models_dir == os.path.expanduser("~/.cache/whisper")
+
+    def test_can_set_models_dir(self, monkeypatch):
+        """Models directory can be set via environment variable."""
+        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "local")
+        monkeypatch.setenv("HANDFREE_MODELS_DIR", "/custom/path/models")
+
+        with patch('handfree.config.load_dotenv'):
+            from handfree.config import Config
+
+            config = Config.from_env()
+            assert config.models_dir == "/custom/path/models"
+
+
+class TestValidTranscribers:
+    """Tests for VALID_TRANSCRIBERS constant."""
+
+    def test_valid_transcribers_exported(self):
+        """VALID_TRANSCRIBERS is exported from config module."""
+        from handfree.config import VALID_TRANSCRIBERS
+
+        assert isinstance(VALID_TRANSCRIBERS, list)
+        assert len(VALID_TRANSCRIBERS) == 2
+
+    def test_valid_transcribers_contains_expected_values(self):
+        """VALID_TRANSCRIBERS contains expected values."""
+        from handfree.config import VALID_TRANSCRIBERS
+
+        assert set(VALID_TRANSCRIBERS) == {"groq", "local"}
+
+
+class TestValidWhisperModels:
+    """Tests for VALID_WHISPER_MODELS constant."""
+
+    def test_valid_whisper_models_exported(self):
+        """VALID_WHISPER_MODELS is exported from config module."""
+        from handfree.config import VALID_WHISPER_MODELS
+
+        assert isinstance(VALID_WHISPER_MODELS, list)
+        assert len(VALID_WHISPER_MODELS) == 11
+
+    def test_valid_whisper_models_contains_expected_values(self):
+        """VALID_WHISPER_MODELS contains all expected models."""
+        from handfree.config import VALID_WHISPER_MODELS
+
+        expected = [
+            "tiny", "tiny.en",
+            "base", "base.en",
+            "small", "small.en",
+            "medium", "medium.en",
+            "large-v1", "large-v2", "large-v3"
+        ]
+
+        assert set(VALID_WHISPER_MODELS) == set(expected)
 
 
 class TestConfigPropertyBased:
