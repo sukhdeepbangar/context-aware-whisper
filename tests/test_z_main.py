@@ -177,7 +177,7 @@ class TestHandFreeAppStateMachine:
 
         app.recorder.stop_recording.assert_called_once()
         app.transcriber.transcribe.assert_called_once()
-        app.output.output.assert_called_once_with("Hello world", use_paste=False, skip_clipboard=True)
+        app.output.output.assert_called_once_with("Hello world", use_paste=False, skip_clipboard=False)
         assert app.state == AppState.IDLE
 
     def test_handle_stop_ignored_when_idle(self, app):
@@ -375,7 +375,7 @@ class TestHandFreeAppUsePaste:
 
         app.handle_stop()
 
-        app.output.output.assert_called_once_with("Hello", use_paste=True, skip_clipboard=True)
+        app.output.output.assert_called_once_with("Hello", use_paste=True, skip_clipboard=False)
 
 
 class TestMainFunction:

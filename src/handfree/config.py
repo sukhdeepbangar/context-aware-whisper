@@ -45,7 +45,7 @@ class Config:
     type_delay: float = 0.0
     sample_rate: int = 16000
     use_paste: bool = False
-    skip_clipboard: bool = True  # If True, don't copy to clipboard (use keystroke typing)
+    skip_clipboard: bool = False  # If True, use slow keystroke typing instead of fast clipboard paste
 
     # Optional with defaults - UI
     ui_enabled: bool = True
@@ -115,7 +115,7 @@ class Config:
             type_delay=float(os.environ.get("HANDFREE_TYPE_DELAY", "0")),
             sample_rate=int(os.environ.get("HANDFREE_SAMPLE_RATE", "16000")),
             use_paste=parse_bool(os.environ.get("HANDFREE_USE_PASTE", ""), False),
-            skip_clipboard=parse_bool(os.environ.get("HANDFREE_SKIP_CLIPBOARD", "true"), True),
+            skip_clipboard=parse_bool(os.environ.get("HANDFREE_SKIP_CLIPBOARD", ""), False),
             ui_enabled=parse_bool(os.environ.get("HANDFREE_UI_ENABLED", "true"), True),
             ui_position=os.environ.get("HANDFREE_UI_POSITION", "top-center").lower(),
             history_enabled=parse_bool(os.environ.get("HANDFREE_HISTORY_ENABLED", "true"), True),

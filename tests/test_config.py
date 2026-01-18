@@ -79,7 +79,7 @@ class TestConfigFromEnv:
         assert config.type_delay == 0.0
         assert config.sample_rate == 16000
         assert config.use_paste is False
-        assert config.skip_clipboard is True  # Default is now True
+        assert config.skip_clipboard is False  # Default is False (fast clipboard paste)
         assert config.ui_enabled is True
         assert config.ui_position == "top-center"
         assert config.history_enabled is True
@@ -199,7 +199,7 @@ class TestConfigBooleanParsing:
         ("False", False),
         ("0", False),
         ("no", False),
-        ("", True),  # Empty string defaults to True (new default)
+        ("", False),  # Empty string defaults to False
     ])
     def test_skip_clipboard_boolean_parsing(self, value, expected, monkeypatch):
         """HANDFREE_SKIP_CLIPBOARD is parsed correctly."""

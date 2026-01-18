@@ -150,7 +150,7 @@ class TestE2EBasicFlow:
         mock_handfree_app.output.output.assert_called_once_with(
             "Hello world, this is a test.",
             use_paste=False,
-            skip_clipboard=True
+            skip_clipboard=False
         )
 
         # State should return to IDLE
@@ -182,7 +182,7 @@ class TestE2EBasicFlow:
             mock_handfree_app.output.output.assert_called_once_with(
                 expected_text,
                 use_paste=False,
-                skip_clipboard=True
+                skip_clipboard=False
             )
 
     def test_basic_flow_with_language_setting(self, mock_handfree_app):
@@ -213,7 +213,7 @@ class TestE2EBasicFlow:
         mock_handfree_app.output.output.assert_called_once_with(
             "Pasted text",
             use_paste=True,
-            skip_clipboard=True
+            skip_clipboard=False
         )
 
 
@@ -324,7 +324,7 @@ class TestE2ELongRecording:
         mock_handfree_app.output.output.assert_called_once_with(
             f"Text for {duration}s recording",
             use_paste=False,
-            skip_clipboard=True
+            skip_clipboard=False
         )
         assert mock_handfree_app.state == AppState.IDLE
 
@@ -395,7 +395,7 @@ class TestE2ESpecialCharacters:
         mock_handfree_app.handle_stop()
 
         # Verify exact text preservation
-        mock_handfree_app.output.output.assert_called_once_with(text, use_paste=False, skip_clipboard=True)
+        mock_handfree_app.output.output.assert_called_once_with(text, use_paste=False, skip_clipboard=False)
 
     def test_empty_transcription_result(self, mock_handfree_app):
         """Empty string from transcriber is handled."""
@@ -421,7 +421,7 @@ class TestE2ESpecialCharacters:
 
         # Note: Current implementation outputs whitespace-only text
         # This test documents current behavior
-        mock_handfree_app.output.output.assert_called_once_with("   ", use_paste=False, skip_clipboard=True)
+        mock_handfree_app.output.output.assert_called_once_with("   ", use_paste=False, skip_clipboard=False)
 
 
 class TestE2EQuickSuccession:
@@ -461,7 +461,7 @@ class TestE2EQuickSuccession:
             mock_handfree_app.handle_stop()
 
             assert mock_handfree_app.state == AppState.IDLE
-            mock_handfree_app.output.output.assert_called_once_with(expected_text, use_paste=False, skip_clipboard=True)
+            mock_handfree_app.output.output.assert_called_once_with(expected_text, use_paste=False, skip_clipboard=False)
 
     def test_five_rapid_cycles(self, mock_handfree_app):
         """Five rapid recording cycles all complete successfully."""
@@ -530,7 +530,7 @@ class TestE2EQuickSuccession:
         mock_handfree_app.handle_stop()
 
         assert mock_handfree_app.state == AppState.IDLE
-        mock_handfree_app.output.output.assert_called_once_with("Success after failure", use_paste=False, skip_clipboard=True)
+        mock_handfree_app.output.output.assert_called_once_with("Success after failure", use_paste=False, skip_clipboard=False)
 
 
 class TestE2EDetectorErrors:
