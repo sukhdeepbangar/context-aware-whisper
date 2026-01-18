@@ -18,6 +18,7 @@ from handfree.audio_recorder import AudioRecorder
 from handfree.config import Config
 from handfree.transcriber import Transcriber
 from handfree.local_transcriber import LocalTranscriber
+from handfree.text_cleanup import TextCleaner, CleanupMode
 from handfree.exceptions import (
     TranscriptionError,
     LocalTranscriptionError,
@@ -87,6 +88,23 @@ def get_transcriber(config: Config) -> tuple:
         return Transcriber(api_key=config.groq_api_key), mode
 
 
+def get_text_cleaner(config: Config) -> TextCleaner:
+    """Create text cleaner based on configuration."""
+    mode_map = {
+        "off": CleanupMode.OFF,
+        "light": CleanupMode.LIGHT,
+        "standard": CleanupMode.STANDARD,
+        "aggressive": CleanupMode.AGGRESSIVE,
+    }
+    mode = mode_map.get(config.text_cleanup, CleanupMode.STANDARD)
+
+    return TextCleaner(
+        mode=mode,
+        api_key=config.groq_api_key if mode == CleanupMode.AGGRESSIVE else None,
+        preserve_intentional=config.preserve_intentional,
+    )
+
+
 class AppState(Enum):
     """Application state machine states."""
     IDLE = auto()
@@ -129,6 +147,10 @@ class HandFreeApp:
         # Initialize transcriber using factory function
         self.transcriber, self.transcriber_mode = get_transcriber(config)
         logger.debug(f"Transcriber initialized: {self.transcriber_mode}")
+
+        # Initialize text cleaner
+        self.text_cleaner = get_text_cleaner(config)
+        logger.debug(f"Text cleaner initialized: mode={config.text_cleanup}")
 
         # Initialize output handler with error handling
         try:
@@ -245,6 +267,13 @@ class HandFreeApp:
                 language=self.language
             )
             if text:
+                # Clean disfluencies
+                if self.config.text_cleanup != "off":
+                    original_text = text
+                    text = self.text_cleaner.clean(text)
+                    if text != original_text:
+                        logger.debug(f"Text cleaned: '{original_text}' -> '{text}'")
+
                 print(f"[Transcription] {text}")
                 try:
                     self.output.output(text, use_paste=self.use_paste, skip_clipboard=self.skip_clipboard)
@@ -331,6 +360,7 @@ class HandFreeApp:
         print()
         print(f"  Platform: {platform}")
         print(f"  Transcription: {self.transcriber_mode}")
+        print(f"  Text cleanup: {self.config.text_cleanup}")
         print(f"  Hotkey: {hotkey} (hold to record)")
         print()
         print("  Usage:")

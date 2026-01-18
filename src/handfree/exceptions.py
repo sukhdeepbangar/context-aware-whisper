@@ -68,3 +68,8 @@ class HotkeyDetectorError(HandFreeError):
 class OutputHandlerError(HandFreeError):
     """Error when output handler fails to initialize."""
     pass
+
+
+class TextCleanupError(HandFreeError):
+    """Error cleaning transcribed text."""
+    pass

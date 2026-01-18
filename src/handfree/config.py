@@ -25,6 +25,9 @@ VALID_WHISPER_MODELS = [
     "large-v1", "large-v2", "large-v3"
 ]
 
+# Valid text cleanup modes
+VALID_CLEANUP_MODES = ["off", "light", "standard", "aggressive"]
+
 
 @dataclass
 class Config:
@@ -56,6 +59,10 @@ class Config:
     # Optional - Custom hotkey (e.g., "ctrl+shift+r")
     custom_hotkey: Optional[str] = None
 
+    # Text cleanup settings
+    text_cleanup: str = "standard"  # off, light, standard, aggressive
+    preserve_intentional: bool = True
+
     @classmethod
     def from_env(cls) -> "Config":
         """
@@ -77,6 +84,8 @@ class Config:
             HANDFREE_HISTORY_ENABLED: Optional. Enable transcription history (default: true).
             HANDFREE_HISTORY_MAX: Optional. Maximum history entries (default: 1000).
             HANDFREE_HOTKEY: Optional. Custom hotkey (e.g., "ctrl+shift+r"). Platform default if not set.
+            HANDFREE_TEXT_CLEANUP: Optional. Text cleanup mode: off, light, standard, aggressive (default: standard).
+            HANDFREE_PRESERVE_INTENTIONAL: Optional. Preserve intentional patterns like emphasis (default: true).
 
         Returns:
             Config instance with loaded values.
@@ -121,6 +130,8 @@ class Config:
             history_enabled=parse_bool(os.environ.get("HANDFREE_HISTORY_ENABLED", "true"), True),
             history_max_entries=int(os.environ.get("HANDFREE_HISTORY_MAX", "1000")),
             custom_hotkey=os.environ.get("HANDFREE_HOTKEY"),
+            text_cleanup=os.environ.get("HANDFREE_TEXT_CLEANUP", "standard").lower(),
+            preserve_intentional=parse_bool(os.environ.get("HANDFREE_PRESERVE_INTENTIONAL", "true"), True),
         )
 
     def validate(self) -> List[str]:
@@ -180,6 +191,20 @@ class Config:
         if self.history_max_entries > 100000:
             warnings.append(
                 f"Large history max ({self.history_max_entries}) may impact performance"
+            )
+
+        # Validate text cleanup mode
+        if self.text_cleanup not in VALID_CLEANUP_MODES:
+            raise ValueError(
+                f"HANDFREE_TEXT_CLEANUP must be one of: {', '.join(VALID_CLEANUP_MODES)}. "
+                f"Got: {self.text_cleanup}"
+            )
+
+        # Warn if aggressive mode without API key
+        if self.text_cleanup == "aggressive" and not self.groq_api_key:
+            warnings.append(
+                "HANDFREE_TEXT_CLEANUP=aggressive requires GROQ_API_KEY. "
+                "Will fall back to 'standard' mode."
             )
 
         return warnings

@@ -20,7 +20,9 @@ from handfree.exceptions import (
     TranscriptionError,
     OutputError,
     PlatformNotSupportedError,
+    TextCleanupError,
 )
+from handfree.text_cleanup import TextCleaner, CleanupMode
 from handfree.transcriber import Transcriber
 
 # Platform abstraction layer
@@ -68,6 +70,10 @@ __all__ = [
     "TranscriptionError",
     "OutputError",
     "PlatformNotSupportedError",
+    "TextCleanupError",
+    # Text cleanup
+    "TextCleaner",
+    "CleanupMode",
     # Platform abstraction
     "get_platform",
     "create_hotkey_detector",
