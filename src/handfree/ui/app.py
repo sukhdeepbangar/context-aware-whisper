@@ -11,20 +11,22 @@ from pathlib import Path
 from typing import Callable, Optional
 
 
-def _set_macos_accessory_app() -> None:
-    """Set the app as an accessory app that never steals focus.
+def _set_macos_background_app() -> None:
+    """Set the app as a background app that CANNOT receive focus.
 
     This MUST be called before creating any tkinter windows.
-    An accessory app:
-    - Never appears in the Dock (unless it has a visible window)
-    - Never receives focus when windows are shown
+    A background (prohibited) app:
+    - Never appears in the Dock
+    - Windows appear but CANNOT be activated/focused
     - Does not appear in Cmd+Tab app switcher
+
+    Reference: https://developer.apple.com/documentation/appkit/nsapplication/activationpolicy/prohibited
     """
     if sys.platform != "darwin":
         return
     try:
-        from AppKit import NSApp, NSApplicationActivationPolicyAccessory
-        NSApp.setActivationPolicy_(NSApplicationActivationPolicyAccessory)
+        from AppKit import NSApp, NSApplicationActivationPolicyProhibited
+        NSApp.setActivationPolicy_(NSApplicationActivationPolicyProhibited)
     except Exception:
         pass
 
@@ -93,9 +95,9 @@ class HandFreeUI:
 
         self._running = True
 
-        # On macOS, set app as accessory BEFORE creating any windows
+        # On macOS, set app as background BEFORE creating any windows
         # This prevents the app from ever stealing focus
-        _set_macos_accessory_app()
+        _set_macos_background_app()
 
         # Create root window (hidden) - MUST be on main thread for macOS
         self._root = tk.Tk()
