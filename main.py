@@ -274,6 +274,14 @@ class HandFreeApp:
                     if text != original_text:
                         logger.debug(f"Text cleaned: '{original_text}' -> '{text}'")
 
+                # Check if text is still non-empty after cleanup
+                if not text:
+                    print("[Warning] No transcription returned (empty after cleanup)")
+                    if self.ui:
+                        self.ui.set_state("error")
+                    self._state = AppState.IDLE
+                    return
+
                 print(f"[Transcription] {text}")
                 try:
                     self.output.output(text, use_paste=self.use_paste, skip_clipboard=self.skip_clipboard)

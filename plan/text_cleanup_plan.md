@@ -55,11 +55,11 @@ Natural speech contains disfluencies that degrade written output:
 
 ### Phase 5: Verification
 - [x] 5.1 Run all tests: `pytest tests/test_text_cleanup.py -v`
-- [ ] 5.2 Manual test with `HANDFREE_TEXT_CLEANUP=off`
-- [ ] 5.3 Manual test with `HANDFREE_TEXT_CLEANUP=light`
-- [ ] 5.4 Manual test with `HANDFREE_TEXT_CLEANUP=standard`
+- [x] 5.2 Manual test with `HANDFREE_TEXT_CLEANUP=off`
+- [x] 5.3 Manual test with `HANDFREE_TEXT_CLEANUP=light`
+- [x] 5.4 Manual test with `HANDFREE_TEXT_CLEANUP=standard`
 - [x] 5.5 Performance benchmark (<5ms for standard mode)
-- [ ] 5.6 End-to-end test with real speech
+- [x] 5.6 End-to-end test with real speech
 
 ---
 

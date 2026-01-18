@@ -411,7 +411,7 @@ class TestE2ESpecialCharacters:
         assert mock_handfree_app.state == AppState.IDLE
 
     def test_whitespace_only_transcription(self, mock_handfree_app):
-        """Whitespace-only transcription is handled."""
+        """Whitespace-only transcription is handled - becomes empty after cleanup."""
         mock_handfree_app._state = AppState.RECORDING
         mock_handfree_app.recorder.get_duration.return_value = 2.0
         mock_handfree_app.recorder.stop_recording.return_value = create_test_audio()
@@ -419,9 +419,10 @@ class TestE2ESpecialCharacters:
 
         mock_handfree_app.handle_stop()
 
-        # Note: Current implementation outputs whitespace-only text
-        # This test documents current behavior
-        mock_handfree_app.output.output.assert_called_once_with("   ", use_paste=False, skip_clipboard=False)
+        # With text cleanup enabled (default: standard mode), whitespace-only
+        # text becomes empty after cleanup, so output should NOT be called
+        mock_handfree_app.output.output.assert_not_called()
+        assert mock_handfree_app.state == AppState.IDLE
 
 
 class TestE2EQuickSuccession:
