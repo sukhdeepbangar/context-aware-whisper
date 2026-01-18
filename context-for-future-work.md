@@ -136,11 +136,48 @@ handfree/
 - Visual feedback: Menu bar icon states?
 - Pause mechanism: Which hotkey to pause/resume listening?
 
+## Future Feature: whisper.cpp Local Transcription
+
+### Benefits Over Groq API
+| Aspect | Groq API (Current) | whisper.cpp (Future) |
+|--------|-------------------|---------------------|
+| Privacy | Audio sent to cloud | Audio stays local |
+| Offline | Requires internet | Works offline |
+| Latency | Network dependent | Local processing |
+| Cost | Free tier limits | Completely free |
+| Rate Limits | 2K req/day, 7.2K sec/min | Unlimited |
+
+### Technical Approach
+**Python Bindings:**
+- `pywhispercpp` - Actively maintained, simple API
+- `whispercpp` - Alternative binding
+
+**Integration Points:**
+1. `src/handfree/transcriber.py` - Add `WhisperCppTranscriber` class
+2. Configuration option to choose backend (groq vs local)
+3. Model download/management utility
+
+### Model Options
+- `tiny.en` (75MB) - Fastest, basic accuracy
+- `base.en` (142MB) - Good balance (recommended)
+- `small.en` (466MB) - Better accuracy
+- `medium.en` (1.5GB) - High accuracy
+- `large` (3GB) - Best accuracy, multilingual
+
+### Implementation Notes
+- Apple Silicon Macs get Metal acceleration (fast!)
+- Models downloaded to `~/.cache/whisper/` or custom location
+- Can run alongside Groq as fallback option
+
+See `future_plans.md` for detailed implementation plan.
+
 ## Resources & References
 - Groq API Docs: https://console.groq.com/docs
 - Ollama: https://ollama.ai
 - SileroVAD: https://github.com/snakers4/silero-vad
 - Wispr Flow approach: Whisper → Llama cleanup → Output
+- whisper.cpp: https://github.com/ggerganov/whisper.cpp
+- pywhispercpp: https://github.com/abdeladim-s/pywhispercpp
 
 ## Current Environment
 - Mac: Darwin 24.5.0

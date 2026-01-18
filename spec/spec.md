@@ -57,6 +57,15 @@ A macOS Python application that uses AirPods mute/unmute gestures to trigger fas
                          │   Model: whisper-   │
                          │   large-v3-turbo    │
                          └─────────────────────┘
+                                    OR
+                         ┌─────────────────────┐
+                         │   whisper.cpp       │
+                         │   (local)           │
+                         │                     │
+                         │   Models: tiny,     │
+                         │   base, small,      │
+                         │   medium, large     │
+                         └─────────────────────┘
 ```
 
 ---
@@ -281,6 +290,78 @@ class Transcriber:
 
 ---
 
+### Module 3b: `local_transcriber.py` (Future: whisper.cpp)
+
+**Purpose:** Local speech-to-text transcription using whisper.cpp for offline, private transcription.
+
+**Dependencies:**
+- `pywhispercpp` (recommended) or `whispercpp`
+
+**Benefits Over Cloud (Groq API):**
+| Aspect | Groq API | whisper.cpp |
+|--------|----------|-------------|
+| Privacy | Audio sent to cloud | Audio stays local |
+| Offline | Requires internet | Works offline |
+| Latency | Network dependent (~200ms) | Local processing (~100-500ms depending on model) |
+| Cost | Free tier limits | Completely free |
+| Rate Limits | 2K req/day | Unlimited |
+
+**Model Options:**
+| Model | Size | RAM | Speed | Quality | Use Case |
+|-------|------|-----|-------|---------|----------|
+| tiny.en | 75 MB | ~1 GB | Fastest | Basic | Quick drafts, low-resource |
+| base.en | 142 MB | ~2 GB | Fast | Good | General use (recommended) |
+| small.en | 466 MB | ~3 GB | Medium | Better | Balanced accuracy/speed |
+| medium.en | 1.5 GB | ~5 GB | Slow | Great | High accuracy needed |
+| large | 3 GB | ~10 GB | Slowest | Best | Maximum accuracy, multilingual |
+
+**Interface:**
+```python
+class LocalTranscriber:
+    def __init__(self, model_name: str = "base.en", models_dir: Optional[str] = None):
+        """
+        Initialize local transcriber with whisper.cpp.
+
+        Args:
+            model_name: Whisper model to use (tiny, base, small, medium, large)
+            models_dir: Directory for model files. Defaults to ~/.cache/whisper/
+        """
+
+    def transcribe(self, audio_bytes: bytes, language: str = "en") -> str:
+        """
+        Transcribe audio to text locally.
+
+        Args:
+            audio_bytes: WAV audio file as bytes
+            language: Language code (default "en")
+
+        Returns:
+            Transcribed text string.
+        """
+
+    def is_model_downloaded(self) -> bool:
+        """Check if the configured model is available locally."""
+
+    def download_model(self) -> None:
+        """Download the configured model if not present."""
+```
+
+**Implementation Notes:**
+- Apple Silicon Macs get Metal GPU acceleration (significantly faster)
+- Models are downloaded on first use to `~/.cache/whisper/`
+- Can run alongside Groq as fallback (use local when offline, cloud when available)
+- Consider model warm-up on app start for faster first transcription
+
+**Configuration:**
+```python
+# Environment variables
+HANDFREE_TRANSCRIBER = "local"  # or "groq" (default)
+HANDFREE_WHISPER_MODEL = "base.en"  # model to use
+HANDFREE_MODELS_DIR = "~/.cache/whisper"  # model storage location
+```
+
+---
+
 ### Module 4: `output_handler.py`
 
 **Purpose:** Copy transcription to clipboard and type into active application.
@@ -352,9 +433,12 @@ def main():
 **Configuration (Environment Variables):**
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `GROQ_API_KEY` | Yes | - | Groq API key for transcription |
+| `GROQ_API_KEY` | Yes* | - | Groq API key (*required if using cloud) |
 | `HANDFREE_LANGUAGE` | No | auto | Language code for transcription |
 | `HANDFREE_TYPE_DELAY` | No | 0 | Delay between keystrokes (seconds) |
+| `HANDFREE_TRANSCRIBER` | No | groq | Transcription backend: "groq" or "local" |
+| `HANDFREE_WHISPER_MODEL` | No | base.en | Local whisper model to use |
+| `HANDFREE_MODELS_DIR` | No | ~/.cache/whisper | Directory for local models |
 
 ---
 
@@ -365,7 +449,8 @@ handfree/
 ├── main.py                 # Entry point, orchestration
 ├── mute_detector.py        # AirPods mute state detection
 ├── audio_recorder.py       # Microphone audio capture
-├── transcriber.py          # Groq Whisper API client
+├── transcriber.py          # Groq Whisper API client (cloud)
+├── local_transcriber.py    # whisper.cpp client (local) [Future]
 ├── output_handler.py       # Clipboard + auto-typing
 ├── config.py               # Configuration loading
 ├── exceptions.py           # Custom exceptions
@@ -374,7 +459,8 @@ handfree/
 ├── spec/
 │   └── spec.md             # This file
 ├── plan/
-│   └── implementation_plan.md
+│   ├── implementation_plan.md
+│   └── whisper_cpp_plan.md # whisper.cpp implementation plan
 └── README.md               # Setup & usage instructions
 ```
 
@@ -392,8 +478,11 @@ sounddevice>=0.4.6
 numpy>=1.24.0
 scipy>=1.11.0
 
-# Groq API
+# Groq API (cloud transcription)
 groq>=0.4.0
+
+# Local transcription (optional - whisper.cpp)
+# pywhispercpp>=1.0.0  # Uncomment to enable local transcription
 
 # Output handling
 pyperclip>=1.8.2
@@ -419,9 +508,12 @@ python-dotenv>=1.0.0
 ## Security Considerations
 
 1. **API Key Storage**: Use environment variable, never hardcode
-2. **Audio Data**: Audio is sent to Groq cloud; not stored locally
+2. **Audio Data**:
+   - Cloud mode (Groq): Audio is sent to Groq servers
+   - Local mode (whisper.cpp): Audio never leaves the machine - maximum privacy
 3. **Permissions**: App requires microphone + accessibility access
 4. **No Persistent Storage**: No audio files saved to disk by default
+5. **Local Transcription Benefits**: For sensitive content, use `HANDFREE_TRANSCRIBER=local`
 
 ---
 

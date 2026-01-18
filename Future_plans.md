@@ -1,46 +1,67 @@
-# Prompt for Next Claude Session
+# Future Plans
 
-Hi Claude! I'm working on HandFree, a speech-to-text app for macOS.
+## whisper.cpp - Local Transcription Support
 
-**Please read SESSION_CONTEXT.md first** - it has all the background.
+### What
+Local speech-to-text transcription using [whisper.cpp](https://github.com/ggerganov/whisper.cpp), a high-performance C/C++ port of OpenAI's Whisper model.
 
-## What I Need Help With
+### Why
+| Benefit | Description |
+|---------|-------------|
+| **Privacy** | Audio never leaves your machine - no cloud processing |
+| **Offline Support** | Works without internet connection |
+| **Lower Latency** | No network round-trip, faster transcription |
+| **No API Costs** | Zero usage fees after initial setup |
+| **No Rate Limits** | Unlimited transcriptions |
+| **Data Control** | Full control over your audio data |
 
-I want to plan and implement these features:
+### How
+Integrate whisper.cpp via Python bindings:
 
-### 1. **Ollama Integration for Text Cleanup**
-- Install Ollama locally on Mac
-- Use llama3.2:1b model
-- Clean up disfluencies (um, uh, like, false starts, corrections)
-- Keep text processing private (local only)
+**Option 1: pywhispercpp**
+```bash
+pip install pywhispercpp
+```
+```python
+from pywhispercpp.model import Model
 
-### 2. **Voice Activity Detection (VAD)**
-- Detect when speech starts/stops
-- Only send real speech to API (not silence)
-- Fix the "thank you" hallucination problem
-- Use SileroVAD or WebRTC VAD
+model = Model('base.en')  # or tiny, small, medium, large
+result = model.transcribe('audio.wav')
+print(result)
+```
 
-### 3. **Always-Listening Mode**
-- No button press needed
-- Continuous monitoring with VAD
-- Auto-record when speech detected
-- Auto-transcribe when silence detected
-- Filter out hallucinations and noise
-- Only type meaningful text
+**Option 2: whispercpp**
+```bash
+pip install whispercpp
+```
+```python
+from whispercpp import Whisper
 
-## Task for This Session
+w = Whisper.from_pretrained("base.en")
+result = w.transcribe("audio.wav")
+```
 
-**Please help me create a detailed implementation plan:**
-- Break down into phases
-- Identify files to modify
-- List specific code changes needed
-- Highlight potential issues
-- Suggest testing approach
+### Model Options
+| Model | Size | Speed | Quality | Use Case |
+|-------|------|-------|---------|----------|
+| tiny | 75 MB | Fastest | Basic | Quick drafts, low-resource |
+| base | 142 MB | Fast | Good | General use |
+| small | 466 MB | Medium | Better | Balanced accuracy/speed |
+| medium | 1.5 GB | Slow | Great | High accuracy needed |
+| large | 3 GB | Slowest | Best | Maximum accuracy |
 
-After planning, we'll implement in a follow-up session.
+**Recommended:** `base.en` or `small.en` for English-only with best speed/accuracy tradeoff.
 
-## Current Project State
-- App is working with Fn key trigger
-- Using Groq Whisper API
-- Files: main.py, src/handfree/*.py
-- See SESSION_CONTEXT.md for full details
+### Implementation Approach
+1. Add whisper.cpp as optional backend alongside Groq API
+2. Auto-detect if models are downloaded locally
+3. Let users choose: cloud (Groq) vs local (whisper.cpp)
+4. Fallback: Use Groq if local model unavailable
+
+### Prerequisites
+- Download whisper models (~75MB to 3GB depending on model)
+- Sufficient RAM for model (tiny: 1GB, base: 2GB, small: 3GB)
+- Apple Silicon recommended for best performance (uses Metal acceleration)
+
+### Timeline
+This is a planned future feature. Current implementation uses Groq Whisper API.
