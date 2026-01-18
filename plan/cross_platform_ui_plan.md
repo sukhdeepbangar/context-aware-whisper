@@ -65,7 +65,7 @@ This plan implements two features in priority order:
 - [ ] 1.5.1 Manual test: indicator appears when Fn pressed
 - [ ] 1.5.2 Manual test: indicator shows correct state colors
 - [ ] 1.5.3 Manual test: indicator disappears/dims when idle
-- [ ] 1.5.4 Create unit tests for `RecordingIndicator` state logic (mocked tkinter)
+- [x] 1.5.4 Create unit tests for `RecordingIndicator` state logic (mocked tkinter) (34 property-based tests)
 
 ---
 
@@ -245,7 +245,7 @@ This plan implements two features in priority order:
 - [ ] 5.4.5 Add screenshots of UI indicator and history panel (optional, requires visual assets)
 
 ### Step 5.5: Final Testing
-- [ ] 5.5.1 Run full test suite on macOS
+- [x] 5.5.1 Run full test suite on macOS (734 tests passing)
 - [ ] 5.5.2 Run full test suite on Windows
 - [ ] 5.5.3 Run full test suite on Linux
 - [ ] 5.5.4 End-to-end test: record, transcribe, verify in history
@@ -296,8 +296,8 @@ This plan implements two features in priority order:
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| Phase 1: Recording Indicator | Complete | UI indicator with states (idle, recording, transcribing, success, error) |
+| Phase 1: Recording Indicator | Complete | UI indicator with states (idle, recording, transcribing, success, error); 34 property-based tests for state logic |
 | Phase 2: Transcription History | Complete | JSONL-based storage, history panel UI, integrated with main app, history toggle hotkey (Cmd+H/Ctrl+H) |
 | Phase 3: Platform Abstraction | Complete | Platform factory with macOS/Windows/Linux implementations, 43 new tests |
 | Phase 4: Windows/Linux Support | Complete | All implementations done including xdotool/wtype fallback for Wayland (4.3.3), pending: VM testing (4.5) |
-| Phase 5: Polish | In Progress | Step 5.1 (Configuration) complete with 75+ tests; Step 5.2 (UI Refinements) complete with 29 new tests; Step 5.3 (Error Handling) complete with 38 new tests; Step 5.4 (Documentation) complete with 87 tests; remaining: final testing (5.5) |
+| Phase 5: Polish | In Progress | Step 5.1 (Configuration) complete with 75+ tests; Step 5.2 (UI Refinements) complete with 29 new tests; Step 5.3 (Error Handling) complete with 38 new tests; Step 5.4 (Documentation) complete with 87 tests; Step 5.5.1 (macOS testing) complete with 734 tests passing; remaining: Windows/Linux testing (5.5.2-5.5.5) |
