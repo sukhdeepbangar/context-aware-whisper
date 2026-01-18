@@ -170,7 +170,7 @@ class Verifier:
         extra_args: list[str] | None = None,
     ) -> tuple[int, str]:
         """Run pytest with given arguments."""
-        cmd = ["python", "-m", "pytest", "-v"]
+        cmd = [sys.executable, "-m", "pytest", "-v"]
 
         if markers:
             cmd.extend(["-m", markers])
