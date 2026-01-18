@@ -541,6 +541,15 @@ class RecordingIndicator:
 
     def show(self) -> None:
         """Show the indicator window without stealing focus."""
+        # On macOS, save the currently active app so we can restore focus
+        previous_app = None
+        if self._platform == "macos" and PYOBJC_AVAILABLE:
+            try:
+                from AppKit import NSWorkspace
+                previous_app = NSWorkspace.sharedWorkspace().frontmostApplication()
+            except Exception:
+                pass
+
         # Re-apply focus prevention before showing (settings may reset after withdraw)
         if self._platform == "macos":
             self._setup_macos_focus_prevention()
@@ -551,6 +560,24 @@ class RecordingIndicator:
         # The -topmost attribute ensures the window stays on top without needing lift()
         if self._platform != "macos":
             self.window.lift()
+
+        # On macOS, immediately restore focus to the previous app
+        if previous_app is not None:
+            try:
+                # Small delay to let the window appear, then restore focus
+                self.window.after(10, lambda: self._restore_focus(previous_app))
+            except Exception:
+                pass
+
+    def _restore_focus(self, app) -> None:
+        """Restore focus to the given application."""
+        if not PYOBJC_AVAILABLE:
+            return
+        try:
+            from AppKit import NSApplicationActivateIgnoringOtherApps
+            app.activateWithOptions_(NSApplicationActivateIgnoringOtherApps)
+        except Exception:
+            pass
 
     def hide(self) -> None:
         """Hide the indicator window."""
