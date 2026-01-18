@@ -61,6 +61,31 @@ Natural speech contains disfluencies that degrade written output:
 - [x] 5.5 Performance benchmark (<5ms for standard mode)
 - [x] 5.6 End-to-end test with real speech
 
+### Phase 6: Integration Tests
+- [x] 6.1 Create `tests/test_text_cleanup_integration.py`
+- [x] 6.2 Test `get_text_cleaner()` factory creates correct cleaner from Config
+- [x] 6.3 Test `HandFreeApp` initializes `text_cleaner` correctly
+- [x] 6.4 Test pipeline integration: mock transcriber output → text_cleaner → verify cleaned output
+- [x] 6.5 Test cleanup mode switching via environment variables
+- [x] 6.6 Test AGGRESSIVE mode fallback when local model unavailable
+- [x] 6.7 Test cleanup is skipped when mode is OFF
+- [x] 6.8 Test logging of cleaned text (debug output)
+- [x] 6.9 Test startup banner displays correct cleanup mode
+
+### Phase 7: Local Model Integration (MLX + Phi-3-mini)
+- [ ] 7.1 Add `mlx` and `mlx-lm` to dependencies (pyproject.toml)
+- [ ] 7.2 Create `local_llm.py` module for MLX model management
+- [ ] 7.3 Implement lazy model loading (load on first use)
+- [ ] 7.4 Update `clean_aggressive()` to use MLX instead of Groq
+- [ ] 7.5 Update LLM_PROMPT for grammar and tense correction
+- [ ] 7.6 Add `HANDFREE_LOCAL_MODEL` config option (default: Phi-3-mini)
+- [ ] 7.7 Add model download/cache management
+- [ ] 7.8 Add fallback to STANDARD mode if MLX unavailable
+- [ ] 7.9 Performance optimization: batch processing for long texts
+- [ ] 7.10 Add unit tests for local model integration
+- [ ] 7.11 Update .env.example with local model configuration
+- [ ] 7.12 Remove Groq dependency from AGGRESSIVE mode
+
 ---
 
 ## Detailed Implementation
@@ -700,6 +725,527 @@ print(f"Average cleanup time: {avg_ms:.2f}ms")
 
 ---
 
+## Phase 6: Integration Tests
+
+### Step 6.1: Create integration test file
+
+**File:** `tests/test_text_cleanup_integration.py`
+
+```python
+"""
+Integration tests for text cleanup module.
+
+Tests the integration of TextCleaner with:
+- Configuration system
+- HandFreeApp pipeline
+- Environment variable handling
+"""
+
+import pytest
+from unittest.mock import Mock, patch, MagicMock
+import os
+
+from handfree.config import Config
+from handfree.text_cleanup import TextCleaner, CleanupMode
+```
+
+### Step 6.2: Test get_text_cleaner() factory
+
+```python
+class TestGetTextCleanerFactory:
+    """Tests for get_text_cleaner() factory function."""
+
+    def test_creates_off_mode_cleaner(self):
+        """Factory creates OFF mode cleaner from config."""
+        from handfree.main import get_text_cleaner
+        config = Mock()
+        config.text_cleanup = "off"
+        config.preserve_intentional = True
+        config.groq_api_key = None
+
+        cleaner = get_text_cleaner(config)
+
+        assert cleaner.mode == CleanupMode.OFF
+
+    def test_creates_light_mode_cleaner(self):
+        """Factory creates LIGHT mode cleaner from config."""
+        from handfree.main import get_text_cleaner
+        config = Mock()
+        config.text_cleanup = "light"
+        config.preserve_intentional = True
+        config.groq_api_key = None
+
+        cleaner = get_text_cleaner(config)
+
+        assert cleaner.mode == CleanupMode.LIGHT
+
+    def test_creates_standard_mode_cleaner(self):
+        """Factory creates STANDARD mode cleaner from config."""
+        from handfree.main import get_text_cleaner
+        config = Mock()
+        config.text_cleanup = "standard"
+        config.preserve_intentional = True
+        config.groq_api_key = None
+
+        cleaner = get_text_cleaner(config)
+
+        assert cleaner.mode == CleanupMode.STANDARD
+
+    def test_creates_aggressive_mode_with_api_key(self):
+        """Factory creates AGGRESSIVE mode cleaner with API key."""
+        from handfree.main import get_text_cleaner
+        config = Mock()
+        config.text_cleanup = "aggressive"
+        config.preserve_intentional = True
+        config.groq_api_key = "test-api-key"
+
+        cleaner = get_text_cleaner(config)
+
+        assert cleaner.mode == CleanupMode.AGGRESSIVE
+        assert cleaner.api_key == "test-api-key"
+
+    def test_preserve_intentional_passed_to_cleaner(self):
+        """Factory passes preserve_intentional flag to cleaner."""
+        from handfree.main import get_text_cleaner
+        config = Mock()
+        config.text_cleanup = "standard"
+        config.preserve_intentional = False
+        config.groq_api_key = None
+
+        cleaner = get_text_cleaner(config)
+
+        assert cleaner.preserve_intentional is False
+```
+
+### Step 6.3: Test HandFreeApp initialization
+
+```python
+class TestHandFreeAppTextCleanerInit:
+    """Tests for HandFreeApp text_cleaner initialization."""
+
+    @patch('handfree.main.get_transcriber')
+    @patch('handfree.main.get_output_handler')
+    @patch('handfree.main.get_text_cleaner')
+    def test_app_initializes_text_cleaner(
+        self, mock_get_cleaner, mock_get_output, mock_get_transcriber
+    ):
+        """HandFreeApp initializes text_cleaner from config."""
+        from handfree.main import HandFreeApp
+
+        mock_cleaner = Mock()
+        mock_get_cleaner.return_value = mock_cleaner
+        mock_get_transcriber.return_value = Mock()
+        mock_get_output.return_value = Mock()
+
+        config = Mock()
+        config.text_cleanup = "standard"
+        config.validate.return_value = []
+
+        # This may need adjustment based on actual HandFreeApp constructor
+        app = HandFreeApp(config)
+
+        mock_get_cleaner.assert_called_once_with(config)
+        assert app.text_cleaner == mock_cleaner
+```
+
+### Step 6.4: Test pipeline integration
+
+```python
+class TestPipelineIntegration:
+    """Tests for text cleanup in the transcription pipeline."""
+
+    def test_transcription_passes_through_cleaner(self):
+        """Transcribed text is cleaned before output."""
+        from handfree.main import get_text_cleaner
+
+        config = Mock()
+        config.text_cleanup = "standard"
+        config.preserve_intentional = True
+        config.groq_api_key = None
+
+        cleaner = get_text_cleaner(config)
+
+        # Simulate transcriber output
+        raw_transcription = "Um, I I think, you know, this is important"
+        cleaned = cleaner.clean(raw_transcription)
+
+        assert "Um" not in cleaned
+        assert "I I" not in cleaned
+        assert "you know" not in cleaned.lower()
+        assert "important" in cleaned
+
+    def test_pipeline_preserves_text_when_off(self):
+        """Text passes through unchanged when cleanup is OFF."""
+        from handfree.main import get_text_cleaner
+
+        config = Mock()
+        config.text_cleanup = "off"
+        config.preserve_intentional = True
+        config.groq_api_key = None
+
+        cleaner = get_text_cleaner(config)
+
+        raw_transcription = "Um, I I think, you know, this is important"
+        cleaned = cleaner.clean(raw_transcription)
+
+        assert cleaned == raw_transcription
+```
+
+### Step 6.5: Test environment variable handling
+
+```python
+class TestEnvironmentVariableIntegration:
+    """Tests for cleanup mode via environment variables."""
+
+    def test_config_reads_cleanup_mode_from_env(self):
+        """Config.from_env() reads HANDFREE_TEXT_CLEANUP."""
+        with patch.dict(os.environ, {"HANDFREE_TEXT_CLEANUP": "light"}):
+            config = Config.from_env()
+            assert config.text_cleanup == "light"
+
+    def test_config_reads_preserve_intentional_from_env(self):
+        """Config.from_env() reads HANDFREE_PRESERVE_INTENTIONAL."""
+        with patch.dict(os.environ, {"HANDFREE_PRESERVE_INTENTIONAL": "false"}):
+            config = Config.from_env()
+            assert config.preserve_intentional is False
+
+    def test_config_defaults_to_standard_mode(self):
+        """Config defaults to standard cleanup mode."""
+        with patch.dict(os.environ, {}, clear=True):
+            # May need to provide required env vars
+            config = Config.from_env()
+            assert config.text_cleanup == "standard"
+```
+
+### Step 6.6: Test AGGRESSIVE mode fallback
+
+```python
+class TestAggressiveModeFallback:
+    """Tests for AGGRESSIVE mode fallback behavior."""
+
+    def test_aggressive_falls_back_without_api_key(self):
+        """AGGRESSIVE mode falls back to STANDARD without API key."""
+        cleaner = TextCleaner(mode=CleanupMode.AGGRESSIVE, api_key=None)
+
+        text = "Um, hello there"
+        result = cleaner.clean(text)
+
+        # Should still clean (using standard mode fallback)
+        assert "Um" not in result
+        assert "hello" in result.lower()
+
+    @patch('handfree.text_cleanup.Groq')
+    def test_aggressive_falls_back_on_api_error(self, mock_groq):
+        """AGGRESSIVE mode falls back to STANDARD on API error."""
+        mock_groq.side_effect = Exception("API error")
+
+        cleaner = TextCleaner(
+            mode=CleanupMode.AGGRESSIVE,
+            api_key="test-key"
+        )
+
+        text = "Um, hello there"
+        result = cleaner.clean(text)
+
+        # Should still return cleaned text via fallback
+        assert isinstance(result, str)
+```
+
+### Step 6.7-6.9: Additional integration tests
+
+```python
+class TestCleanupSkippedWhenOff:
+    """Tests for cleanup being skipped in OFF mode."""
+
+    def test_off_mode_is_noop(self):
+        """OFF mode does not modify text at all."""
+        cleaner = TextCleaner(mode=CleanupMode.OFF)
+
+        text = "Um, uh, I I think... sorry, I know"
+        result = cleaner.clean(text)
+
+        assert result == text
+
+
+class TestLoggingIntegration:
+    """Tests for cleanup logging."""
+
+    @patch('handfree.main.logger')
+    def test_logs_when_text_is_cleaned(self, mock_logger):
+        """Debug log is emitted when text is cleaned."""
+        # This test would need to be run against actual handle_stop()
+        # May need to mock the transcriber and verify logging
+        pass
+
+
+class TestStartupBannerIntegration:
+    """Tests for startup banner showing cleanup mode."""
+
+    def test_banner_shows_cleanup_mode(self, capsys):
+        """Startup banner displays text cleanup mode."""
+        # Would need to capture stdout during app initialization
+        pass
+```
+
+---
+
+## Phase 7: Local Model Integration (MLX + Phi-3-mini)
+
+### Step 7.1: Add dependencies
+
+**File:** `pyproject.toml`
+
+Add to dependencies:
+```toml
+[project.optional-dependencies]
+local-llm = [
+    "mlx>=0.5.0",
+    "mlx-lm>=0.4.0",
+]
+```
+
+### Step 7.2: Create local_llm.py module
+
+**File:** `src/handfree/local_llm.py`
+
+```python
+"""
+Local LLM Module
+Manages MLX-based local language model for text cleanup.
+"""
+
+import logging
+from typing import Optional
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+# Singleton model instance
+_model = None
+_tokenizer = None
+
+
+def get_model(model_name: str = "mlx-community/Phi-3-mini-4k-instruct-4bit"):
+    """
+    Get or load the local LLM model (lazy loading).
+
+    Args:
+        model_name: HuggingFace model identifier for MLX model
+
+    Returns:
+        Tuple of (model, tokenizer)
+    """
+    global _model, _tokenizer
+
+    if _model is None:
+        try:
+            from mlx_lm import load
+
+            logger.info(f"Loading local model: {model_name}")
+            _model, _tokenizer = load(model_name)
+            logger.info("Local model loaded successfully")
+
+        except ImportError:
+            logger.error("MLX not installed. Install with: pip install mlx mlx-lm")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to load model {model_name}: {e}")
+            raise
+
+    return _model, _tokenizer
+
+
+def generate(
+    prompt: str,
+    max_tokens: int = 512,
+    temperature: float = 0.1,
+    model_name: str = "mlx-community/Phi-3-mini-4k-instruct-4bit",
+) -> str:
+    """
+    Generate text using the local LLM.
+
+    Args:
+        prompt: Input prompt
+        max_tokens: Maximum tokens to generate
+        temperature: Sampling temperature (lower = more deterministic)
+        model_name: Model to use
+
+    Returns:
+        Generated text
+    """
+    try:
+        from mlx_lm import generate as mlx_generate
+
+        model, tokenizer = get_model(model_name)
+
+        response = mlx_generate(
+            model,
+            tokenizer,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temp=temperature,
+            verbose=False,
+        )
+
+        return response.strip()
+
+    except Exception as e:
+        logger.error(f"Local LLM generation failed: {e}")
+        raise
+
+
+def is_available() -> bool:
+    """Check if MLX is available on this system."""
+    try:
+        import mlx
+        import mlx_lm
+        return True
+    except ImportError:
+        return False
+
+
+def unload_model():
+    """Unload model from memory."""
+    global _model, _tokenizer
+    _model = None
+    _tokenizer = None
+```
+
+### Step 7.3-7.4: Update text_cleanup.py for MLX
+
+**File:** `src/handfree/text_cleanup.py`
+
+Update the `clean_aggressive()` method:
+
+```python
+# Updated LLM prompt for grammar and tense correction
+LLM_PROMPT = """Clean and correct this speech transcription.
+
+Tasks:
+1. Remove filler words (um, uh, like, you know, basically)
+2. Remove false starts and repetitions
+3. Fix grammar errors
+4. Correct tense inconsistencies
+5. Preserve the speaker's intended meaning and tone
+
+Input: {text}
+
+Output only the corrected text, nothing else:"""
+
+
+def clean_aggressive(self, text: str) -> str:
+    """Use local LLM for intelligent cleanup with grammar correction."""
+    if not text:
+        return text
+
+    try:
+        from handfree.local_llm import generate, is_available
+
+        if not is_available():
+            logger.warning("MLX not available, falling back to standard cleanup")
+            return self.clean_standard(text)
+
+        cleaned = generate(
+            prompt=self.LLM_PROMPT.format(text=text),
+            max_tokens=len(text) * 2,
+            temperature=0.1,
+            model_name=self.model_name,
+        )
+
+        # Sanity check: if too much removed, fall back
+        if len(cleaned) < len(text) * 0.3:
+            logger.warning("LLM removed too much text, falling back to standard")
+            return self.clean_standard(text)
+
+        return cleaned
+
+    except Exception as e:
+        logger.warning(f"Local LLM cleanup failed, using rule-based: {e}")
+        return self.clean_standard(text)
+```
+
+### Step 7.5: Update TextCleaner __init__
+
+```python
+def __init__(
+    self,
+    mode: CleanupMode = CleanupMode.STANDARD,
+    model_name: str = "mlx-community/Phi-3-mini-4k-instruct-4bit",
+    preserve_intentional: bool = True,
+):
+    """
+    Initialize text cleaner.
+
+    Args:
+        mode: Cleanup aggressiveness level
+        model_name: Local model name for AGGRESSIVE mode (MLX model)
+        preserve_intentional: Preserve intentional patterns
+    """
+    self.mode = mode
+    self.model_name = model_name
+    self.preserve_intentional = preserve_intentional
+
+    # Pre-compile regex patterns for performance
+    self._compile_patterns()
+```
+
+### Step 7.6: Update config.py
+
+**File:** `src/handfree/config.py`
+
+Add to Config dataclass:
+```python
+# Local model settings
+local_model: str = "mlx-community/Phi-3-mini-4k-instruct-4bit"
+```
+
+Update `from_env()`:
+```python
+local_model=os.environ.get(
+    "HANDFREE_LOCAL_MODEL",
+    "mlx-community/Phi-3-mini-4k-instruct-4bit"
+),
+```
+
+### Step 7.7: Update main.py factory
+
+```python
+def get_text_cleaner(config: Config) -> TextCleaner:
+    """Create text cleaner based on configuration."""
+    mode_map = {
+        "off": CleanupMode.OFF,
+        "light": CleanupMode.LIGHT,
+        "standard": CleanupMode.STANDARD,
+        "aggressive": CleanupMode.AGGRESSIVE,
+    }
+    mode = mode_map.get(config.text_cleanup, CleanupMode.STANDARD)
+
+    return TextCleaner(
+        mode=mode,
+        model_name=config.local_model,
+        preserve_intentional=config.preserve_intentional,
+    )
+```
+
+### Step 7.11: Update .env.example
+
+```bash
+# Text Cleanup Settings
+# Removes speech disfluencies and corrects grammar/tenses
+# Options: off, light, standard, aggressive
+HANDFREE_TEXT_CLEANUP=standard
+
+# Local model for AGGRESSIVE mode (MLX model from HuggingFace)
+# Default: mlx-community/Phi-3-mini-4k-instruct-4bit (~2GB)
+# Alternative: mlx-community/Mistral-7B-Instruct-v0.3-4bit (~4GB, better quality)
+HANDFREE_LOCAL_MODEL=mlx-community/Phi-3-mini-4k-instruct-4bit
+
+# Preserve intentional patterns like "I like pizza" vs filler "like"
+HANDFREE_PRESERVE_INTENTIONAL=true
+```
+
+---
+
 ## Performance Targets
 
 | Mode | Target | Max Acceptable |
@@ -707,7 +1253,7 @@ print(f"Average cleanup time: {avg_ms:.2f}ms")
 | OFF | 0ms | 0ms |
 | LIGHT | <2ms | <5ms |
 | STANDARD | <5ms | <20ms |
-| AGGRESSIVE | <500ms | <1000ms |
+| AGGRESSIVE (local) | <1000ms | <2000ms |
 
 ---
 
@@ -715,11 +1261,14 @@ print(f"Average cleanup time: {avg_ms:.2f}ms")
 
 ### New Files
 - `src/handfree/text_cleanup.py`
+- `src/handfree/local_llm.py` - MLX model management (Phase 7)
 - `tests/test_text_cleanup.py`
+- `tests/test_text_cleanup_integration.py` - Integration tests (Phase 6)
 
 ### Modified Files
 - `src/handfree/exceptions.py` - Add `TextCleanupError`
-- `src/handfree/config.py` - Add cleanup config options
+- `src/handfree/config.py` - Add cleanup config options + local_model
 - `src/handfree/__init__.py` - Export new classes
 - `main.py` - Integrate cleanup in pipeline
 - `.env.example` - Document new env vars
+- `pyproject.toml` - Add mlx/mlx-lm optional dependencies
