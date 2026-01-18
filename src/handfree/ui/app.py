@@ -30,6 +30,13 @@ def _set_macos_accessory_app() -> None:
 
 
 from handfree.ui.indicator import RecordingIndicator
+
+# Try to use native indicator on macOS (doesn't steal focus)
+try:
+    from handfree.ui.native_indicator import NativeRecordingIndicator
+    NATIVE_INDICATOR_AVAILABLE = True
+except ImportError:
+    NATIVE_INDICATOR_AVAILABLE = False
 from handfree.ui.history import HistoryPanel
 from handfree.ui.menubar import create_menubar_app, MenuBarApp
 from handfree.storage.history_store import HistoryStore, TranscriptionRecord
@@ -64,6 +71,7 @@ class HandFreeUI:
         """
         self._root: Optional[tk.Tk] = None
         self._indicator: Optional[RecordingIndicator] = None
+        self._native_indicator = None  # NativeRecordingIndicator on macOS
         self._history_panel: Optional[HistoryPanel] = None
         self._history_store: Optional[HistoryStore] = None
         self._menubar: Optional[MenuBarApp] = None
@@ -96,8 +104,17 @@ class HandFreeUI:
         self._root = tk.Tk()
         self._root.withdraw()  # Hide root window
 
-        # Create indicator with configured position
-        self._indicator = RecordingIndicator(root=self._root, position=self._indicator_position)
+        # Create indicator - prefer native on macOS (doesn't steal focus)
+        self._native_indicator = None
+        if NATIVE_INDICATOR_AVAILABLE:
+            try:
+                self._native_indicator = NativeRecordingIndicator(position=self._indicator_position)
+                self._indicator = None  # Don't create tkinter indicator
+            except Exception as e:
+                print(f"[Warning] Native indicator failed, using tkinter: {e}")
+                self._indicator = RecordingIndicator(root=self._root, position=self._indicator_position)
+        else:
+            self._indicator = RecordingIndicator(root=self._root, position=self._indicator_position)
 
         # Create history components if enabled
         if self._history_enabled:
@@ -152,15 +169,22 @@ class HandFreeUI:
         Args:
             state: One of "idle", "recording", "transcribing", "success", "error"
         """
-        if not self._running or not self._root or not self._indicator:
+        if not self._running:
             return
 
-        # Schedule state update in UI thread using after()
-        try:
-            self._root.after(0, lambda: self._indicator.set_state(state))
-        except Exception:
-            # Ignore errors if UI is shutting down
-            pass
+        # Use native indicator if available (direct call, no thread scheduling needed)
+        if self._native_indicator:
+            try:
+                self._native_indicator.set_state(state)
+            except Exception:
+                pass
+        elif self._root and self._indicator:
+            # Schedule state update in UI thread using after()
+            try:
+                self._root.after(0, lambda: self._indicator.set_state(state))
+            except Exception:
+                # Ignore errors if UI is shutting down
+                pass
 
         # Update menu bar recording state
         if self._menubar:
@@ -238,6 +262,14 @@ class HandFreeUI:
             return
 
         self._running = False
+
+        # Stop native indicator if using it
+        if self._native_indicator:
+            try:
+                self._native_indicator.destroy()
+            except Exception:
+                pass
+            self._native_indicator = None
 
         # Stop menu bar first
         if self._menubar:
