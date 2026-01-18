@@ -110,9 +110,11 @@ class HandFreeApp:
             try:
                 self.ui = HandFreeUI(
                     history_enabled=history_enabled,
-                    indicator_position=ui_position
+                    indicator_position=ui_position,
+                    menubar_enabled=True,
+                    on_quit=self._handle_quit_from_menu
                 )
-                logger.info(f"UI initialized (position={ui_position}, history={history_enabled})")
+                logger.info(f"UI initialized (position={ui_position}, history={history_enabled}, menubar=True)")
             except Exception as e:
                 # UI failure is non-fatal - continue without UI
                 logger.warning(f"UI initialization failed, continuing without visual indicator: {e}")
@@ -241,10 +243,15 @@ class HandFreeApp:
             self._state = AppState.IDLE
 
     def handle_history_toggle(self) -> None:
-        """Called when user presses history toggle hotkey (Cmd+H / Ctrl+H)."""
+        """Called when user presses history toggle hotkey (Cmd+Shift+H / Ctrl+Shift+H)."""
         if self.ui:
             self.ui.toggle_history()
             logger.debug("History panel toggled")
+
+    def _handle_quit_from_menu(self) -> None:
+        """Called when user clicks Quit from menu bar."""
+        logger.info("Quit requested from menu bar")
+        self.stop()
 
     def run(self) -> None:
         """Start the application and run the event loop."""
@@ -293,6 +300,8 @@ class HandFreeApp:
         print()
         if self.ui and self.history_enabled:
             print(f"  Press {history_hotkey} to toggle history panel")
+        if self.ui and self.ui.menubar_enabled:
+            print("  Menu bar: Click microphone icon for controls")
         print("  Press Ctrl+C to exit")
         print("=" * 55)
         print()

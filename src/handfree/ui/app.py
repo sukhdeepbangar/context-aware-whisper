@@ -7,10 +7,11 @@ Manages the UI components in a separate thread with thread-safe state updates.
 import threading
 import tkinter as tk
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 from handfree.ui.indicator import RecordingIndicator
 from handfree.ui.history import HistoryPanel
+from handfree.ui.menubar import create_menubar_app, MenuBarApp
 from handfree.storage.history_store import HistoryStore, TranscriptionRecord
 
 
@@ -25,7 +26,9 @@ class HandFreeUI:
         self,
         history_enabled: bool = True,
         history_path: Optional[Path] = None,
-        indicator_position: str = "top-center"
+        indicator_position: str = "top-center",
+        menubar_enabled: bool = True,
+        on_quit: Optional[Callable[[], None]] = None
     ):
         """
         Initialize UI controller.
@@ -36,16 +39,21 @@ class HandFreeUI:
             indicator_position: Position for the recording indicator. One of:
                                top-center, top-right, top-left, bottom-center,
                                bottom-right, bottom-left. Default: top-center.
+            menubar_enabled: Whether to enable menu bar icon (macOS only)
+            on_quit: Callback when quit is selected from menu bar
         """
         self._root: Optional[tk.Tk] = None
         self._indicator: Optional[RecordingIndicator] = None
         self._history_panel: Optional[HistoryPanel] = None
         self._history_store: Optional[HistoryStore] = None
+        self._menubar: Optional[MenuBarApp] = None
         self._ui_thread: Optional[threading.Thread] = None
         self._running = False
         self._history_enabled = history_enabled
         self._history_path = history_path
         self._indicator_position = indicator_position
+        self._menubar_enabled = menubar_enabled
+        self._on_quit = on_quit
 
     def start(self) -> None:
         """
@@ -84,6 +92,20 @@ class HandFreeUI:
                 self._history_store = None
                 self._history_panel = None
 
+        # Create menu bar if enabled (macOS only)
+        if self._menubar_enabled:
+            try:
+                self._menubar = create_menubar_app(
+                    on_quit=self._on_quit,
+                    on_history_toggle=self.toggle_history
+                )
+                if self._menubar:
+                    self._menubar.start()
+            except Exception as e:
+                # Menu bar failed to initialize, continue without it
+                print(f"[Warning] Menu bar disabled: {e}")
+                self._menubar = None
+
     def run_mainloop(self) -> None:
         """
         Run the tkinter mainloop on the current (main) thread.
@@ -115,6 +137,15 @@ class HandFreeUI:
         except Exception:
             # Ignore errors if UI is shutting down
             pass
+
+        # Update menu bar recording state
+        if self._menubar:
+            try:
+                is_recording = state == "recording"
+                self._menubar.set_recording(is_recording)
+            except Exception:
+                # Ignore errors if menu bar is unavailable
+                pass
 
     def add_transcription(
         self,
@@ -168,6 +199,11 @@ class HandFreeUI:
         """Whether history feature is enabled and available."""
         return self._history_store is not None
 
+    @property
+    def menubar_enabled(self) -> bool:
+        """Whether menu bar is enabled and available."""
+        return self._menubar is not None
+
     def stop(self) -> None:
         """
         Stop the UI gracefully.
@@ -178,6 +214,14 @@ class HandFreeUI:
             return
 
         self._running = False
+
+        # Stop menu bar first
+        if self._menubar:
+            try:
+                self._menubar.stop()
+            except Exception:
+                pass
+            self._menubar = None
 
         if self._root:
             try:

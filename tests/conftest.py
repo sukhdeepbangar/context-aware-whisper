@@ -24,7 +24,12 @@ def _setup_global_mocks():
     This must run before any test modules are imported to prevent:
     - tkinter import failures/hangs on headless systems
     - macOS-specific module import failures on non-macOS systems
+    - NSStatusBar SIGABRT crashes in pytest (menu bar disabled)
     """
+    import os
+
+    # Disable menu bar to prevent SIGABRT crashes from NSStatusBar in pytest
+    os.environ["HANDFREE_DISABLE_MENUBAR"] = "1"
     # Mock tkinter if not available (headless environments)
     if '_tkinter' not in sys.modules:
         mock_tk = MagicMock()
