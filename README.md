@@ -90,6 +90,7 @@ IDLE --[press Fn]--> RECORDING --[release Fn]--> TRANSCRIBING --> IDLE
 | `HANDFREE_USE_PASTE` | No | false | Use clipboard paste instead of keystrokes |
 | `HANDFREE_UI_ENABLED` | No | true | Enable visual recording indicator |
 | `HANDFREE_HISTORY_ENABLED` | No | true | Enable transcription history storage |
+| `HANDFREE_DEBUG` | No | false | Enable debug logging (verbose output) |
 
 Example `.env` file:
 
