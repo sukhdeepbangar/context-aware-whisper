@@ -51,11 +51,11 @@ This document provides a detailed step-by-step guide to add local transcription 
 - [x] 4.5 Verify: End-to-end flow works with local transcription
 
 ### Phase 5: Model Management
-- [ ] 5.1 Create `model_manager.py` utility
-- [ ] 5.2 Implement model download progress display
-- [ ] 5.3 Implement model listing command
-- [ ] 5.4 Add CLI option to download models: `python -m handfree.download_model base.en`
-- [ ] 5.5 Verify: Model download works correctly
+- [x] 5.1 Create `model_manager.py` utility
+- [x] 5.2 Implement model download progress display
+- [x] 5.3 Implement model listing command
+- [x] 5.4 Add CLI option to download models: `python -m handfree.model_manager download base.en`
+- [x] 5.5 Verify: Model download works correctly
 
 ### Phase 6: Documentation & Testing
 - [ ] 6.1 Update README.md with local transcription setup
