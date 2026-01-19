@@ -21,7 +21,7 @@ from scipy.io import wavfile
 # Add src to path for direct execution
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from handfree.local_transcriber import LocalTranscriber
+from context_aware_whisper.local_transcriber import LocalTranscriber
 
 
 class TestWhisperStandalone(unittest.TestCase):
@@ -36,7 +36,7 @@ class TestWhisperStandalone(unittest.TestCase):
         if not cls.MODEL_PATH.exists():
             raise unittest.SkipTest(
                 f"Model {cls.MODEL_NAME} not downloaded. "
-                f"Run: python -m handfree.model_manager download {cls.MODEL_NAME}"
+                f"Run: python -m context_aware_whisper.model_manager download {cls.MODEL_NAME}"
             )
 
     def test_model_loads_successfully(self):

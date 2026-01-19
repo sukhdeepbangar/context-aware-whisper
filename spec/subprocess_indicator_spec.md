@@ -37,10 +37,10 @@ A recording indicator overlay that runs in a separate subprocess to prevent focu
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Main Process (HandFree)                  │
+│                     Main Process (Context-Aware Whisper)                  │
 │                                                              │
 │  ┌──────────────┐    ┌───────────────────────────────────┐ │
-│  │ HandFreeUI   │───>│ SubprocessIndicator (Client)       │ │
+│  │ Context-Aware WhisperUI   │───>│ SubprocessIndicator (Client)       │ │
 │  │              │    │                                    │ │
 │  │ set_state()  │    │ - start()                         │ │
 │  │ stop()       │    │ - set_state(state)                │ │

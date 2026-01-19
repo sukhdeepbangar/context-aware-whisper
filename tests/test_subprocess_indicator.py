@@ -24,13 +24,13 @@ class TestSubprocessIndicatorClientStructure:
 
     def test_subprocess_indicator_client_exists(self):
         """Test that SubprocessIndicator class exists."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         assert SubprocessIndicator is not None
 
     def test_subprocess_indicator_has_required_methods(self):
         """Test that SubprocessIndicator has all required methods."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         required_methods = ['start', 'stop', 'set_state']
         for method in required_methods:
@@ -39,7 +39,7 @@ class TestSubprocessIndicatorClientStructure:
 
     def test_subprocess_indicator_has_properties(self):
         """Test that SubprocessIndicator has required properties."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         assert hasattr(indicator, 'is_running')
@@ -47,7 +47,7 @@ class TestSubprocessIndicatorClientStructure:
 
     def test_subprocess_indicator_can_be_instantiated(self):
         """Test that SubprocessIndicator can be instantiated."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         assert indicator is not None
@@ -56,7 +56,7 @@ class TestSubprocessIndicatorClientStructure:
 
     def test_subprocess_indicator_initial_state_is_idle(self):
         """Test that initial state is idle."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         assert indicator.current_state == "idle"
@@ -67,7 +67,7 @@ class TestSubprocessIndicatorClientLifecycle:
 
     def test_start_returns_false_when_script_not_found(self):
         """Test that start returns False when script doesn't exist."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
 
@@ -79,7 +79,7 @@ class TestSubprocessIndicatorClientLifecycle:
 
     def test_stop_when_not_started(self):
         """Test that stop doesn't crash when not started."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         # Should not raise exception
@@ -87,7 +87,7 @@ class TestSubprocessIndicatorClientLifecycle:
 
     def test_set_state_when_not_started(self):
         """Test that set_state doesn't crash when not started."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         # Should not raise exception
@@ -95,7 +95,7 @@ class TestSubprocessIndicatorClientLifecycle:
 
     def test_start_is_idempotent(self):
         """Test that calling start multiple times returns True after first success."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         indicator._started = True  # Simulate already started
@@ -105,14 +105,14 @@ class TestSubprocessIndicatorClientLifecycle:
 
     def test_is_running_false_when_not_started(self):
         """Test that is_running is False when not started."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         assert indicator.is_running is False
 
     def test_context_manager_protocol(self):
         """Test that SubprocessIndicator supports context manager protocol."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         assert hasattr(indicator, '__enter__')
@@ -124,7 +124,7 @@ class TestSubprocessIndicatorClientStateManagement:
 
     def test_valid_states(self):
         """Test that all valid states are accepted."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         valid_states = ["idle", "recording", "transcribing", "success", "error"]
         indicator = SubprocessIndicator()
@@ -135,7 +135,7 @@ class TestSubprocessIndicatorClientStateManagement:
 
     def test_invalid_state_ignored(self):
         """Test that invalid states are silently ignored."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         # Should not raise exception
@@ -143,10 +143,10 @@ class TestSubprocessIndicatorClientStateManagement:
         # State should remain idle
         assert indicator.current_state == "idle"
 
-    @patch('handfree.ui.subprocess_indicator_client.subprocess.Popen')
+    @patch('context_aware_whisper.ui.subprocess_indicator_client.subprocess.Popen')
     def test_set_state_writes_to_stdin(self, mock_popen):
         """Test that set_state writes command to subprocess stdin."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         mock_process = MagicMock()
         mock_process.poll.return_value = None
@@ -166,7 +166,7 @@ class TestSubprocessIndicatorClientStateManagement:
 
     def test_redundant_state_updates_skipped(self):
         """Test that redundant state updates are skipped for efficiency."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         mock_process = MagicMock()
         mock_process.poll.return_value = None
@@ -185,7 +185,7 @@ class TestSubprocessIndicatorClientStateManagement:
 
     def test_success_error_states_always_sent(self):
         """Test that success/error states are always sent even if repeated."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         mock_process = MagicMock()
         mock_process.poll.return_value = None
@@ -208,14 +208,14 @@ class TestSubprocessIndicatorClientConstants:
 
     def test_ready_timeout_exists(self):
         """Test that READY_TIMEOUT constant exists."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         assert hasattr(SubprocessIndicator, 'READY_TIMEOUT')
         assert SubprocessIndicator.READY_TIMEOUT > 0
 
     def test_stop_timeout_exists(self):
         """Test that STOP_TIMEOUT constant exists."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         assert hasattr(SubprocessIndicator, 'STOP_TIMEOUT')
         assert SubprocessIndicator.STOP_TIMEOUT > 0
@@ -232,14 +232,14 @@ class TestSubprocessIndicatorScriptStructure:
     @pytest.mark.skipif(sys.platform != "darwin", reason="macOS only")
     def test_subprocess_indicator_script_exists(self):
         """Test that subprocess_indicator.py exists."""
-        script_path = Path(__file__).parent.parent / "src" / "handfree" / "ui" / "subprocess_indicator.py"
+        script_path = Path(__file__).parent.parent / "src" / "context-aware-whisper" / "ui" / "subprocess_indicator.py"
         assert script_path.exists(), f"Script not found at {script_path}"
 
     def test_subprocess_indicator_script_is_importable_with_mocks(self):
         """Test that subprocess_indicator.py can be parsed (not executed on non-macOS)."""
         import ast
 
-        script_path = Path(__file__).parent.parent / "src" / "handfree" / "ui" / "subprocess_indicator.py"
+        script_path = Path(__file__).parent.parent / "src" / "context-aware-whisper" / "ui" / "subprocess_indicator.py"
         if script_path.exists():
             with open(script_path) as f:
                 code = f.read()
@@ -252,7 +252,7 @@ class TestSubprocessIndicatorVisualDesign:
 
     def test_visual_constants_defined(self):
         """Test that visual design constants are defined in the script."""
-        script_path = Path(__file__).parent.parent / "src" / "handfree" / "ui" / "subprocess_indicator.py"
+        script_path = Path(__file__).parent.parent / "src" / "context-aware-whisper" / "ui" / "subprocess_indicator.py"
         if script_path.exists():
             with open(script_path) as f:
                 code = f.read()
@@ -266,7 +266,7 @@ class TestSubprocessIndicatorVisualDesign:
 
     def test_color_constants_defined(self):
         """Test that color constants are defined in the script."""
-        script_path = Path(__file__).parent.parent / "src" / "handfree" / "ui" / "subprocess_indicator.py"
+        script_path = Path(__file__).parent.parent / "src" / "context-aware-whisper" / "ui" / "subprocess_indicator.py"
         if script_path.exists():
             with open(script_path) as f:
                 code = f.read()
@@ -278,43 +278,43 @@ class TestSubprocessIndicatorVisualDesign:
 
 
 # =============================================================================
-# Tests for Integration with HandFreeUI
+# Tests for Integration with CAWUI
 # =============================================================================
 
 
-class TestHandFreeUISubprocessIntegration:
-    """Tests for HandFreeUI integration with subprocess indicator."""
+class TestCAWUISubprocessIntegration:
+    """Tests for CAWUI integration with subprocess indicator."""
 
     def test_subprocess_indicator_available_flag_exists(self):
         """Test that SUBPROCESS_INDICATOR_AVAILABLE flag exists in app.py."""
-        from handfree.ui import app
+        from context_aware_whisper.ui import app
 
         assert hasattr(app, 'SUBPROCESS_INDICATOR_AVAILABLE')
 
-    def test_handfree_ui_has_subprocess_indicator_attribute(self):
-        """Test that HandFreeUI has _subprocess_indicator attribute."""
-        from handfree.ui.app import HandFreeUI
+    def test_caw_ui_has_subprocess_indicator_attribute(self):
+        """Test that CAWUI has _subprocess_indicator attribute."""
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI()
+        ui = CAWUI()
         assert hasattr(ui, '_subprocess_indicator')
 
-    def test_handfree_ui_subprocess_indicator_initially_none(self):
+    def test_caw_ui_subprocess_indicator_initially_none(self):
         """Test that _subprocess_indicator is initially None."""
-        from handfree.ui.app import HandFreeUI
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI()
+        ui = CAWUI()
         assert ui._subprocess_indicator is None
 
-    @patch('handfree.ui.app.SUBPROCESS_INDICATOR_AVAILABLE', False)
+    @patch('context_aware_whisper.ui.app.SUBPROCESS_INDICATOR_AVAILABLE', False)
     def test_subprocess_indicator_not_started_when_unavailable(self):
         """Test that subprocess indicator is not started on non-macOS."""
-        from handfree.ui.app import HandFreeUI
+        from context_aware_whisper.ui.app import CAWUI
 
-        with patch('handfree.ui.app.tk.Tk') as mock_tk:
+        with patch('context_aware_whisper.ui.app.tk.Tk') as mock_tk:
             mock_root = MagicMock()
             mock_tk.return_value = mock_root
 
-            ui = HandFreeUI()
+            ui = CAWUI()
             ui.start()
 
             assert ui._subprocess_indicator is None
@@ -327,7 +327,7 @@ class TestSubprocessIndicatorIPCProtocol:
         """Test that all valid IPC commands are documented."""
         valid_commands = ['recording', 'transcribing', 'success', 'error', 'idle', 'exit']
 
-        script_path = Path(__file__).parent.parent / "src" / "handfree" / "ui" / "subprocess_indicator.py"
+        script_path = Path(__file__).parent.parent / "src" / "context-aware-whisper" / "ui" / "subprocess_indicator.py"
         if script_path.exists():
             with open(script_path) as f:
                 code = f.read()
@@ -337,7 +337,7 @@ class TestSubprocessIndicatorIPCProtocol:
 
     def test_ready_signal_sent_on_startup(self):
         """Test that subprocess sends 'ready' signal on startup."""
-        script_path = Path(__file__).parent.parent / "src" / "handfree" / "ui" / "subprocess_indicator.py"
+        script_path = Path(__file__).parent.parent / "src" / "context-aware-whisper" / "ui" / "subprocess_indicator.py"
         if script_path.exists():
             with open(script_path) as f:
                 code = f.read()
@@ -350,7 +350,7 @@ class TestSubprocessIndicatorErrorHandling:
 
     def test_client_handles_process_death(self):
         """Test that client handles subprocess death gracefully."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         mock_process = MagicMock()
         mock_process.poll.return_value = 1  # Process exited
@@ -366,7 +366,7 @@ class TestSubprocessIndicatorErrorHandling:
 
     def test_client_handles_broken_pipe(self):
         """Test that client handles broken pipe gracefully."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         mock_process = MagicMock()
         mock_process.poll.return_value = None
@@ -388,7 +388,7 @@ class TestSubprocessIndicatorCleanup:
 
     def test_stop_sends_exit_command(self):
         """Test that stop sends exit command to subprocess."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         mock_process = MagicMock()
         mock_process.poll.return_value = None
@@ -404,7 +404,7 @@ class TestSubprocessIndicatorCleanup:
 
     def test_stop_waits_for_process(self):
         """Test that stop waits for process to terminate."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         mock_process = MagicMock()
         mock_process.poll.return_value = None
@@ -419,7 +419,7 @@ class TestSubprocessIndicatorCleanup:
 
     def test_del_calls_stop(self):
         """Test that __del__ calls stop for cleanup."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         indicator._started = True
@@ -439,14 +439,14 @@ class TestSubprocessIndicatorThreadSafety:
 
     def test_client_has_lock(self):
         """Test that SubprocessIndicator has a threading lock."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
 
         indicator = SubprocessIndicator()
         assert hasattr(indicator, '_lock')
 
     def test_set_state_uses_lock(self):
         """Test that set_state uses lock for thread safety."""
-        from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+        from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
         import threading
 
         indicator = SubprocessIndicator()

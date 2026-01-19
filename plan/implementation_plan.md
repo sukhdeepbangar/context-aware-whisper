@@ -1,6 +1,6 @@
-# HandFree - Step-by-Step Implementation Plan
+# Context-Aware Whisper - Step-by-Step Implementation Plan
 
-This document provides a detailed step-by-step guide to implement the HandFree application. For architecture and specifications, see `../spec/spec.md`.
+This document provides a detailed step-by-step guide to implement the Context-Aware Whisper application. For architecture and specifications, see `../spec/spec.md`.
 
 ---
 
@@ -55,7 +55,7 @@ Use this checklist to track progress and resume from any point.
 - [x] 5.6 Verify: Text appears in TextEdit AND clipboard
 
 ### Step 6: Main Loop
-- [x] 6.1 Create `main.py` with `HandFreeApp` class
+- [x] 6.1 Create `main.py` with `Context-Aware WhisperApp` class
 - [x] 6.2 Implement `__init__` - initialize all modules
 - [x] 6.3 Implement `handle_unmute()` - start recording
 - [x] 6.4 Implement `handle_mute()` - stop, transcribe, output
@@ -92,7 +92,7 @@ Use this checklist to track progress and resume from any point.
 - [x] 10.2 Detect Fn key (keycode 63) press and release
 - [x] 10.3 Implement hold-to-record, release-to-transcribe flow
 - [x] 10.4 Update `main.py` to use hotkey mode by default
-- [x] 10.5 Add `HANDFREE_USE_HOTKEY` environment variable
+- [x] 10.5 Add `CAW_USE_HOTKEY` environment variable
 - [x] 10.6 Update README with Fn key usage instructions
 - [x] 10.7 Verify: Hold Fn, speak, release -> text typed correctly
 
@@ -116,7 +116,7 @@ Use this checklist to track progress and resume from any point.
 
 **Commands:**
 ```bash
-cd /Users/sukhdeepsingh/projects/ClaudeProjects/handfree
+cd /Users/sukhdeepsingh/projects/ClaudeProjects/context_aware_whisper
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -676,7 +676,7 @@ print("Open TextEdit and click in the document.")
 print("You have 3 seconds...")
 time.sleep(3)
 
-handler.output("Hello, this is a test of the HandFree output handler!")
+handler.output("Hello, this is a test of the Context-Aware Whisper output handler!")
 
 import pyperclip
 clipboard = pyperclip.paste()
@@ -703,7 +703,7 @@ print(f"Clipboard contains: {clipboard}")
 **Complete Implementation:**
 ```python
 """
-HandFree - AirPods-Triggered Speech-to-Text
+Context-Aware Whisper - AirPods-Triggered Speech-to-Text
 
 Main application entry point.
 """
@@ -719,7 +719,7 @@ from transcriber import Transcriber
 from output_handler import OutputHandler
 
 
-class HandFreeApp:
+class Context-Aware WhisperApp:
     """Main application class coordinating all modules."""
 
     def __init__(self):
@@ -776,7 +776,7 @@ class HandFreeApp:
         self.detector.start()
 
         print("=" * 50)
-        print("HandFree is running!")
+        print("Context-Aware Whisper is running!")
         print("=" * 50)
         print("")
         print("• Unmute AirPods (press stem) to START recording")
@@ -797,12 +797,12 @@ class HandFreeApp:
         """Stop the application gracefully."""
         self._running = False
         self.detector.stop()
-        print("\nHandFree stopped. Goodbye!")
+        print("\nContext-Aware Whisper stopped. Goodbye!")
 
 
 def main():
     """Main entry point."""
-    app = HandFreeApp()
+    app = Context-Aware WhisperApp()
 
     def signal_handler(sig, frame):
         app.stop()
@@ -857,9 +857,9 @@ class Config:
     GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
     # Optional
-    LANGUAGE = os.environ.get("HANDFREE_LANGUAGE", None)  # Auto-detect if not set
-    TYPE_DELAY = float(os.environ.get("HANDFREE_TYPE_DELAY", 0))
-    SAMPLE_RATE = int(os.environ.get("HANDFREE_SAMPLE_RATE", 16000))
+    LANGUAGE = os.environ.get("CAW_LANGUAGE", None)  # Auto-detect if not set
+    TYPE_DELAY = float(os.environ.get("CAW_TYPE_DELAY", 0))
+    SAMPLE_RATE = int(os.environ.get("CAW_SAMPLE_RATE", 16000))
 
     @classmethod
     def validate(cls) -> None:
@@ -880,27 +880,27 @@ Custom Exceptions
 """
 
 
-class HandFreeError(Exception):
-    """Base exception for HandFree errors."""
+class Context-Aware WhisperError(Exception):
+    """Base exception for Context-Aware Whisper errors."""
     pass
 
 
-class MuteDetectionError(HandFreeError):
+class MuteDetectionError(Context-Aware WhisperError):
     """Error detecting mute state."""
     pass
 
 
-class AudioRecordingError(HandFreeError):
+class AudioRecordingError(Context-Aware WhisperError):
     """Error recording audio."""
     pass
 
 
-class TranscriptionError(HandFreeError):
+class TranscriptionError(Context-Aware WhisperError):
     """Error transcribing audio."""
     pass
 
 
-class OutputError(HandFreeError):
+class OutputError(Context-Aware WhisperError):
     """Error outputting text."""
     pass
 ```
@@ -912,13 +912,13 @@ class OutputError(HandFreeError):
 GROQ_API_KEY=your_api_key_here
 
 # Optional: Language code for transcription (auto-detected if not set)
-# HANDFREE_LANGUAGE=en
+# CAW_LANGUAGE=en
 
 # Optional: Delay between keystrokes in seconds (0 = fastest)
-# HANDFREE_TYPE_DELAY=0
+# CAW_TYPE_DELAY=0
 
 # Optional: Audio sample rate in Hz (default 16000)
-# HANDFREE_SAMPLE_RATE=16000
+# CAW_SAMPLE_RATE=16000
 ```
 
 **Verification:**
@@ -947,12 +947,12 @@ GROQ_API_KEY=your_api_key_here
 # test_e2e.py
 import time
 import pyperclip
-from main import HandFreeApp
+from main import Context-Aware WhisperApp
 
 def test_manual():
     """Manual end-to-end test - requires human interaction."""
     print("=" * 50)
-    print("HandFree End-to-End Test")
+    print("Context-Aware Whisper End-to-End Test")
     print("=" * 50)
     print("")
     print("Instructions:")
@@ -965,7 +965,7 @@ def test_manual():
     print("")
     input("Press Enter when ready to start...")
 
-    app = HandFreeApp()
+    app = Context-Aware WhisperApp()
 
     import signal
     def handler(sig, frame):
@@ -996,7 +996,7 @@ if __name__ == "__main__":
 **File:** `README.md`
 
 ```markdown
-# HandFree
+# Context-Aware Whisper
 
 AirPods-triggered speech-to-text for macOS. Press your AirPods stem to start recording, press again to transcribe and type.
 
@@ -1011,7 +1011,7 @@ AirPods-triggered speech-to-text for macOS. Press your AirPods stem to start rec
 
 1. Clone or download this repository:
    ```bash
-   cd /path/to/handfree
+   cd /path/to/context_aware_whisper
    ```
 
 2. Create and activate virtual environment:

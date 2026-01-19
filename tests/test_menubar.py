@@ -4,7 +4,7 @@ Tests for the Menu Bar Component
 Tests the menubar module including:
 - MenuBarApp class initialization and state management
 - create_menubar_app factory function
-- Integration with HandFreeUI
+- Integration with CAWUI
 - Thread safety of state updates
 - Cleanup and resource management
 """
@@ -27,7 +27,7 @@ class TestMenuBarAvailability:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MENUBAR_AVAILABLE, is_menubar_available
+        from context_aware_whisper.ui.menubar import MENUBAR_AVAILABLE, is_menubar_available
 
         # On macOS with PyObjC, should be available
         assert MENUBAR_AVAILABLE is True
@@ -38,7 +38,7 @@ class TestMenuBarAvailability:
         if sys.platform == "darwin":
             pytest.skip("Non-macOS test")
 
-        from handfree.ui.menubar import MENUBAR_AVAILABLE, is_menubar_available
+        from context_aware_whisper.ui.menubar import MENUBAR_AVAILABLE, is_menubar_available
 
         assert MENUBAR_AVAILABLE is False
         assert is_menubar_available() is False
@@ -52,7 +52,7 @@ class TestCreateMenubarApp:
         if sys.platform == "darwin":
             pytest.skip("Non-macOS test")
 
-        from handfree.ui.menubar import create_menubar_app
+        from context_aware_whisper.ui.menubar import create_menubar_app
 
         result = create_menubar_app(on_quit=lambda: None)
         assert result is None
@@ -62,7 +62,7 @@ class TestCreateMenubarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import create_menubar_app, MenuBarApp
+        from context_aware_whisper.ui.menubar import create_menubar_app, MenuBarApp
 
         on_quit = MagicMock()
         on_history = MagicMock()
@@ -80,9 +80,9 @@ class TestCreateMenubarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import create_menubar_app
+        from context_aware_whisper.ui.menubar import create_menubar_app
 
-        with patch('handfree.ui.menubar.MenuBarApp', side_effect=RuntimeError("Test")):
+        with patch('context_aware_whisper.ui.menubar.MenuBarApp', side_effect=RuntimeError("Test")):
             result = create_menubar_app(on_quit=lambda: None)
             assert result is None
 
@@ -102,9 +102,9 @@ class TestMenuBarApp:
 
     def test_init_without_pyobjc_raises(self):
         """MenuBarApp raises RuntimeError if PyObjC not available."""
-        with patch('handfree.ui.menubar.MENUBAR_AVAILABLE', False):
+        with patch('context_aware_whisper.ui.menubar.MENUBAR_AVAILABLE', False):
             # Need to reimport to get the patched version
-            from handfree.ui import menubar
+            from context_aware_whisper.ui import menubar
             original = menubar.MENUBAR_AVAILABLE
             menubar.MENUBAR_AVAILABLE = False
 
@@ -119,7 +119,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         on_quit = MagicMock()
         on_history = MagicMock()
@@ -134,7 +134,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
 
@@ -147,7 +147,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
 
@@ -166,7 +166,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
         errors = []
@@ -193,7 +193,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
         app.start()
@@ -211,7 +211,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
         app.start()
@@ -230,7 +230,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
         app.start()
@@ -245,7 +245,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
         # Should not raise
@@ -257,7 +257,7 @@ class TestMenuBarApp:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
         app.start()
@@ -284,7 +284,7 @@ class TestMenuBarDelegate:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarDelegate
+        from context_aware_whisper.ui.menubar import MenuBarDelegate
 
         history_callback = MagicMock()
         quit_callback = MagicMock()
@@ -303,7 +303,7 @@ class TestMenuBarDelegate:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarDelegate
+        from context_aware_whisper.ui.menubar import MenuBarDelegate
 
         history_callback = MagicMock()
         quit_callback = MagicMock()
@@ -322,7 +322,7 @@ class TestMenuBarDelegate:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarDelegate
+        from context_aware_whisper.ui.menubar import MenuBarDelegate
 
         delegate = MenuBarDelegate.alloc().init()
         # Don't set callbacks - they default to None
@@ -333,16 +333,16 @@ class TestMenuBarDelegate:
 
 
 class TestMenuBarIntegration:
-    """Integration tests for menu bar with HandFreeUI."""
+    """Integration tests for menu bar with CAWUI."""
 
-    def test_handfreeui_creates_menubar(self):
-        """HandFreeUI creates menubar when enabled."""
+    def test_cawui_creates_menubar(self):
+        """CAWUI creates menubar when enabled."""
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.app import HandFreeUI
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI(
+        ui = CAWUI(
             history_enabled=False,
             menubar_enabled=True,
             on_quit=lambda: None
@@ -351,11 +351,11 @@ class TestMenuBarIntegration:
         # Note: start() must be called on main thread, so we just check config
         assert ui._menubar_enabled is True
 
-    def test_handfreeui_menubar_disabled(self):
-        """HandFreeUI respects menubar_enabled=False."""
-        from handfree.ui.app import HandFreeUI
+    def test_cawui_menubar_disabled(self):
+        """CAWUI respects menubar_enabled=False."""
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI(
+        ui = CAWUI(
             history_enabled=False,
             menubar_enabled=False
         )
@@ -374,7 +374,7 @@ class TestMenuBarPropertyBased:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
         app.set_recording(is_recording)
@@ -388,7 +388,7 @@ class TestMenuBarPropertyBased:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         app = MenuBarApp(on_quit=lambda: None)
 
@@ -407,7 +407,7 @@ class TestMenuBarIcons:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         assert hasattr(MenuBarApp, 'ICON_IDLE')
         assert hasattr(MenuBarApp, 'ICON_RECORDING')
@@ -418,7 +418,7 @@ class TestMenuBarIcons:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         assert MenuBarApp.ICON_IDLE == "🎙️"
 
@@ -427,6 +427,6 @@ class TestMenuBarIcons:
         if sys.platform != "darwin":
             pytest.skip("macOS-only test")
 
-        from handfree.ui.menubar import MenuBarApp
+        from context_aware_whisper.ui.menubar import MenuBarApp
 
         assert MenuBarApp.ICON_RECORDING == "🔴"

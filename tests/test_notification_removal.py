@@ -28,7 +28,7 @@ class TestNotificationRemovalModuleStructure(unittest.TestCase):
     def test_no_subprocess_import(self):
         """Verify subprocess is not imported by hotkey_detector."""
         # Import the module
-        from handfree import hotkey_detector
+        from context_aware_whisper import hotkey_detector
 
         # Check that subprocess is not in the module's namespace
         self.assertNotIn('subprocess', dir(hotkey_detector))
@@ -39,7 +39,7 @@ class TestNotificationRemovalModuleStructure(unittest.TestCase):
 
     def test_no_show_indicator_method(self):
         """Verify _show_indicator method has been removed."""
-        from handfree.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
 
         self.assertFalse(
             hasattr(HotkeyDetector, '_show_indicator'),
@@ -48,14 +48,14 @@ class TestNotificationRemovalModuleStructure(unittest.TestCase):
 
     def test_no_display_notification_in_source(self):
         """Verify no 'display notification' osascript command in source."""
-        from handfree import hotkey_detector
+        from context_aware_whisper import hotkey_detector
 
         module_source = inspect.getsource(hotkey_detector)
         self.assertNotIn('display notification', module_source)
 
     def test_no_osascript_in_source(self):
         """Verify no osascript calls in source."""
-        from handfree import hotkey_detector
+        from context_aware_whisper import hotkey_detector
 
         module_source = inspect.getsource(hotkey_detector)
         self.assertNotIn('osascript', module_source)
@@ -96,16 +96,16 @@ FN_FLAG = 0x800000
 class TestHotkeyDetectorNoNotifications(unittest.TestCase):
     """Tests verifying no notifications are sent during recording events."""
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     @patch('subprocess.run')
     def test_fn_press_does_not_call_subprocess(
         self, mock_subprocess_run, mock_get_flags, mock_tap_create
     ):
         """Test that pressing Fn key does not call subprocess."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -120,16 +120,16 @@ class TestHotkeyDetectorNoNotifications(unittest.TestCase):
         # Verify no subprocess was called
         mock_subprocess_run.assert_not_called()
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     @patch('subprocess.run')
     def test_fn_release_does_not_call_subprocess(
         self, mock_subprocess_run, mock_get_flags, mock_tap_create
     ):
         """Test that releasing Fn key does not call subprocess."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -145,16 +145,16 @@ class TestHotkeyDetectorNoNotifications(unittest.TestCase):
         # Verify no subprocess was called
         mock_subprocess_run.assert_not_called()
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     @patch('subprocess.run')
     def test_full_recording_cycle_no_subprocess(
         self, mock_subprocess_run, mock_get_flags, mock_tap_create
     ):
         """Test complete recording cycle does not call subprocess."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -179,13 +179,13 @@ class TestHotkeyDetectorNoNotifications(unittest.TestCase):
 class TestHotkeyDetectorStillFunctions(unittest.TestCase):
     """Tests verifying the detector still functions correctly after notification removal."""
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     def test_fn_press_starts_recording(self, mock_get_flags, mock_tap_create):
         """Test Fn key press still starts recording."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -199,13 +199,13 @@ class TestHotkeyDetectorStillFunctions(unittest.TestCase):
         on_start.assert_called_once()
         self.assertTrue(detector.is_recording)
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     def test_fn_release_stops_recording(self, mock_get_flags, mock_tap_create):
         """Test Fn key release still stops recording."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -220,13 +220,13 @@ class TestHotkeyDetectorStillFunctions(unittest.TestCase):
         on_stop.assert_called_once()
         self.assertFalse(detector.is_recording)
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     def test_event_still_passed_through(self, mock_get_flags, mock_tap_create):
         """Test events are still passed through correctly."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         detector = HotkeyDetector(lambda: None, lambda: None)
 
@@ -241,9 +241,9 @@ class TestHotkeyDetectorStillFunctions(unittest.TestCase):
 class TestHotkeyDetectorPropertyBased:
     """Property-based tests using Hypothesis."""
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     @patch('subprocess.run')
     @given(st.lists(st.booleans(), min_size=1, max_size=50))
     @settings(max_examples=30)
@@ -251,8 +251,8 @@ class TestHotkeyDetectorPropertyBased:
         self, mock_subprocess_run, mock_get_flags, mock_tap_create, fn_states
     ):
         """Property: subprocess is never called regardless of Fn key sequence."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         detector = HotkeyDetector(lambda: None, lambda: None)
 
@@ -263,17 +263,17 @@ class TestHotkeyDetectorPropertyBased:
 
         mock_subprocess_run.assert_not_called()
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     @given(st.integers(min_value=1, max_value=100))
     @settings(max_examples=20)
     def test_callbacks_still_called_correctly(
         self, mock_get_flags, mock_tap_create, num_cycles
     ):
         """Property: callbacks are called correct number of times."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -297,11 +297,11 @@ class TestHotkeyDetectorPropertyBased:
 class TestNoNotificationSideEffects(unittest.TestCase):
     """Tests that there are no other notification-related side effects."""
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
     def test_no_threading_for_notifications(self, mock_tap_create):
         """Verify no extra threading is created for notifications."""
-        from handfree.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
         import threading
 
         initial_thread_count = threading.active_count()
@@ -312,13 +312,13 @@ class TestNoNotificationSideEffects(unittest.TestCase):
         # (run loop thread is only created on start())
         self.assertEqual(threading.active_count(), initial_thread_count)
 
-    @patch('handfree.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.hotkey_detector.CGEventGetFlags')
     def test_callbacks_execute_immediately(self, mock_get_flags, mock_tap_create):
         """Verify callbacks execute synchronously, not in background thread."""
-        from handfree.hotkey_detector import HotkeyDetector
-        from handfree.hotkey_detector import kCGEventFlagsChanged
+        from context_aware_whisper.hotkey_detector import HotkeyDetector
+        from context_aware_whisper.hotkey_detector import kCGEventFlagsChanged
 
         execution_order = []
 

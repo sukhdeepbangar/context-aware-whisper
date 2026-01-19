@@ -11,15 +11,15 @@ from unittest.mock import patch, MagicMock, PropertyMock
 
 import pytest
 
-from handfree.config import Config
-from handfree.exceptions import (
-    HandFreeError,
+from context_aware_whisper.config import Config
+from context_aware_whisper.exceptions import (
+    Context-Aware WhisperError,
     UIInitializationError,
     HotkeyDetectorError,
     OutputHandlerError,
     PlatformNotSupportedError,
 )
-from handfree.platform import (
+from context_aware_whisper.platform import (
     get_platform,
     get_platform_error_message,
     create_hotkey_detector,
@@ -64,8 +64,8 @@ class TestNewExceptions(unittest.TestCase):
     """Tests for new exception classes."""
 
     def test_ui_initialization_error_inheritance(self):
-        """Test UIInitializationError inherits from HandFreeError."""
-        self.assertTrue(issubclass(UIInitializationError, HandFreeError))
+        """Test UIInitializationError inherits from Context-Aware WhisperError."""
+        self.assertTrue(issubclass(UIInitializationError, Context-Aware WhisperError))
 
     def test_ui_initialization_error_message(self):
         """Test UIInitializationError can be raised with message."""
@@ -74,8 +74,8 @@ class TestNewExceptions(unittest.TestCase):
         self.assertEqual(str(context.exception), "UI failed to initialize")
 
     def test_hotkey_detector_error_inheritance(self):
-        """Test HotkeyDetectorError inherits from HandFreeError."""
-        self.assertTrue(issubclass(HotkeyDetectorError, HandFreeError))
+        """Test HotkeyDetectorError inherits from Context-Aware WhisperError."""
+        self.assertTrue(issubclass(HotkeyDetectorError, Context-Aware WhisperError))
 
     def test_hotkey_detector_error_message(self):
         """Test HotkeyDetectorError can be raised with message."""
@@ -84,8 +84,8 @@ class TestNewExceptions(unittest.TestCase):
         self.assertEqual(str(context.exception), "Hotkey detection failed")
 
     def test_output_handler_error_inheritance(self):
-        """Test OutputHandlerError inherits from HandFreeError."""
-        self.assertTrue(issubclass(OutputHandlerError, HandFreeError))
+        """Test OutputHandlerError inherits from Context-Aware WhisperError."""
+        self.assertTrue(issubclass(OutputHandlerError, Context-Aware WhisperError))
 
     def test_output_handler_error_message(self):
         """Test OutputHandlerError can be raised with message."""
@@ -173,9 +173,9 @@ class TestHotkeyDetectorFactoryErrorHandling(unittest.TestCase):
     @patch.object(sys, 'platform', 'darwin')
     def test_create_hotkey_detector_import_error_macos(self):
         """Test factory handles ImportError on macOS."""
-        with patch.dict('sys.modules', {'handfree.platform.macos.hotkey_detector': None}):
+        with patch.dict('sys.modules', {'context_aware_whisper.platform.macos.hotkey_detector': None}):
             # Force ImportError by patching the import
-            with patch('handfree.platform.create_hotkey_detector') as mock_factory:
+            with patch('context_aware_whisper.platform.create_hotkey_detector') as mock_factory:
                 mock_factory.side_effect = PlatformNotSupportedError(
                     "macOS hotkey detection unavailable: No module named 'Quartz'"
                 )
@@ -199,16 +199,16 @@ class TestOutputHandlerFactoryErrorHandling(unittest.TestCase):
 class TestUIGracefulDegradation(unittest.TestCase):
     """Tests for graceful UI degradation."""
 
-    def test_handfree_ui_import(self):
-        """Test HandFreeUI can be imported."""
-        from handfree.ui import HandFreeUI
-        self.assertIsNotNone(HandFreeUI)
+    def test_caw_ui_import(self):
+        """Test CAWUI can be imported."""
+        from context_aware_whisper.ui import CAWUI
+        self.assertIsNotNone(CAWUI)
 
-    @patch('handfree.ui.app.tk.Tk')
-    @patch('handfree.ui.app.RecordingIndicator')
-    def test_handfree_ui_catches_tkinter_error(self, mock_indicator, mock_tk):
-        """Test HandFreeUI handles tkinter initialization errors."""
-        from handfree.ui import HandFreeUI
+    @patch('context_aware_whisper.ui.app.tk.Tk')
+    @patch('context_aware_whisper.ui.app.RecordingIndicator')
+    def test_caw_ui_catches_tkinter_error(self, mock_indicator, mock_tk):
+        """Test CAWUI handles tkinter initialization errors."""
+        from context_aware_whisper.ui import CAWUI
 
         # Simulate tkinter failing to initialize
         mock_tk.side_effect = Exception("No display available")
@@ -223,8 +223,8 @@ class TestLoggingIntegration(unittest.TestCase):
 
     def test_platform_module_has_logger(self):
         """Test platform module has logger configured."""
-        import handfree.platform
-        self.assertIsNotNone(handfree.platform.logger)
+        import context_aware_whisper.platform
+        self.assertIsNotNone(context_aware_whisper.platform.logger)
 
     @unittest.skipUnless(TKINTER_AVAILABLE, SKIP_TKINTER_MSG)
     def test_main_module_has_logger(self):
@@ -267,26 +267,26 @@ class TestLoggingIntegration(unittest.TestCase):
         self.assertEqual(call_kwargs['level'], logging.DEBUG)
 
         # File handler should be created in debug mode
-        mock_file_handler.assert_called_once_with("handfree.log")
+        mock_file_handler.assert_called_once_with("context-aware-whisper.log")
 
 
 @unittest.skipUnless(TKINTER_AVAILABLE, SKIP_TKINTER_MSG)
-class TestHandFreeAppErrorHandling(unittest.TestCase):
-    """Tests for HandFreeApp initialization error handling."""
+class TestCAWAppErrorHandling(unittest.TestCase):
+    """Tests for CAWApp initialization error handling."""
 
     @patch('main.logger')
     @patch('main.create_hotkey_detector')
     @patch('main.create_output_handler')
     @patch('main.AudioRecorder')
     @patch('main.get_transcriber')
-    @patch('main.HandFreeUI')
+    @patch('main.CAWUI')
     @patch('main.get_platform', return_value='macos')
     def test_app_continues_without_ui_on_failure(
         self, mock_platform, mock_ui, mock_get_transcriber,
         mock_recorder, mock_output, mock_hotkey, mock_logger
     ):
         """Test app continues if UI fails to initialize."""
-        from main import HandFreeApp
+        from main import CAWApp
         from unittest.mock import Mock
 
         # Make UI initialization fail
@@ -295,7 +295,7 @@ class TestHandFreeAppErrorHandling(unittest.TestCase):
 
         # App should still initialize without UI
         config = make_config(ui_enabled=True, history_enabled=True)
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
 
         # UI should be None due to failure
         self.assertIsNone(app.ui)
@@ -317,8 +317,8 @@ class TestHandFreeAppErrorHandling(unittest.TestCase):
         mock_recorder, mock_output, mock_hotkey, mock_logger
     ):
         """Test app raises HotkeyDetectorError on hotkey detector failure."""
-        from main import HandFreeApp
-        from handfree.exceptions import HotkeyDetectorError
+        from main import CAWApp
+        from context_aware_whisper.exceptions import HotkeyDetectorError
         from unittest.mock import Mock
 
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
@@ -326,7 +326,7 @@ class TestHandFreeAppErrorHandling(unittest.TestCase):
         mock_hotkey.side_effect = PlatformNotSupportedError("Hotkey detection failed")
 
         with self.assertRaises(HotkeyDetectorError):
-            HandFreeApp(config=make_config())
+            CAWApp(config=make_config())
 
     @patch('main.logger')
     @patch('main.create_hotkey_detector')
@@ -339,8 +339,8 @@ class TestHandFreeAppErrorHandling(unittest.TestCase):
         mock_recorder, mock_output, mock_hotkey, mock_logger
     ):
         """Test app raises OutputHandlerError on output handler failure."""
-        from main import HandFreeApp
-        from handfree.exceptions import OutputHandlerError
+        from main import CAWApp
+        from context_aware_whisper.exceptions import OutputHandlerError
         from unittest.mock import Mock
 
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
@@ -348,31 +348,31 @@ class TestHandFreeAppErrorHandling(unittest.TestCase):
         mock_output.side_effect = PlatformNotSupportedError("Output handler failed")
 
         with self.assertRaises(OutputHandlerError):
-            HandFreeApp(config=make_config())
+            CAWApp(config=make_config())
 
 
 class TestPlatformLogging(unittest.TestCase):
     """Tests for platform detection logging."""
 
-    @patch('handfree.platform.logger')
+    @patch('context_aware_whisper.platform.logger')
     @patch.object(sys, 'platform', 'darwin')
     def test_hotkey_detector_logs_platform(self, mock_logger):
         """Test hotkey detector creation logs platform."""
         try:
             # The actual import and creation will log
-            from handfree.platform import create_hotkey_detector
+            from context_aware_whisper.platform import create_hotkey_detector
             # Just verify logger is available
             self.assertIsNotNone(mock_logger)
         except Exception:
             # May fail if Quartz not available, but logger test passed
             pass
 
-    @patch('handfree.platform.logger')
+    @patch('context_aware_whisper.platform.logger')
     @patch.object(sys, 'platform', 'darwin')
     def test_output_handler_logs_platform(self, mock_logger):
         """Test output handler creation logs platform."""
         try:
-            from handfree.platform import create_output_handler
+            from context_aware_whisper.platform import create_output_handler
             # Just verify logger is available
             self.assertIsNotNone(mock_logger)
         except Exception:
@@ -419,25 +419,25 @@ class TestErrorMessageContent(unittest.TestCase):
 
 
 class TestDebugEnvironmentVariable(unittest.TestCase):
-    """Tests for HANDFREE_DEBUG environment variable."""
+    """Tests for CAW_DEBUG environment variable."""
 
-    @patch.dict('os.environ', {'HANDFREE_DEBUG': 'true'})
+    @patch.dict('os.environ', {'CAW_DEBUG': 'true'})
     def test_debug_mode_enabled_true(self):
-        """Test debug mode is enabled when HANDFREE_DEBUG=true."""
+        """Test debug mode is enabled when CAW_DEBUG=true."""
         import os
-        self.assertEqual(os.environ.get("HANDFREE_DEBUG"), "true")
+        self.assertEqual(os.environ.get("CAW_DEBUG"), "true")
 
-    @patch.dict('os.environ', {'HANDFREE_DEBUG': '1'})
+    @patch.dict('os.environ', {'CAW_DEBUG': '1'})
     def test_debug_mode_enabled_one(self):
-        """Test debug mode is enabled when HANDFREE_DEBUG=1."""
+        """Test debug mode is enabled when CAW_DEBUG=1."""
         import os
-        self.assertEqual(os.environ.get("HANDFREE_DEBUG"), "1")
+        self.assertEqual(os.environ.get("CAW_DEBUG"), "1")
 
-    @patch.dict('os.environ', {'HANDFREE_DEBUG': 'yes'})
+    @patch.dict('os.environ', {'CAW_DEBUG': 'yes'})
     def test_debug_mode_enabled_yes(self):
-        """Test debug mode is enabled when HANDFREE_DEBUG=yes."""
+        """Test debug mode is enabled when CAW_DEBUG=yes."""
         import os
-        self.assertEqual(os.environ.get("HANDFREE_DEBUG"), "yes")
+        self.assertEqual(os.environ.get("CAW_DEBUG"), "yes")
 
 
 if __name__ == '__main__':

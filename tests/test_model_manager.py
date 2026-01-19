@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 
 from hypothesis import given, settings, strategies as st
 
-from handfree.model_manager import (
+from context_aware_whisper.model_manager import (
     MODEL_SIZES,
     MODEL_DESCRIPTIONS,
     format_size,
@@ -24,7 +24,7 @@ from handfree.model_manager import (
     create_parser,
     main,
 )
-from handfree.local_transcriber import LocalTranscriber
+from context_aware_whisper.local_transcriber import LocalTranscriber
 
 
 class TestFormatSize(unittest.TestCase):
@@ -180,7 +180,7 @@ class TestDownloadModel(unittest.TestCase):
         """Test that download_model triggers download when model missing."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Mock LocalTranscriber where it's used
-            with patch('handfree.model_manager.LocalTranscriber') as mock_transcriber_class:
+            with patch('context_aware_whisper.model_manager.LocalTranscriber') as mock_transcriber_class:
                 # Need to set AVAILABLE_MODELS on the mock class for the check
                 mock_transcriber_class.AVAILABLE_MODELS = LocalTranscriber.AVAILABLE_MODELS
                 mock_transcriber = MagicMock()
@@ -198,7 +198,7 @@ class TestDownloadModel(unittest.TestCase):
     def test_download_force_redownload(self):
         """Test that force flag triggers re-download."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            with patch('handfree.model_manager.LocalTranscriber') as mock_transcriber_class:
+            with patch('context_aware_whisper.model_manager.LocalTranscriber') as mock_transcriber_class:
                 # Need to set AVAILABLE_MODELS on the mock class for the check
                 mock_transcriber_class.AVAILABLE_MODELS = LocalTranscriber.AVAILABLE_MODELS
                 mock_transcriber = MagicMock()

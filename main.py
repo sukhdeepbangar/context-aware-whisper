@@ -1,5 +1,5 @@
 """
-HandFree - Speech-to-Text
+Context-Aware Whisper - Speech-to-Text
 
 Main application entry point.
 Orchestrates hotkey detection, audio recording, transcription, and text output.
@@ -14,12 +14,12 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-from handfree.audio_recorder import AudioRecorder
-from handfree.config import Config
-from handfree.transcriber import Transcriber
-from handfree.local_transcriber import LocalTranscriber
-from handfree.text_cleanup import TextCleaner, CleanupMode
-from handfree.exceptions import (
+from context_aware_whisper.audio_recorder import AudioRecorder
+from context_aware_whisper.config import Config
+from context_aware_whisper.transcriber import Transcriber
+from context_aware_whisper.local_transcriber import LocalTranscriber
+from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
+from context_aware_whisper.exceptions import (
     TranscriptionError,
     LocalTranscriptionError,
     OutputError,
@@ -28,8 +28,8 @@ from handfree.exceptions import (
     OutputHandlerError,
     PlatformNotSupportedError,
 )
-from handfree.ui import HandFreeUI
-from handfree.platform import (
+from context_aware_whisper.ui import CAWUI
+from context_aware_whisper.platform import (
     create_hotkey_detector,
     create_output_handler,
     get_platform,
@@ -70,7 +70,7 @@ def get_transcriber(config: Config) -> tuple:
                 logger.info("Falling back to Groq cloud transcription")
                 print(f"[Warning] Local model '{config.whisper_model}' not found.")
                 print("          Falling back to Groq cloud transcription.")
-                print(f"          To download: python -m handfree.model_manager download {config.whisper_model}")
+                print(f"          To download: python -m context_aware_whisper.model_manager download {config.whisper_model}")
                 return Transcriber(api_key=config.groq_api_key), "groq (fallback)"
             else:
                 # No fallback available - download model
@@ -112,7 +112,7 @@ class AppState(Enum):
     TRANSCRIBING = auto()
 
 
-class HandFreeApp:
+class CAWApp:
     """Main application class coordinating all modules."""
 
     def __init__(
@@ -167,7 +167,7 @@ class HandFreeApp:
         self.ui = None
         if config.ui_enabled:
             try:
-                self.ui = HandFreeUI(
+                self.ui = CAWUI(
                     history_enabled=config.history_enabled,
                     indicator_position=config.ui_position,
                     menubar_enabled=True,
@@ -363,7 +363,7 @@ class HandFreeApp:
         platform = get_platform()
 
         print("=" * 55)
-        print("  HandFree - Speech-to-Text")
+        print("  Context-Aware Whisper - Speech-to-Text")
         print("=" * 55)
         print()
         print(f"  Platform: {platform}")
@@ -406,7 +406,7 @@ class HandFreeApp:
         if self.ui:
             self.ui.stop()
 
-        print("\nHandFree stopped. Goodbye!")
+        print("\nContext-Aware Whisper stopped. Goodbye!")
 
 
 def setup_logging(debug: bool = False) -> None:
@@ -428,7 +428,7 @@ def setup_logging(debug: bool = False) -> None:
 
     # Also log to file if in debug mode
     if debug:
-        file_handler = logging.FileHandler("handfree.log")
+        file_handler = logging.FileHandler("context-aware-whisper.log")
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logging.Formatter(format_str, datefmt=date_format))
         logging.getLogger().addHandler(file_handler)
@@ -437,10 +437,10 @@ def setup_logging(debug: bool = False) -> None:
 def main():
     """Main entry point."""
     # Check for debug mode from environment
-    debug_mode = os.environ.get("HANDFREE_DEBUG", "").lower() in ("true", "1", "yes")
+    debug_mode = os.environ.get("CAW_DEBUG", "").lower() in ("true", "1", "yes")
     setup_logging(debug=debug_mode)
 
-    logger.info("HandFree starting...")
+    logger.info("Context-Aware Whisper starting...")
 
     # Load and validate configuration
     try:
@@ -456,7 +456,7 @@ def main():
 
     # Create application with validated config
     try:
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
     except HotkeyDetectorError as e:
         print(f"Error: {e}")
         logger.error(f"Hotkey detector error: {e}")
@@ -485,7 +485,7 @@ def main():
 
     # Run the application
     try:
-        logger.info("HandFree running")
+        logger.info("Context-Aware Whisper running")
         app.run()
     except Exception as e:
         print(f"Fatal error: {e}")

@@ -15,7 +15,7 @@ class TestAudioRecorderIntegration:
 
     def test_real_recording_short(self):
         """Record 0.5s of actual audio and validate WAV format."""
-        from handfree.audio_recorder import AudioRecorder
+        from context_aware_whisper.audio_recorder import AudioRecorder
 
         recorder = AudioRecorder(sample_rate=16000, channels=1)
 
@@ -36,7 +36,7 @@ class TestAudioRecorderIntegration:
 
     def test_real_recording_medium(self):
         """Record 2s of actual audio and validate duration."""
-        from handfree.audio_recorder import AudioRecorder
+        from context_aware_whisper.audio_recorder import AudioRecorder
 
         recorder = AudioRecorder(sample_rate=16000, channels=1)
 
@@ -52,7 +52,7 @@ class TestAudioRecorderIntegration:
 
     def test_multiple_recording_cycles(self):
         """Test multiple start/stop cycles work correctly."""
-        from handfree.audio_recorder import AudioRecorder
+        from context_aware_whisper.audio_recorder import AudioRecorder
 
         recorder = AudioRecorder()
 
@@ -65,7 +65,7 @@ class TestAudioRecorderIntegration:
 
     def test_captures_audio_levels(self):
         """Verify recorded audio has non-zero RMS (captures something)."""
-        from handfree.audio_recorder import AudioRecorder
+        from context_aware_whisper.audio_recorder import AudioRecorder
 
         recorder = AudioRecorder(sample_rate=16000, channels=1)
 
@@ -90,7 +90,7 @@ class TestAudioRecorderUnit:
 
     def test_recorder_initialization(self):
         """Test recorder can be instantiated."""
-        from handfree.audio_recorder import AudioRecorder
+        from context_aware_whisper.audio_recorder import AudioRecorder
 
         recorder = AudioRecorder(sample_rate=16000, channels=1)
         assert recorder.sample_rate == 16000
@@ -98,7 +98,7 @@ class TestAudioRecorderUnit:
 
     def test_recorder_default_params(self):
         """Test recorder uses sensible defaults."""
-        from handfree.audio_recorder import AudioRecorder
+        from context_aware_whisper.audio_recorder import AudioRecorder
 
         recorder = AudioRecorder()
         assert recorder.sample_rate >= 8000

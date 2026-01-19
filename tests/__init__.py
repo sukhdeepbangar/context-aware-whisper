@@ -1,3 +1,3 @@
 """
-Tests for HandFree application.
+Tests for Context-Aware Whisper application.
 """

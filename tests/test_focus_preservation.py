@@ -1,7 +1,7 @@
 """
 Property-based and integration tests for focus preservation during recording.
 
-This module tests that the HandFree application does not steal keyboard focus
+This module tests that the Context-Aware Whisper application does not steal keyboard focus
 from active text fields when the Fn key is pressed to start recording.
 
 Tested scenarios:
@@ -27,7 +27,7 @@ class TestIndicatorFocusPrevention:
     @pytest.mark.skipif(sys.platform != "darwin", reason="macOS-specific test")
     def test_pyobjc_available_on_macos(self):
         """Test PYOBJC_AVAILABLE is True on macOS when pyobjc is installed."""
-        from handfree.ui.indicator import PYOBJC_AVAILABLE
+        from context_aware_whisper.ui.indicator import PYOBJC_AVAILABLE
         # On macOS with pyobjc installed, this should be True
         # If pyobjc is not installed, the test still passes (it's a soft requirement)
         assert isinstance(PYOBJC_AVAILABLE, bool), "PYOBJC_AVAILABLE should be a boolean"
@@ -35,19 +35,19 @@ class TestIndicatorFocusPrevention:
     @pytest.mark.skipif(sys.platform == "darwin", reason="Non-macOS test")
     def test_pyobjc_not_available_on_other_platforms(self):
         """Test PYOBJC_AVAILABLE is False on non-macOS platforms."""
-        from handfree.ui.indicator import PYOBJC_AVAILABLE
+        from context_aware_whisper.ui.indicator import PYOBJC_AVAILABLE
         assert PYOBJC_AVAILABLE is False, "PYOBJC_AVAILABLE should be False on non-macOS"
 
     @pytest.mark.skipif(sys.platform != "darwin", reason="macOS-specific test")
     def test_macos_sets_background_activation_policy(self):
         """Test that macOS UI sets app activation policy to Background before creating windows."""
-        with patch('handfree.ui.app.tk.Tk') as mock_tk, \
-             patch('handfree.ui.app._set_macos_background_app') as mock_set_background:
+        with patch('context_aware_whisper.ui.app.tk.Tk') as mock_tk, \
+             patch('context_aware_whisper.ui.app._set_macos_background_app') as mock_set_background:
             mock_root = MagicMock()
             mock_tk.return_value = mock_root
 
-            from handfree.ui.app import HandFreeUI
-            ui = HandFreeUI(history_enabled=False, menubar_enabled=False)
+            from context_aware_whisper.ui.app import CAWUI
+            ui = CAWUI(history_enabled=False, menubar_enabled=False)
             ui.start()
 
             # Should call _set_macos_background_app before creating Tk root
@@ -63,9 +63,9 @@ class TestIndicatorFocusPrevention:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
 
@@ -77,9 +77,9 @@ class TestIndicatorFocusPrevention:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
 
@@ -95,10 +95,10 @@ class TestIndicatorFocusPrevention:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             # Patch _setup_macos_focus_prevention to track if it was called
             with patch.object(RecordingIndicator, '_setup_macos_focus_prevention') as mock_method:
@@ -123,10 +123,10 @@ class TestIndicatorFocusPrevention:
         mock_nsapp = MagicMock()
         mock_nsapp.windows.return_value = [mock_nswindow]
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'), \
-             patch('handfree.ui.indicator.PYOBJC_AVAILABLE', True), \
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'), \
+             patch('context_aware_whisper.ui.indicator.PYOBJC_AVAILABLE', True), \
              patch.dict('sys.modules', {'AppKit': MagicMock(NSApp=mock_nsapp, NSFloatingWindowLevel=3)}):
 
             # Mock tkinter window position/size to match our mock NSWindow
@@ -136,7 +136,7 @@ class TestIndicatorFocusPrevention:
             mock_window.winfo_height.return_value = 24
             mock_window.winfo_id.return_value = 12345
 
-            from handfree.ui.indicator import RecordingIndicator
+            from context_aware_whisper.ui.indicator import RecordingIndicator
             indicator = RecordingIndicator()
 
             # Should configure NSWindow to not become key or main window
@@ -149,10 +149,10 @@ class TestIndicatorFocusPrevention:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
 
@@ -167,10 +167,10 @@ class TestIndicatorFocusPrevention:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
             mock_window.lift.reset_mock()  # Reset after initialization
@@ -186,10 +186,10 @@ class TestIndicatorFocusPrevention:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='linux'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='linux'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
             mock_window.lift.reset_mock()
@@ -207,10 +207,10 @@ class TestIndicatorFocusPrevention:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
             mock_window.deiconify.reset_mock()
@@ -236,13 +236,13 @@ class TestHotkeyDetectorFocusPrevention:
         from unittest.mock import patch, MagicMock
 
         # Mock the Quartz module
-        with patch('handfree.platform.macos.hotkey_detector.Quartz') as mock_quartz, \
-             patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate') as mock_create, \
-             patch('handfree.platform.macos.hotkey_detector.CGEventMaskBit') as mock_mask, \
-             patch('handfree.platform.macos.hotkey_detector.CFMachPortCreateRunLoopSource'), \
-             patch('handfree.platform.macos.hotkey_detector.CFRunLoopGetCurrent'), \
-             patch('handfree.platform.macos.hotkey_detector.CFRunLoopAddSource'), \
-             patch('handfree.platform.macos.hotkey_detector.CFRunLoopRunInMode'):
+        with patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz') as mock_quartz, \
+             patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate') as mock_create, \
+             patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventMaskBit') as mock_mask, \
+             patch('context_aware_whisper.platform.macos.hotkey_detector.CFMachPortCreateRunLoopSource'), \
+             patch('context_aware_whisper.platform.macos.hotkey_detector.CFRunLoopGetCurrent'), \
+             patch('context_aware_whisper.platform.macos.hotkey_detector.CFRunLoopAddSource'), \
+             patch('context_aware_whisper.platform.macos.hotkey_detector.CFRunLoopRunInMode'):
 
             # Set up mocks
             mock_quartz.kCGSessionEventTap = 0
@@ -251,7 +251,7 @@ class TestHotkeyDetectorFocusPrevention:
             mock_tap = MagicMock()
             mock_create.return_value = mock_tap
 
-            from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+            from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
             detector = MacOSHotkeyDetector(lambda: None, lambda: None)
             detector._running = False  # Will exit immediately
@@ -272,15 +272,15 @@ class TestHotkeyDetectorFocusPrevention:
         """Test event callback returns events unmodified (pass-through)."""
         from unittest.mock import patch, MagicMock
 
-        with patch('handfree.platform.macos.hotkey_detector.Quartz') as mock_quartz, \
-             patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate'), \
-             patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags') as mock_get_flags:
+        with patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz') as mock_quartz, \
+             patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate'), \
+             patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags') as mock_get_flags:
 
             mock_quartz.kCGEventFlagsChanged = 12
             mock_quartz.kCGEventFlagMaskCommand = 0x100000
             mock_get_flags.return_value = 0
 
-            from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+            from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
             detector = MacOSHotkeyDetector(lambda: None, lambda: None)
 
@@ -312,10 +312,10 @@ class TestFocusPreservationIntegration:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
 
@@ -334,10 +334,10 @@ class TestFocusPreservationIntegration:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
 
@@ -368,10 +368,10 @@ class TestFocusPreservationProperties:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
 
@@ -391,10 +391,10 @@ class TestFocusPreservationProperties:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator(width=width, height=height)
 
@@ -416,7 +416,7 @@ class TestFocusPreservationManualGuidance:
     Manual tests to perform (cannot be automated):
 
     1. Open TextEdit with cursor in document
-    2. Run HandFree app
+    2. Run Context-Aware Whisper app
     3. Press Fn key to start recording
     4. Verify:
        - Cursor stays in TextEdit (does not move)
@@ -464,10 +464,10 @@ class TestFocusPreservationPerformance:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas), \
-             patch('handfree.ui.indicator.get_current_platform', return_value='macos'):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas), \
+             patch('context_aware_whisper.ui.indicator.get_current_platform', return_value='macos'):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
 

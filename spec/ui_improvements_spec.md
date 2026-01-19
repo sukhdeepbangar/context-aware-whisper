@@ -8,7 +8,7 @@
 
 ## 1. Overview
 
-This specification defines six UI/UX improvements for HandFree on macOS:
+This specification defines six UI/UX improvements for Context-Aware Whisper on macOS:
 
 1. Remove duplicate system notifications during recording
 2. Replace static "REC" indicator with animated audio visualizer bars
@@ -124,7 +124,7 @@ This specification defines six UI/UX improvements for HandFree on macOS:
 ├────────────────────┤
 │ Show History       │  ← Opens history panel
 ├────────────────────┤
-│ Quit HandFree      │  ← Graceful shutdown
+│ Quit Context-Aware Whisper      │  ← Graceful shutdown
 └────────────────────┘
 ```
 
@@ -223,13 +223,13 @@ This specification defines six UI/UX improvements for HandFree on macOS:
 
 | File | Action | Changes |
 |------|--------|---------|
-| `src/handfree/platform/macos/hotkey_detector.py` | Modify | Remove `_show_indicator()`, add Shift flag detection |
-| `src/handfree/ui/indicator.py` | Modify | Add bar animation system |
-| `src/handfree/ui/history.py` | Modify | Update hotkey hints to Cmd+Shift+H |
-| `src/handfree/ui/menubar.py` | Create | New menu bar component |
-| `src/handfree/ui/app.py` | Modify | Integrate menu bar |
-| `src/handfree/platform/base.py` | Modify | Update output() method |
-| `src/handfree/platform/macos/output_handler.py` | Modify | Add type_text_instant() |
+| `src/context_aware_whisper/platform/macos/hotkey_detector.py` | Modify | Remove `_show_indicator()`, add Shift flag detection |
+| `src/context_aware_whisper/ui/indicator.py` | Modify | Add bar animation system |
+| `src/context_aware_whisper/ui/history.py` | Modify | Update hotkey hints to Cmd+Shift+H |
+| `src/context_aware_whisper/ui/menubar.py` | Create | New menu bar component |
+| `src/context_aware_whisper/ui/app.py` | Modify | Integrate menu bar |
+| `src/context_aware_whisper/platform/base.py` | Modify | Update output() method |
+| `src/context_aware_whisper/platform/macos/output_handler.py` | Modify | Add type_text_instant() |
 | `main.py` | Modify | Connect menu bar callbacks |
 | `pyproject.toml` | Modify | Add rumps dependency |
 

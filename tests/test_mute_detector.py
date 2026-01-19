@@ -4,7 +4,7 @@ Unit tests for MuteDetector module.
 
 import unittest
 from unittest.mock import Mock, MagicMock, patch
-from handfree.mute_detector import MuteDetector
+from context_aware_whisper.mute_detector import MuteDetector
 
 
 class TestMuteDetector(unittest.TestCase):
@@ -28,9 +28,9 @@ class TestMuteDetector(unittest.TestCase):
         self.assertIsNone(self.detector._session)
         self.assertIsNone(self.detector._last_mute_state)
 
-    @patch('handfree.mute_detector.AVAudioApplication')
-    @patch('handfree.mute_detector.AVAudioSession')
-    @patch('handfree.mute_detector.NSNotificationCenter')
+    @patch('context_aware_whisper.mute_detector.AVAudioApplication')
+    @patch('context_aware_whisper.mute_detector.AVAudioSession')
+    @patch('context_aware_whisper.mute_detector.NSNotificationCenter')
     def test_start(self, mock_notification_center, mock_audio_session, mock_audio_app):
         """Test starting the mute detector."""
         # Set up mocks
@@ -59,7 +59,7 @@ class TestMuteDetector(unittest.TestCase):
         # Verify initial state was set
         self.assertEqual(self.detector._last_mute_state, False)
 
-    @patch('handfree.mute_detector.AVAudioApplication')
+    @patch('context_aware_whisper.mute_detector.AVAudioApplication')
     def test_handle_notification_mute(self, mock_audio_app):
         """Test handling mute notification."""
         # Set up initial state as unmuted
@@ -78,7 +78,7 @@ class TestMuteDetector(unittest.TestCase):
         self.on_unmute_callback.assert_not_called()
         self.assertEqual(self.detector._last_mute_state, True)
 
-    @patch('handfree.mute_detector.AVAudioApplication')
+    @patch('context_aware_whisper.mute_detector.AVAudioApplication')
     def test_handle_notification_unmute(self, mock_audio_app):
         """Test handling unmute notification."""
         # Set up initial state as muted
@@ -97,7 +97,7 @@ class TestMuteDetector(unittest.TestCase):
         self.on_mute_callback.assert_not_called()
         self.assertEqual(self.detector._last_mute_state, False)
 
-    @patch('handfree.mute_detector.AVAudioApplication')
+    @patch('context_aware_whisper.mute_detector.AVAudioApplication')
     def test_handle_notification_no_state_change(self, mock_audio_app):
         """Test handling notification when state hasn't changed."""
         # Set up initial state as muted
@@ -115,7 +115,7 @@ class TestMuteDetector(unittest.TestCase):
         self.on_mute_callback.assert_not_called()
         self.on_unmute_callback.assert_not_called()
 
-    @patch('handfree.mute_detector.NSNotificationCenter')
+    @patch('context_aware_whisper.mute_detector.NSNotificationCenter')
     def test_stop(self, mock_notification_center):
         """Test stopping the mute detector."""
         # Set up mock observer and session
@@ -139,7 +139,7 @@ class TestMuteDetector(unittest.TestCase):
         self.assertIsNone(self.detector._observer)
         self.assertIsNone(self.detector._session)
 
-    @patch('handfree.mute_detector.AVAudioApplication')
+    @patch('context_aware_whisper.mute_detector.AVAudioApplication')
     def test_is_muted_property(self, mock_audio_app):
         """Test is_muted property."""
         # Mock the app to return muted state
@@ -154,9 +154,9 @@ class TestMuteDetector(unittest.TestCase):
         mock_app_instance.isInputMuted.return_value = False
         self.assertFalse(self.detector.is_muted)
 
-    @patch('handfree.mute_detector.AVAudioApplication')
-    @patch('handfree.mute_detector.AVAudioSession')
-    @patch('handfree.mute_detector.NSNotificationCenter')
+    @patch('context_aware_whisper.mute_detector.AVAudioApplication')
+    @patch('context_aware_whisper.mute_detector.AVAudioSession')
+    @patch('context_aware_whisper.mute_detector.NSNotificationCenter')
     def test_start_audio_session_error(self, mock_notification_center, mock_audio_session, mock_audio_app):
         """Test handling audio session configuration error."""
         # Set up mocks with error - returns False to indicate failure

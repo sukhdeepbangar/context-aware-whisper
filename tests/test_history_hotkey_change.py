@@ -60,11 +60,11 @@ SHIFT_FLAG = 0x20000  # kCGEventFlagMaskShift
 class TestHistoryHotkeyDescription(unittest.TestCase):
     """Tests for updated history hotkey description."""
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_history_toggle_description_is_cmd_shift_h(self, mock_tap_create):
         """Test history toggle description returns 'Cmd+Shift+H'."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
         detector = MacOSHotkeyDetector(lambda: None, lambda: None)
 
@@ -73,11 +73,11 @@ class TestHistoryHotkeyDescription(unittest.TestCase):
             "Cmd+Shift+H"
         )
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_description_not_cmd_h(self, mock_tap_create):
         """Verify description is NOT the old 'Cmd+H'."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
         detector = MacOSHotkeyDetector(lambda: None, lambda: None)
 
@@ -90,12 +90,12 @@ class TestHistoryHotkeyDescription(unittest.TestCase):
 class TestHistoryHotkeyDetection(unittest.TestCase):
     """Tests for history hotkey detection with Cmd+Shift+H."""
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_cmd_shift_h_triggers_history_toggle(self, mock_get_flags, mock_tap_create):
         """Test Cmd+Shift+H triggers history toggle."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         on_history = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history)
@@ -107,12 +107,12 @@ class TestHistoryHotkeyDetection(unittest.TestCase):
 
         on_history.assert_called_once()
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_cmd_h_alone_does_not_trigger(self, mock_get_flags, mock_tap_create):
         """Test Cmd+H without Shift does NOT trigger history toggle."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         on_history = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history)
@@ -124,12 +124,12 @@ class TestHistoryHotkeyDetection(unittest.TestCase):
 
         on_history.assert_not_called()
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_shift_h_alone_does_not_trigger(self, mock_get_flags, mock_tap_create):
         """Test Shift+H without Cmd does NOT trigger history toggle."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         on_history = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history)
@@ -141,12 +141,12 @@ class TestHistoryHotkeyDetection(unittest.TestCase):
 
         on_history.assert_not_called()
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_h_alone_does_not_trigger(self, mock_get_flags, mock_tap_create):
         """Test H alone does NOT trigger history toggle."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         on_history = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history)
@@ -158,12 +158,12 @@ class TestHistoryHotkeyDetection(unittest.TestCase):
 
         on_history.assert_not_called()
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_cmd_shift_h_with_other_modifiers_still_triggers(self, mock_get_flags, mock_tap_create):
         """Test Cmd+Shift+H with additional modifiers (like Option) still triggers."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         on_history = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history)
@@ -176,12 +176,12 @@ class TestHistoryHotkeyDetection(unittest.TestCase):
 
         on_history.assert_called_once()
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_no_callback_configured_no_error(self, mock_get_flags, mock_tap_create):
         """Test no error when history toggle not configured."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         detector = MacOSHotkeyDetector(lambda: None, lambda: None)  # No history callback
 
@@ -195,19 +195,19 @@ class TestHistoryHotkeyDetection(unittest.TestCase):
 class TestHistoryHotkeyConstants(unittest.TestCase):
     """Test that SHIFT_FLAG constant exists and is correct."""
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_shift_flag_constant_exists(self, mock_tap_create):
         """Test SHIFT_FLAG constant is defined in the module."""
-        from handfree.platform.macos import hotkey_detector
+        from context_aware_whisper.platform.macos import hotkey_detector
 
         self.assertTrue(hasattr(hotkey_detector, 'SHIFT_FLAG'))
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_shift_flag_value(self, mock_tap_create):
         """Test SHIFT_FLAG has correct value (kCGEventFlagMaskShift)."""
-        from handfree.platform.macos import hotkey_detector
+        from context_aware_whisper.platform.macos import hotkey_detector
 
         # kCGEventFlagMaskShift should be 0x20000 (131072)
         self.assertEqual(
@@ -219,9 +219,9 @@ class TestHistoryHotkeyConstants(unittest.TestCase):
 class TestHistoryHotkeyPropertyBased:
     """Property-based tests using Hypothesis for modifier combinations."""
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     @given(
         has_cmd=st.booleans(),
         has_shift=st.booleans(),
@@ -234,7 +234,7 @@ class TestHistoryHotkeyPropertyBased:
         has_cmd, has_shift, has_option, has_ctrl
     ):
         """Test that ONLY Cmd+Shift combination triggers history toggle."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         on_history = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history)
@@ -261,14 +261,14 @@ class TestHistoryHotkeyPropertyBased:
         else:
             assert on_history.call_count == 0
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     @given(num_presses=st.integers(min_value=1, max_value=20))
     @settings(max_examples=20)
     def test_multiple_cmd_shift_h_presses(self, mock_get_flags, mock_tap_create, num_presses):
         """Test multiple Cmd+Shift+H presses all trigger correctly."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         on_history = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history)
@@ -289,7 +289,7 @@ class TestHistoryPanelUIHints(unittest.TestCase):
         """Test modifier key is 'Cmd' on macOS."""
         with patch.object(sys, 'platform', 'darwin'):
             # Re-import to get fresh value
-            from handfree.ui import history
+            from context_aware_whisper.ui import history
             # Reload to pick up patched platform
             import importlib
             importlib.reload(history)
@@ -300,7 +300,7 @@ class TestHistoryPanelUIHints(unittest.TestCase):
     def test_get_modifier_key_returns_ctrl_on_others(self):
         """Test modifier key is 'Ctrl' on non-macOS platforms."""
         with patch.object(sys, 'platform', 'linux'):
-            from handfree.ui import history
+            from context_aware_whisper.ui import history
             import importlib
             importlib.reload(history)
 
@@ -311,12 +311,12 @@ class TestHistoryPanelUIHints(unittest.TestCase):
 class TestHistoryHotkeyNotConflictWithSystem(unittest.TestCase):
     """Tests verifying Cmd+Shift+H doesn't conflict with system shortcuts."""
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_cmd_h_allowed_to_pass_through_for_system(self, mock_get_flags, mock_tap_create):
         """Test Cmd+H alone is not intercepted, allowing system 'Hide' to work."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         on_history = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history)
@@ -335,12 +335,12 @@ class TestHistoryHotkeyNotConflictWithSystem(unittest.TestCase):
 class TestHistoryHotkeyIntegration(unittest.TestCase):
     """Integration tests for the complete hotkey change."""
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_full_workflow_cmd_shift_h(self, mock_get_flags, mock_tap_create):
         """Test complete workflow: press Cmd+Shift+H toggles history."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector, kCGEventKeyDown
 
         toggle_count = 0
 
@@ -360,12 +360,12 @@ class TestHistoryHotkeyIntegration(unittest.TestCase):
         detector._event_callback(None, kCGEventKeyDown, event, None)
         self.assertEqual(toggle_count, 2)
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz', MockQuartz)
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventGetFlags')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventGetFlags')
     def test_history_toggle_does_not_interfere_with_recording(self, mock_get_flags, mock_tap_create):
         """Test history toggle doesn't affect recording state."""
-        from handfree.platform.macos.hotkey_detector import (
+        from context_aware_whisper.platform.macos.hotkey_detector import (
             MacOSHotkeyDetector, kCGEventKeyDown, kCGEventFlagsChanged
         )
 

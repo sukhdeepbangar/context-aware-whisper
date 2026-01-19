@@ -40,8 +40,8 @@ class TestReadmeExists:
         """README.md should start with a proper title."""
         readme_path = PROJECT_ROOT / "README.md"
         content = readme_path.read_text()
-        # Should start with # HandFree
-        assert content.strip().startswith("# HandFree"), "README should start with '# HandFree'"
+        # Should start with # Context-Aware Whisper
+        assert content.strip().startswith("# Context-Aware Whisper"), "README should start with '# Context-Aware Whisper'"
 
 
 class TestReadmeRequiredSections:
@@ -135,7 +135,7 @@ class TestReadmeUsageContent:
 
     def test_mentions_main_py(self, readme_content):
         """Usage should mention how to run the app."""
-        assert "python main.py" in readme_content or "handfree" in readme_content.lower(), \
+        assert "python main.py" in readme_content or "context-aware-whisper" in readme_content.lower(), \
             "Should mention how to run the application"
 
 
@@ -159,16 +159,16 @@ class TestReadmeEnvironmentVariables:
         assert "GROQ_API_KEY" in readme_content
 
     def test_language_env_documented(self, readme_content):
-        """HANDFREE_LANGUAGE should be documented."""
-        assert "HANDFREE_LANGUAGE" in readme_content
+        """CAW_LANGUAGE should be documented."""
+        assert "CAW_LANGUAGE" in readme_content
 
     def test_type_delay_documented(self, readme_content):
-        """HANDFREE_TYPE_DELAY should be documented."""
-        assert "HANDFREE_TYPE_DELAY" in readme_content
+        """CAW_TYPE_DELAY should be documented."""
+        assert "CAW_TYPE_DELAY" in readme_content
 
     def test_sample_rate_documented(self, readme_content):
-        """HANDFREE_SAMPLE_RATE should be documented."""
-        assert "HANDFREE_SAMPLE_RATE" in readme_content
+        """CAW_SAMPLE_RATE should be documented."""
+        assert "CAW_SAMPLE_RATE" in readme_content
 
     def test_env_vars_used_in_code(self, main_py_content, readme_content):
         """Environment variables used in code should be documented."""
@@ -229,9 +229,9 @@ class TestReadmeProjectStructure:
         assert "main.py" in readme_content
         assert (PROJECT_ROOT / "main.py").exists()
 
-    def test_handfree_package_documented(self, readme_content):
-        """handfree package should be documented."""
-        assert "handfree" in readme_content.lower()
+    def test_caw_package_documented(self, readme_content):
+        """context-aware-whisper package should be documented."""
+        assert "context-aware-whisper" in readme_content.lower()
 
     def test_tests_directory_documented(self, readme_content):
         """tests directory should be documented."""
@@ -490,28 +490,28 @@ class TestUIEnvironmentVariables:
         return readme_path.read_text()
 
     def test_ui_enabled_documented(self, readme_content):
-        """HANDFREE_UI_ENABLED should be documented."""
-        assert "HANDFREE_UI_ENABLED" in readme_content
+        """CAW_UI_ENABLED should be documented."""
+        assert "CAW_UI_ENABLED" in readme_content
 
     def test_ui_position_documented(self, readme_content):
-        """HANDFREE_UI_POSITION should be documented."""
-        assert "HANDFREE_UI_POSITION" in readme_content
+        """CAW_UI_POSITION should be documented."""
+        assert "CAW_UI_POSITION" in readme_content
 
     def test_history_enabled_documented(self, readme_content):
-        """HANDFREE_HISTORY_ENABLED should be documented."""
-        assert "HANDFREE_HISTORY_ENABLED" in readme_content
+        """CAW_HISTORY_ENABLED should be documented."""
+        assert "CAW_HISTORY_ENABLED" in readme_content
 
     def test_history_max_documented(self, readme_content):
-        """HANDFREE_HISTORY_MAX should be documented."""
-        assert "HANDFREE_HISTORY_MAX" in readme_content
+        """CAW_HISTORY_MAX should be documented."""
+        assert "CAW_HISTORY_MAX" in readme_content
 
     def test_hotkey_documented(self, readme_content):
-        """HANDFREE_HOTKEY should be documented."""
-        assert "HANDFREE_HOTKEY" in readme_content
+        """CAW_HOTKEY should be documented."""
+        assert "CAW_HOTKEY" in readme_content
 
     def test_debug_documented(self, readme_content):
-        """HANDFREE_DEBUG should be documented."""
-        assert "HANDFREE_DEBUG" in readme_content
+        """CAW_DEBUG should be documented."""
+        assert "CAW_DEBUG" in readme_content
 
 
 class TestPlatformDirectoryDocumentation:
@@ -693,19 +693,19 @@ class TestLocalTranscriptionDocumentation:
             "Should mention base model size"
 
     def test_documents_transcriber_env_var(self, readme_content):
-        """README should document HANDFREE_TRANSCRIBER env var."""
-        assert "HANDFREE_TRANSCRIBER" in readme_content, \
-            "Should document HANDFREE_TRANSCRIBER"
+        """README should document CAW_TRANSCRIBER env var."""
+        assert "CAW_TRANSCRIBER" in readme_content, \
+            "Should document CAW_TRANSCRIBER"
 
     def test_documents_whisper_model_env_var(self, readme_content):
-        """README should document HANDFREE_WHISPER_MODEL env var."""
-        assert "HANDFREE_WHISPER_MODEL" in readme_content, \
-            "Should document HANDFREE_WHISPER_MODEL"
+        """README should document CAW_WHISPER_MODEL env var."""
+        assert "CAW_WHISPER_MODEL" in readme_content, \
+            "Should document CAW_WHISPER_MODEL"
 
     def test_documents_models_dir_env_var(self, readme_content):
-        """README should document HANDFREE_MODELS_DIR env var."""
-        assert "HANDFREE_MODELS_DIR" in readme_content, \
-            "Should document HANDFREE_MODELS_DIR"
+        """README should document CAW_MODELS_DIR env var."""
+        assert "CAW_MODELS_DIR" in readme_content, \
+            "Should document CAW_MODELS_DIR"
 
     def test_mentions_offline_capability(self, readme_content):
         """README should mention offline capability."""
@@ -766,12 +766,12 @@ class TestLocalTranscriberFileExists:
 
     def test_local_transcriber_exists(self):
         """local_transcriber.py should exist."""
-        local_transcriber_path = PROJECT_ROOT / "src" / "handfree" / "local_transcriber.py"
+        local_transcriber_path = PROJECT_ROOT / "src" / "context-aware-whisper" / "local_transcriber.py"
         assert local_transcriber_path.exists(), "local_transcriber.py not found"
 
     def test_model_manager_exists(self):
         """model_manager.py should exist."""
-        model_manager_path = PROJECT_ROOT / "src" / "handfree" / "model_manager.py"
+        model_manager_path = PROJECT_ROOT / "src" / "context-aware-whisper" / "model_manager.py"
         assert model_manager_path.exists(), "model_manager.py not found"
 
     def test_local_transcriber_documented_in_readme(self):

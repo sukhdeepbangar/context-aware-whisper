@@ -1,4 +1,4 @@
-# HandFree - Architecture & Specifications
+# Context-Aware Whisper - Architecture & Specifications
 
 ## Overview
 A macOS Python application that uses AirPods mute/unmute gestures to trigger fast speech-to-text transcription via Groq Whisper API.
@@ -30,11 +30,17 @@ A macOS Python application that uses AirPods mute/unmute gestures to trigger fas
 │           │                    │                    │                       │
 │           ▼                    ▼                    ▼                       │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐            │
-│  │  Mute Detector  │  │  Audio Recorder │  │  Output Handler │            │
-│  │  (PyObjC/       │  │  (sounddevice)  │  │  (pyautogui/    │            │
-│  │   AVFAudio)     │  │                 │  │   clipboard)    │            │
+│  │  Mute Detector  │  │  Audio Recorder │  │  Text Cleaner   │            │
+│  │  (PyObjC/       │  │  (sounddevice)  │  │  (disfluency    │            │
+│  │   AVFAudio)     │  │                 │  │   removal)      │            │
 │  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘            │
 │           │                    │                    │                       │
+│           │                    │                    ▼                       │
+│           │                    │           ┌─────────────────┐             │
+│           │                    │           │  Output Handler │             │
+│           │                    │           │  (pyautogui/    │             │
+│           │                    │           │   clipboard)    │             │
+│           │                    │           └────────┬────────┘             │
 │           │ mute/unmute        │ audio bytes        │ text output          │
 │           │ events             │                    │                       │
 │           ▼                    ▼                    ▼                       │
@@ -66,6 +72,9 @@ A macOS Python application that uses AirPods mute/unmute gestures to trigger fas
                          │   base, small,      │
                          │   medium, large     │
                          └─────────────────────┘
+
+Data Flow:
+  Audio → Transcriber → TextCleaner → OutputHandler → Active App
 ```
 
 ---
@@ -355,9 +364,9 @@ class LocalTranscriber:
 **Configuration:**
 ```python
 # Environment variables
-HANDFREE_TRANSCRIBER = "local"  # or "groq" (default)
-HANDFREE_WHISPER_MODEL = "base.en"  # model to use
-HANDFREE_MODELS_DIR = "~/.cache/whisper"  # model storage location
+CAW_TRANSCRIBER = "local"  # or "groq" (default)
+CAW_WHISPER_MODEL = "base.en"  # model to use
+CAW_MODELS_DIR = "~/.cache/whisper"  # model storage location
 ```
 
 ---
@@ -434,23 +443,191 @@ def main():
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GROQ_API_KEY` | Yes* | - | Groq API key (*required if using cloud) |
-| `HANDFREE_LANGUAGE` | No | auto | Language code for transcription |
-| `HANDFREE_TYPE_DELAY` | No | 0 | Delay between keystrokes (seconds) |
-| `HANDFREE_TRANSCRIBER` | No | groq | Transcription backend: "groq" or "local" |
-| `HANDFREE_WHISPER_MODEL` | No | base.en | Local whisper model to use |
-| `HANDFREE_MODELS_DIR` | No | ~/.cache/whisper | Directory for local models |
+| `CAW_LANGUAGE` | No | auto | Language code for transcription |
+| `CAW_TYPE_DELAY` | No | 0 | Delay between keystrokes (seconds) |
+| `CAW_TRANSCRIBER` | No | groq | Transcription backend: "groq" or "local" |
+| `CAW_WHISPER_MODEL` | No | base.en | Local whisper model to use |
+| `CAW_MODELS_DIR` | No | ~/.cache/whisper | Directory for local models |
+
+---
+
+### Module 6: `text_cleanup.py`
+
+**Purpose:** Remove speech disfluencies from transcriptions before output.
+
+**Problem:**
+Natural speech contains disfluencies that degrade written output quality:
+- "Hey, um, can you... sorry, can you send this?" → "Can you send this?"
+- "I I think we should" → "I think we should"
+- "So like basically, you know, the thing is" → "The thing is"
+
+**Dependencies:**
+- `re` (standard library, regex patterns)
+- `groq` (optional, for aggressive LLM-based cleanup)
+
+**Cleanup Modes:**
+
+| Mode | Description | Latency | Use Case |
+|------|-------------|---------|----------|
+| `off` | No cleanup, raw transcription | 0ms | Verbatim transcription needed |
+| `light` | Remove obvious fillers (um, uh, ah) | <2ms | Minimal cleanup |
+| `standard` | Fillers + repetitions + false starts | <5ms | **Recommended default** |
+| `aggressive` | LLM-powered intelligent cleanup | 200-500ms | Professional quality |
+
+**Disfluencies Handled:**
+
+| Type | Examples | Handling |
+|------|----------|----------|
+| Filler words | um, uh, ah, er, hmm | Remove |
+| Discourse markers | like, you know, I mean, basically, actually | Remove (context-aware) |
+| Word repetitions | "I I think", "the the" | Deduplicate |
+| False starts | "Can you... sorry, can you" | Keep correction only |
+| Self-corrections | "Go left, I mean right" | Keep correction only |
+
+**Interface:**
+```python
+from enum import Enum, auto
+from typing import Optional
+
+class CleanupMode(Enum):
+    """Text cleanup aggressiveness levels."""
+    OFF = auto()        # No cleanup
+    LIGHT = auto()      # Only obvious fillers (um, uh, ah)
+    STANDARD = auto()   # Fillers + repetitions + false starts
+    AGGRESSIVE = auto() # LLM-powered cleanup (requires API)
+
+
+class TextCleaner:
+    """
+    Cleans speech disfluencies from transcribed text.
+
+    Pipeline position: Transcriber → TextCleaner → OutputHandler
+    """
+
+    def __init__(
+        self,
+        mode: CleanupMode = CleanupMode.STANDARD,
+        api_key: Optional[str] = None,
+        preserve_intentional: bool = True,
+    ):
+        """
+        Initialize text cleaner.
+
+        Args:
+            mode: Cleanup aggressiveness level
+            api_key: Groq API key (required for AGGRESSIVE mode)
+            preserve_intentional: Preserve intentional patterns like "I like pizza"
+        """
+
+    def clean(self, text: str) -> str:
+        """
+        Clean speech disfluencies from text.
+
+        Args:
+            text: Raw transcription text
+
+        Returns:
+            Cleaned text with disfluencies removed
+
+        Raises:
+            TextCleanupError: If cleanup fails (AGGRESSIVE mode only)
+        """
+```
+
+**Rule-Based Implementation (LIGHT/STANDARD):**
+
+```python
+# Filler words - removed as standalone words
+FILLERS_LIGHT = {"um", "uh", "ah", "er", "hmm", "mm", "mhm"}
+
+FILLERS_STANDARD = FILLERS_LIGHT | {
+    "like", "you know", "i mean", "so", "basically",
+    "actually", "literally", "right", "okay", "well",
+    "anyway", "kind of", "sort of",
+}
+
+# Correction markers - text before these is likely a false start
+CORRECTION_MARKERS = [
+    "sorry", "i mean", "no wait", "actually",
+    "let me rephrase", "correction", "rather",
+]
+```
+
+**Context-Aware Rules:**
+- "like" as verb preserved: "I like pizza" ✓
+- "like" as filler removed: "It's like really good" → "It's really good"
+- Emphasis repetition preserved: "very very important" ✓
+- Stutter repetition removed: "I I think" → "I think"
+
+**LLM-Based Implementation (AGGRESSIVE):**
+
+```python
+LLM_PROMPT = """Clean this speech transcription by removing disfluencies.
+
+Remove: filler words, false starts, repetitions, incomplete sentences
+Preserve: core meaning, natural tone, intentional emphasis
+
+Input: {text}
+
+Output only the cleaned text:"""
+
+# Uses Groq's llama-3.1-8b-instant for fast, cheap cleanup
+```
+
+**Configuration (Environment Variables):**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CAW_TEXT_CLEANUP` | `standard` | Cleanup mode: off, light, standard, aggressive |
+| `CAW_PRESERVE_INTENTIONAL` | `true` | Preserve intentional patterns |
+
+**Integration Point:**
+
+In `main.py` handle_stop(), between transcription and output:
+
+```python
+# After transcription
+text = self.transcriber.transcribe(audio_bytes, language)
+
+# NEW: Clean disfluencies
+if self.config.text_cleanup != "off":
+    text = self.text_cleaner.clean(text)
+
+# Output cleaned text
+self.output.output(text)
+```
+
+**Performance Targets:**
+
+| Mode | Target | Max Acceptable |
+|------|--------|----------------|
+| OFF | 0ms | 0ms |
+| LIGHT | <2ms | <5ms |
+| STANDARD | <5ms | <20ms |
+| AGGRESSIVE | <500ms | <1000ms |
+
+**Edge Cases:**
+
+| Case | Input | Expected Output |
+|------|-------|-----------------|
+| Empty input | "" | "" |
+| All fillers | "Um uh like" | "" or original |
+| Quoted speech | 'She said "um, hello"' | Preserve quoted content |
+| Technical terms | "like literally equals" | Preserve technical usage |
+| Non-English | Mixed language | Apply basic patterns |
 
 ---
 
 ## File Structure
 
 ```
-handfree/
+context_aware_whisper/
 ├── main.py                 # Entry point, orchestration
 ├── mute_detector.py        # AirPods mute state detection
 ├── audio_recorder.py       # Microphone audio capture
 ├── transcriber.py          # Groq Whisper API client (cloud)
-├── local_transcriber.py    # whisper.cpp client (local) [Future]
+├── local_transcriber.py    # whisper.cpp client (local)
+├── text_cleanup.py         # Speech disfluency removal
 ├── output_handler.py       # Clipboard + auto-typing
 ├── config.py               # Configuration loading
 ├── exceptions.py           # Custom exceptions
@@ -460,7 +637,8 @@ handfree/
 │   └── spec.md             # This file
 ├── plan/
 │   ├── implementation_plan.md
-│   └── whisper_cpp_plan.md # whisper.cpp implementation plan
+│   ├── whisper_cpp_plan.md # whisper.cpp implementation plan
+│   └── text_cleanup_plan.md # Text cleanup implementation plan
 └── README.md               # Setup & usage instructions
 ```
 
@@ -513,7 +691,7 @@ python-dotenv>=1.0.0
    - Local mode (whisper.cpp): Audio never leaves the machine - maximum privacy
 3. **Permissions**: App requires microphone + accessibility access
 4. **No Persistent Storage**: No audio files saved to disk by default
-5. **Local Transcription Benefits**: For sensitive content, use `HANDFREE_TRANSCRIBER=local`
+5. **Local Transcription Benefits**: For sensitive content, use `CAW_TRANSCRIBER=local`
 
 ---
 

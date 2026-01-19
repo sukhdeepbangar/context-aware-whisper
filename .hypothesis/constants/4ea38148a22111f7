@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/src/handfree/model_manager.py
+# hypothesis_version: 6.150.2
+
+[1000000, 75000000, 142000000, 466000000, 1000000000, 1500000000, 3000000000, '-', '--force', '--models-dir', '-f', '.cache', '.en', 'Command to run', 'Fast, good quality', 'Not downloaded', 'Slow, English-only', 'Slow, great quality', '__main__', 'base', 'base.en', 'command', 'download', 'handfree-models', 'info', 'large-v1', 'large-v2', 'large-v3', 'list', 'medium', 'medium.en', 'model', 'small', 'small.en', 'store_true', 'tiny', 'tiny.en', 'whisper', '~100ms for 5s audio', '~1s for 5s audio', '~200ms for 5s audio', '~2s for 5s audio', '~500ms for 5s audio']

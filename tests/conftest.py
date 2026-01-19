@@ -1,5 +1,5 @@
 """
-Pytest configuration and fixtures for handfree tests.
+Pytest configuration and fixtures for context-aware-whisper tests.
 
 IMPORTANT: This file sets up mocks for macOS-specific and tkinter modules
 BEFORE any test imports happen. This prevents hangs when running full test suite.
@@ -29,7 +29,7 @@ def _setup_global_mocks():
     import os
 
     # Disable menu bar to prevent SIGABRT crashes from NSStatusBar in pytest
-    os.environ["HANDFREE_DISABLE_MENUBAR"] = "1"
+    os.environ["CAW_DISABLE_MENUBAR"] = "1"
     # Mock tkinter if not available (headless environments)
     if '_tkinter' not in sys.modules:
         mock_tk = MagicMock()

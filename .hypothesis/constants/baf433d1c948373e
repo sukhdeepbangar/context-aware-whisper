@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/main.py
+# hypothesis_version: 6.150.2
+
+[0.1, '  Usage:', '%Y-%m-%d %H:%M:%S', '1', '=', 'HANDFREE_DEBUG', 'HandFree running', 'HandFree starting...', '[Output] Text typed', '__main__', 'aggressive', 'error', 'groq (cloud)', 'groq (fallback)', 'handfree.log', 'light', 'local', 'off', 'recording', 'standard', 'success', 'transcribing', 'true', 'yes']

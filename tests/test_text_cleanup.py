@@ -13,7 +13,7 @@ Comprehensive tests for TextCleaner class including:
 import pytest
 from hypothesis import given, strategies as st
 
-from handfree.text_cleanup import TextCleaner, CleanupMode
+from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
 
 class TestCleanupModeOff:
@@ -322,7 +322,7 @@ class TestCleanupModeAggressive:
         """Aggressive mode falls back to standard when MLX unavailable."""
         from unittest.mock import patch
 
-        with patch('handfree.local_llm.is_available', return_value=False):
+        with patch('context_aware_whisper.local_llm.is_available', return_value=False):
             cleaner = TextCleaner(mode=CleanupMode.AGGRESSIVE)
             result = cleaner.clean("Um, hello there")
             # Should still clean basic fillers (fallback to standard)

@@ -1,6 +1,6 @@
 # Verification Workflow
 
-Guide for verifying feature implementations and bug fixes in HandFree.
+Guide for verifying feature implementations and bug fixes in Context-Aware Whisper.
 
 ---
 
@@ -133,7 +133,7 @@ Integration tests auto-skip when hardware/models unavailable:
 ls ~/.cache/whisper/ggml-base.en.bin
 
 # Download if missing
-python -m handfree.model_manager download base.en
+python -m context-aware-whisper.model_manager download base.en
 ```
 
 ### Microphone Tests Skip

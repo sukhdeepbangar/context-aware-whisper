@@ -1,4 +1,4 @@
-# HandFree CI/CD - Test Workflow
+# Context-Aware Whisper CI/CD - Test Workflow
 #
 # This workflow runs unit tests on all platforms and integration tests on macOS.
 # Integration tests use audio fixtures and whisper.cpp for transcription testing.
@@ -20,7 +20,7 @@ on:
 env:
   PYTHON_VERSION: "3.11"
   # Use tiny.en model in CI (75MB, fastest)
-  HANDFREE_WHISPER_MODEL: "tiny.en"
+  CAW_WHISPER_MODEL: "tiny.en"
 
 jobs:
   # =============================================================================
@@ -144,7 +144,7 @@ jobs:
 
       - name: Download whisper model (tiny.en for CI)
         run: |
-          python -m handfree.model_manager download tiny.en || echo "Model download skipped"
+          python -m context_aware_whisper.model_manager download tiny.en || echo "Model download skipped"
         continue-on-error: true
 
       - name: Run integration tests (no microphone)
@@ -153,7 +153,7 @@ jobs:
             --tb=short --junitxml=test-results-integration.xml
         env:
           CI: "true"
-          HANDFREE_WHISPER_MODEL: "tiny.en"
+          CAW_WHISPER_MODEL: "tiny.en"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -220,7 +220,7 @@ jobs:
 
       - name: Download whisper model (base.en)
         run: |
-          python -m handfree.model_manager download base.en || echo "Model download failed"
+          python -m context_aware_whisper.model_manager download base.en || echo "Model download failed"
         continue-on-error: true
 
       - name: Run all integration tests
@@ -229,7 +229,7 @@ jobs:
             --tb=long --junitxml=test-results-full.xml
         env:
           CI: "true"
-          HANDFREE_WHISPER_MODEL: "base.en"
+          CAW_WHISPER_MODEL: "base.en"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

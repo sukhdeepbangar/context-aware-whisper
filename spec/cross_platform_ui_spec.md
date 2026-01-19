@@ -1,4 +1,4 @@
-# HandFree: Cross-Platform & UI Specification
+# Context-Aware Whisper: Cross-Platform & UI Specification
 
 **Version**: 1.0
 **Date**: January 2026
@@ -8,9 +8,9 @@
 
 ## Overview
 
-This specification describes two major features for HandFree:
+This specification describes two major features for Context-Aware Whisper:
 
-1. **Cross-Platform Support** - Enable HandFree to run on Windows and Linux in addition to macOS
+1. **Cross-Platform Support** - Enable Context-Aware Whisper to run on Windows and Linux in addition to macOS
 2. **Visual UI** - Add a recording indicator and transcription history panel
 
 ---
@@ -19,7 +19,7 @@ This specification describes two major features for HandFree:
 
 ### 1.1 Background
 
-HandFree currently uses macOS-specific APIs:
+Context-Aware Whisper currently uses macOS-specific APIs:
 - **Quartz CGEventTap** - For Fn/Globe key detection
 - **osascript/AppleScript** - For typing text into applications
 
@@ -60,7 +60,7 @@ HandFree currently uses macOS-specific APIs:
 #### 1.3.1 Platform Abstraction Layer
 
 ```
-src/handfree/platform/
+src/context_aware_whisper/platform/
 ├── __init__.py          # Platform detection + factory functions
 ├── base.py              # Abstract base classes
 ├── macos/
@@ -173,7 +173,7 @@ Current feedback mechanisms:
 | ID | Requirement |
 |----|-------------|
 | UI-20 | Use SQLite for persistence |
-| UI-21 | Store in `~/.handfree/history.db` |
+| UI-21 | Store in `~/.context_aware_whisper/history.db` |
 | UI-22 | Schema: id, text, timestamp, duration_seconds, language |
 | UI-23 | Keep maximum 1000 entries (delete oldest when exceeded) |
 
@@ -197,12 +197,12 @@ Current feedback mechanisms:
 #### 2.4.1 File Structure
 
 ```
-src/handfree/
+src/context_aware_whisper/
 ├── ui/
 │   ├── __init__.py
 │   ├── indicator.py      # RecordingIndicator class
 │   ├── history.py        # HistoryPanel class
-│   └── app.py            # HandFreeUI controller
+│   └── app.py            # Context-Aware WhisperUI controller
 ├── storage/
 │   ├── __init__.py
 │   └── history_store.py  # HistoryStore class (SQLite)
@@ -230,7 +230,7 @@ class HistoryStore:
     def get_recent(self, limit: int = 50) -> List[TranscriptionRecord]: ...
     def search(self, query: str) -> List[TranscriptionRecord]: ...
 
-class HandFreeUI:
+class Context-Aware WhisperUI:
     def start(self) -> None: ...  # Starts UI in separate thread
     def set_state(self, state: str) -> None: ...  # Thread-safe
     def add_transcription(self, text: str, duration: float) -> None: ...
@@ -252,11 +252,11 @@ class HandFreeUI:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `HANDFREE_HOTKEY` | Platform default | Custom hotkey (e.g., "ctrl+shift+r") |
-| `HANDFREE_UI_ENABLED` | `true` | Enable visual UI |
-| `HANDFREE_UI_POSITION` | `top-center` | Indicator position (top-center, top-right, bottom-center) |
-| `HANDFREE_HISTORY_ENABLED` | `true` | Enable transcription history |
-| `HANDFREE_HISTORY_MAX` | `1000` | Maximum history entries |
+| `CAW_HOTKEY` | Platform default | Custom hotkey (e.g., "ctrl+shift+r") |
+| `CAW_UI_ENABLED` | `true` | Enable visual UI |
+| `CAW_UI_POSITION` | `top-center` | Indicator position (top-center, top-right, bottom-center) |
+| `CAW_HISTORY_ENABLED` | `true` | Enable transcription history |
+| `CAW_HISTORY_MAX` | `1000` | Maximum history entries |
 
 ---
 

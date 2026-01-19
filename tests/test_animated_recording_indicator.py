@@ -34,9 +34,9 @@ def create_indicator_with_mocks(position="top-center", width=60, height=24):
     """Create a RecordingIndicator with mocked tkinter."""
     mock_window, mock_canvas = create_mock_tkinter()
 
-    with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-         patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
-        from handfree.ui.indicator import RecordingIndicator
+    with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+         patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         indicator = RecordingIndicator(width=width, height=height, position=position)
         return indicator, mock_window, mock_canvas
 
@@ -50,49 +50,49 @@ class TestBarAnimationConstants:
 
     def test_bar_count_constant_exists(self):
         """Test that BAR_COUNT constant exists and is 4."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'BAR_COUNT')
         assert RecordingIndicator.BAR_COUNT == 4
 
     def test_bar_width_constant_exists(self):
         """Test that BAR_WIDTH constant exists and is 6."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'BAR_WIDTH')
         assert RecordingIndicator.BAR_WIDTH == 6
 
     def test_bar_gap_constant_exists(self):
         """Test that BAR_GAP constant exists and is 3."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'BAR_GAP')
         assert RecordingIndicator.BAR_GAP == 3
 
     def test_bar_min_height_constant_exists(self):
         """Test that BAR_MIN_HEIGHT constant exists and is 4."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'BAR_MIN_HEIGHT')
         assert RecordingIndicator.BAR_MIN_HEIGHT == 4
 
     def test_bar_max_height_constant_exists(self):
         """Test that BAR_MAX_HEIGHT constant exists and is 16."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'BAR_MAX_HEIGHT')
         assert RecordingIndicator.BAR_MAX_HEIGHT == 16
 
     def test_bar_animation_interval_constant_exists(self):
         """Test that BAR_ANIMATION_INTERVAL_MS constant exists and is 80 (~12.5 FPS)."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'BAR_ANIMATION_INTERVAL_MS')
         assert RecordingIndicator.BAR_ANIMATION_INTERVAL_MS == 80
 
     def test_bar_colors_constant_exists(self):
         """Test that BAR_COLORS constant exists with correct gradient."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'BAR_COLORS')
         assert len(RecordingIndicator.BAR_COLORS) == 4
@@ -100,14 +100,14 @@ class TestBarAnimationConstants:
 
     def test_bar_bg_color_constant_exists(self):
         """Test that BAR_BG_COLOR constant exists (dark slate)."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'BAR_BG_COLOR')
         assert RecordingIndicator.BAR_BG_COLOR == "#1C1C1E"
 
     def test_bar_dimensions_fit_within_default_indicator(self):
         """Test that bars fit within the default 60x24 indicator."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         total_bar_width = (RecordingIndicator.BAR_COUNT * RecordingIndicator.BAR_WIDTH) + \
                           ((RecordingIndicator.BAR_COUNT - 1) * RecordingIndicator.BAR_GAP)
@@ -134,7 +134,7 @@ class TestBarAnimationInstanceVariables:
 
     def test_bar_heights_initialized(self):
         """Test that _bar_heights is initialized with correct values."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, _ = create_indicator_with_mocks()
         assert hasattr(indicator, '_bar_heights')
@@ -164,7 +164,7 @@ class TestDrawRecordingBars:
 
     def test_draw_recording_bars_method_exists(self):
         """Test that _draw_recording_bars method exists."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, '_draw_recording_bars')
         assert callable(getattr(RecordingIndicator, '_draw_recording_bars'))
@@ -180,7 +180,7 @@ class TestDrawRecordingBars:
 
     def test_draw_recording_bars_draws_background(self):
         """Test that _draw_recording_bars draws dark background."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, mock_canvas = create_indicator_with_mocks()
 
@@ -197,7 +197,7 @@ class TestDrawRecordingBars:
 
     def test_draw_recording_bars_draws_four_bars(self):
         """Test that _draw_recording_bars draws 4 bars."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, mock_canvas = create_indicator_with_mocks()
 
@@ -210,7 +210,7 @@ class TestDrawRecordingBars:
 
     def test_draw_recording_bars_uses_bar_colors(self):
         """Test that _draw_recording_bars uses correct bar colors."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, mock_canvas = create_indicator_with_mocks()
 
@@ -234,7 +234,7 @@ class TestAnimateBars:
 
     def test_animate_bars_method_exists(self):
         """Test that _animate_bars method exists."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, '_animate_bars')
         assert callable(getattr(RecordingIndicator, '_animate_bars'))
@@ -254,7 +254,7 @@ class TestAnimateBars:
 
     def test_animate_bars_updates_bar_heights(self):
         """Test that _animate_bars updates bar heights."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, mock_window, _ = create_indicator_with_mocks()
         indicator._current_state = "recording"
@@ -262,7 +262,7 @@ class TestAnimateBars:
         initial_heights = indicator._bar_heights.copy()
 
         # Mock random to return consistent values for testing
-        with patch('handfree.ui.indicator.random.randint', return_value=3):
+        with patch('context_aware_whisper.ui.indicator.random.randint', return_value=3):
             indicator._animate_bars()
 
         # At least some heights should have changed
@@ -272,7 +272,7 @@ class TestAnimateBars:
 
     def test_animate_bars_respects_height_bounds(self):
         """Test that _animate_bars keeps heights within bounds."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, _ = create_indicator_with_mocks()
         indicator._current_state = "recording"
@@ -281,7 +281,7 @@ class TestAnimateBars:
         indicator._bar_heights = [RecordingIndicator.BAR_MAX_HEIGHT] * 4
         indicator._bar_directions = [1, 1, 1, 1]  # All going up
 
-        with patch('handfree.ui.indicator.random.randint', return_value=5):
+        with patch('context_aware_whisper.ui.indicator.random.randint', return_value=5):
             indicator._animate_bars()
 
         # Heights should still be within bounds
@@ -290,7 +290,7 @@ class TestAnimateBars:
 
     def test_animate_bars_reverses_direction_at_limits(self):
         """Test that _animate_bars reverses direction at height limits."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, _ = create_indicator_with_mocks()
         indicator._current_state = "recording"
@@ -299,7 +299,7 @@ class TestAnimateBars:
         indicator._bar_heights = [RecordingIndicator.BAR_MAX_HEIGHT, 8, 8, 8]
         indicator._bar_directions = [1, 1, 1, 1]
 
-        with patch('handfree.ui.indicator.random.randint', return_value=3):
+        with patch('context_aware_whisper.ui.indicator.random.randint', return_value=3):
             indicator._animate_bars()
 
         # First bar should have reversed direction
@@ -307,7 +307,7 @@ class TestAnimateBars:
 
     def test_animate_bars_schedules_next_frame(self):
         """Test that _animate_bars schedules next animation frame."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, mock_window, _ = create_indicator_with_mocks()
         indicator._current_state = "recording"
@@ -330,7 +330,7 @@ class TestStopBarAnimation:
 
     def test_stop_bar_animation_method_exists(self):
         """Test that _stop_bar_animation method exists."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, '_stop_bar_animation')
         assert callable(getattr(RecordingIndicator, '_stop_bar_animation'))
@@ -357,7 +357,7 @@ class TestStopBarAnimation:
 
     def test_stop_bar_animation_resets_bar_heights(self):
         """Test that _stop_bar_animation resets bar heights to minimum."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, _ = create_indicator_with_mocks()
 
@@ -498,7 +498,7 @@ class TestBarAnimationProperties:
     @settings(max_examples=20)
     def test_bar_heights_stay_within_bounds(self, height):
         """Property: Bar heights always stay within MIN and MAX bounds."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, _ = create_indicator_with_mocks()
         indicator._current_state = "recording"
@@ -517,7 +517,7 @@ class TestBarAnimationProperties:
     @settings(max_examples=10)
     def test_bar_direction_reverses_at_limits(self, direction):
         """Property: Bar direction always reverses when hitting limits."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, _ = create_indicator_with_mocks()
         indicator._current_state = "recording"
@@ -530,7 +530,7 @@ class TestBarAnimationProperties:
 
         indicator._bar_directions = [direction] * 4
 
-        with patch('handfree.ui.indicator.random.randint', return_value=3):
+        with patch('context_aware_whisper.ui.indicator.random.randint', return_value=3):
             indicator._animate_bars()
 
         # Direction should be reversed
@@ -567,7 +567,7 @@ class TestBarDrawingProperties:
     @settings(max_examples=20)
     def test_bars_centered_regardless_of_dimensions(self, width, height):
         """Property: Bars are always centered horizontally in the indicator."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, _, mock_canvas = create_indicator_with_mocks(width=width, height=height)
 
@@ -592,7 +592,7 @@ class TestAnimationTimingProperties:
 
     def test_animation_frame_rate_is_reasonable(self):
         """Property: Animation frame rate is between 10-20 FPS."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         interval_ms = RecordingIndicator.BAR_ANIMATION_INTERVAL_MS
         fps = 1000 / interval_ms
@@ -601,7 +601,7 @@ class TestAnimationTimingProperties:
 
     def test_bar_count_matches_colors(self):
         """Property: Number of bar colors matches bar count."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert len(RecordingIndicator.BAR_COLORS) >= RecordingIndicator.BAR_COUNT
 

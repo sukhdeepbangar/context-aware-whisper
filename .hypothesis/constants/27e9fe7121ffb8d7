@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/src/handfree/__init__.py
+# hypothesis_version: 6.150.2
+
+['0.2.0', 'AudioRecorder', 'AudioRecordingError', 'CleanupMode', 'Config', 'ConfigurationError', 'HandFreeError', 'HandFreeUI', 'HotkeyDetector', 'HotkeyDetectorBase', 'MuteDetectionError', 'MuteDetector', 'OutputError', 'OutputHandler', 'OutputHandlerBase', 'RecordingIndicator', 'TextCleaner', 'TextCleanupError', 'Transcriber', 'TranscriptionError', 'get_platform']

@@ -1,7 +1,7 @@
 """
 Tests for the main module.
 
-Tests cover the HandFreeApp class state machine and orchestration logic.
+Tests cover the CAWApp class state machine and orchestration logic.
 
 PERFORMANCE NOTE: Mocks are set up in conftest.py - no need to duplicate here.
 """
@@ -9,11 +9,11 @@ PERFORMANCE NOTE: Mocks are set up in conftest.py - no need to duplicate here.
 import pytest
 from unittest.mock import Mock, patch
 
-from handfree.config import Config
-from handfree.exceptions import TranscriptionError, OutputError, LocalTranscriptionError
+from context_aware_whisper.config import Config
+from context_aware_whisper.exceptions import TranscriptionError, OutputError, LocalTranscriptionError
 
 # Mocks are already set up in conftest.py - no need to duplicate here
-from main import HandFreeApp, AppState, main, get_transcriber
+from main import CAWApp, AppState, main, get_transcriber
 
 
 def make_config(**kwargs):
@@ -49,8 +49,8 @@ class TestAppState:
         assert len(states) == len(set(states))
 
 
-class TestHandFreeAppInit:
-    """Tests for HandFreeApp initialization."""
+class TestCAWAppInit:
+    """Tests for CAWApp initialization."""
 
     @pytest.fixture(autouse=True)
     def setup_env(self, monkeypatch):
@@ -63,10 +63,10 @@ class TestHandFreeAppInit:
     @patch('main.create_output_handler')
     def test_init_creates_all_modules(self, mock_output, mock_get_transcriber,
                                        mock_recorder, mock_detector):
-        """HandFreeApp initializes all required modules."""
+        """CAWApp initializes all required modules."""
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
         config = make_config()
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
 
         mock_recorder.assert_called_once()
         mock_get_transcriber.assert_called_once_with(config)
@@ -79,10 +79,10 @@ class TestHandFreeAppInit:
     @patch('main.create_output_handler')
     def test_init_default_state_is_idle(self, mock_output, mock_get_transcriber,
                                          mock_recorder, mock_detector):
-        """HandFreeApp starts in IDLE state."""
+        """CAWApp starts in IDLE state."""
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
         config = make_config()
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
         assert app.state == AppState.IDLE
 
     @patch('main.create_hotkey_detector')
@@ -91,10 +91,10 @@ class TestHandFreeAppInit:
     @patch('main.create_output_handler')
     def test_init_not_running(self, mock_output, mock_get_transcriber,
                                mock_recorder, mock_detector):
-        """HandFreeApp is not running after init."""
+        """CAWApp is not running after init."""
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
         config = make_config()
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
         assert app.is_running is False
 
     @patch('main.create_hotkey_detector')
@@ -103,10 +103,10 @@ class TestHandFreeAppInit:
     @patch('main.create_output_handler')
     def test_init_custom_sample_rate(self, mock_output, mock_get_transcriber,
                                       mock_recorder, mock_detector):
-        """HandFreeApp passes sample rate to AudioRecorder."""
+        """CAWApp passes sample rate to AudioRecorder."""
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
         config = make_config(sample_rate=44100)
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
         mock_recorder.assert_called_once_with(sample_rate=44100)
 
     @patch('main.create_hotkey_detector')
@@ -115,15 +115,15 @@ class TestHandFreeAppInit:
     @patch('main.create_output_handler')
     def test_init_custom_type_delay(self, mock_output, mock_get_transcriber,
                                      mock_recorder, mock_detector):
-        """HandFreeApp passes type delay to OutputHandler."""
+        """CAWApp passes type delay to OutputHandler."""
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
         config = make_config(type_delay=0.05)
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
         mock_output.assert_called_once_with(type_delay=0.05)
 
 
-class TestHandFreeAppStateMachine:
-    """Tests for HandFreeApp state machine transitions."""
+class TestCAWAppStateMachine:
+    """Tests for CAWApp state machine transitions."""
 
     @pytest.fixture(autouse=True)
     def setup_env(self, monkeypatch):
@@ -132,7 +132,7 @@ class TestHandFreeAppStateMachine:
 
     @pytest.fixture
     def app(self):
-        """Create a HandFreeApp with mocked dependencies."""
+        """Create a CAWApp with mocked dependencies."""
         with patch('main.create_hotkey_detector') as mock_detector, \
              patch('main.AudioRecorder') as mock_recorder, \
              patch('main.get_transcriber') as mock_get_transcriber, \
@@ -140,7 +140,7 @@ class TestHandFreeAppStateMachine:
 
             mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
             config = make_config()
-            app = HandFreeApp(config=config)
+            app = CAWApp(config=config)
 
             # Set up mock instances
             app.recorder = Mock()
@@ -212,7 +212,7 @@ class TestHandFreeAppStateMachine:
 
     def test_handle_stop_handles_transcription_error(self, app):
         """Mute event handles transcription errors gracefully."""
-        from handfree.exceptions import TranscriptionError
+        from context_aware_whisper.exceptions import TranscriptionError
 
         app._state = AppState.RECORDING
         app.recorder.get_duration.return_value = 3.0
@@ -226,7 +226,7 @@ class TestHandFreeAppStateMachine:
 
     def test_handle_stop_handles_output_error(self, app):
         """Mute event handles output errors gracefully."""
-        from handfree.exceptions import OutputError
+        from context_aware_whisper.exceptions import OutputError
 
         app._state = AppState.RECORDING
         app.recorder.get_duration.return_value = 3.0
@@ -251,8 +251,8 @@ class TestHandFreeAppStateMachine:
         app.output.output.assert_not_called()
 
 
-class TestHandFreeAppLifecycle:
-    """Tests for HandFreeApp start/stop lifecycle."""
+class TestCAWAppLifecycle:
+    """Tests for CAWApp start/stop lifecycle."""
 
     @pytest.fixture(autouse=True)
     def setup_env(self, monkeypatch):
@@ -261,7 +261,7 @@ class TestHandFreeAppLifecycle:
 
     @pytest.fixture
     def app(self):
-        """Create a HandFreeApp with mocked dependencies."""
+        """Create a CAWApp with mocked dependencies."""
         with patch('main.create_hotkey_detector') as mock_detector, \
              patch('main.AudioRecorder') as mock_recorder, \
              patch('main.get_transcriber') as mock_get_transcriber, \
@@ -269,7 +269,7 @@ class TestHandFreeAppLifecycle:
 
             mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
             config = make_config()
-            app = HandFreeApp(config=config)
+            app = CAWApp(config=config)
             app.recorder = Mock()
             app.detector = Mock()
 
@@ -308,7 +308,7 @@ class TestHandFreeAppLifecycle:
         app.detector.stop.assert_not_called()
 
 
-class TestHandFreeAppLanguage:
+class TestCAWAppLanguage:
     """Tests for language configuration."""
 
     @pytest.fixture(autouse=True)
@@ -325,7 +325,7 @@ class TestHandFreeAppLanguage:
         """Language is passed to transcriber.transcribe()."""
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
         config = make_config(language="en")
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
 
         # Set up mocks
         app.recorder = Mock()
@@ -345,7 +345,7 @@ class TestHandFreeAppLanguage:
         )
 
 
-class TestHandFreeAppUsePaste:
+class TestCAWAppUsePaste:
     """Tests for use_paste configuration."""
 
     @pytest.fixture(autouse=True)
@@ -362,7 +362,7 @@ class TestHandFreeAppUsePaste:
         """use_paste is passed to output.output()."""
         mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
         config = make_config(use_paste=True)
-        app = HandFreeApp(config=config)
+        app = CAWApp(config=config)
 
         app.recorder = Mock()
         app.transcriber = Mock()
@@ -381,26 +381,26 @@ class TestHandFreeAppUsePaste:
 class TestMainFunction:
     """Tests for the main() entry point function."""
 
-    @patch('handfree.config.load_dotenv')
+    @patch('context_aware_whisper.config.load_dotenv')
     def test_main_exits_without_api_key(self, mock_load_dotenv, monkeypatch):
         """main() exits with error when GROQ_API_KEY is not set and transcriber is groq."""
         monkeypatch.delenv("GROQ_API_KEY", raising=False)
-        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "groq")
+        monkeypatch.setenv("CAW_TRANSCRIBER", "groq")
 
         with pytest.raises(SystemExit) as exc_info:
             main()
 
         assert exc_info.value.code == 1
 
-    @patch('main.HandFreeApp')
+    @patch('main.CAWApp')
     @patch('main.signal.signal')
     def test_main_creates_app_with_env_config(self, mock_signal, mock_app_class, monkeypatch):
-        """main() creates HandFreeApp with environment configuration."""
+        """main() creates CAWApp with environment configuration."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
-        monkeypatch.setenv("HANDFREE_LANGUAGE", "es")
-        monkeypatch.setenv("HANDFREE_TYPE_DELAY", "0.1")
-        monkeypatch.setenv("HANDFREE_SAMPLE_RATE", "22050")
-        monkeypatch.setenv("HANDFREE_USE_PASTE", "true")
+        monkeypatch.setenv("CAW_LANGUAGE", "es")
+        monkeypatch.setenv("CAW_TYPE_DELAY", "0.1")
+        monkeypatch.setenv("CAW_SAMPLE_RATE", "22050")
+        monkeypatch.setenv("CAW_USE_PASTE", "true")
 
         mock_app = Mock()
         mock_app_class.return_value = mock_app
@@ -426,14 +426,14 @@ class TestMainFunction:
 class TestConfigModule:
     """Tests for the config module."""
 
-    @patch('handfree.config.load_dotenv')
+    @patch('context_aware_whisper.config.load_dotenv')
     def test_config_from_env_requires_api_key_for_groq(self, mock_load_dotenv, monkeypatch):
         """Config.from_env() raises error without API key when transcriber is groq."""
         # Ensure GROQ_API_KEY is not set
         monkeypatch.delenv("GROQ_API_KEY", raising=False)
-        monkeypatch.setenv("HANDFREE_TRANSCRIBER", "groq")  # Explicitly use groq
+        monkeypatch.setenv("CAW_TRANSCRIBER", "groq")  # Explicitly use groq
 
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         with pytest.raises(ValueError) as exc_info:
             Config.from_env()
@@ -443,12 +443,12 @@ class TestConfigModule:
     def test_config_from_env_loads_all_settings(self, monkeypatch):
         """Config.from_env() loads all environment settings."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
-        monkeypatch.setenv("HANDFREE_LANGUAGE", "fr")
-        monkeypatch.setenv("HANDFREE_TYPE_DELAY", "0.5")
-        monkeypatch.setenv("HANDFREE_SAMPLE_RATE", "44100")
-        monkeypatch.setenv("HANDFREE_USE_PASTE", "yes")
+        monkeypatch.setenv("CAW_LANGUAGE", "fr")
+        monkeypatch.setenv("CAW_TYPE_DELAY", "0.5")
+        monkeypatch.setenv("CAW_SAMPLE_RATE", "44100")
+        monkeypatch.setenv("CAW_USE_PASTE", "yes")
 
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         config = Config.from_env()
 
@@ -462,36 +462,36 @@ class TestConfigModule:
         """Config.validate() rejects negative type delay."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
 
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         config = Config(groq_api_key="test-key", type_delay=-1.0)
 
         with pytest.raises(ValueError) as exc_info:
             config.validate()
 
-        assert "HANDFREE_TYPE_DELAY" in str(exc_info.value)
+        assert "CAW_TYPE_DELAY" in str(exc_info.value)
 
     def test_config_validate_zero_sample_rate(self, monkeypatch):
         """Config.validate() rejects zero sample rate."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
 
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         config = Config(groq_api_key="test-key", sample_rate=0)
 
         with pytest.raises(ValueError) as exc_info:
             config.validate()
 
-        assert "HANDFREE_SAMPLE_RATE" in str(exc_info.value)
+        assert "CAW_SAMPLE_RATE" in str(exc_info.value)
 
 
 class TestExceptionsModule:
     """Tests for the exceptions module."""
 
     def test_all_exceptions_inherit_from_base(self):
-        """All custom exceptions inherit from HandFreeError."""
-        from handfree.exceptions import (
-            HandFreeError,
+        """All custom exceptions inherit from Context-Aware WhisperError."""
+        from context_aware_whisper.exceptions import (
+            Context-Aware WhisperError,
             ConfigurationError,
             MuteDetectionError,
             AudioRecordingError,
@@ -499,15 +499,15 @@ class TestExceptionsModule:
             OutputError,
         )
 
-        assert issubclass(ConfigurationError, HandFreeError)
-        assert issubclass(MuteDetectionError, HandFreeError)
-        assert issubclass(AudioRecordingError, HandFreeError)
-        assert issubclass(TranscriptionError, HandFreeError)
-        assert issubclass(OutputError, HandFreeError)
+        assert issubclass(ConfigurationError, Context-Aware WhisperError)
+        assert issubclass(MuteDetectionError, Context-Aware WhisperError)
+        assert issubclass(AudioRecordingError, Context-Aware WhisperError)
+        assert issubclass(TranscriptionError, Context-Aware WhisperError)
+        assert issubclass(OutputError, Context-Aware WhisperError)
 
     def test_exceptions_can_be_raised_with_message(self):
         """Custom exceptions can be raised with a message."""
-        from handfree.exceptions import TranscriptionError
+        from context_aware_whisper.exceptions import TranscriptionError
 
         with pytest.raises(TranscriptionError) as exc_info:
             raise TranscriptionError("Test error message")
@@ -525,7 +525,7 @@ class TestStateMachineProperties:
 
     @pytest.fixture
     def app(self):
-        """Create a HandFreeApp with mocked dependencies."""
+        """Create a CAWApp with mocked dependencies."""
         with patch('main.create_hotkey_detector') as mock_detector, \
              patch('main.AudioRecorder') as mock_recorder, \
              patch('main.get_transcriber') as mock_get_transcriber, \
@@ -533,7 +533,7 @@ class TestStateMachineProperties:
 
             mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
             config = make_config()
-            app = HandFreeApp(config=config)
+            app = CAWApp(config=config)
             app.recorder = Mock()
             app.transcriber = Mock()
             app.output = Mock()
@@ -617,7 +617,7 @@ class TestStateMachineSequences:
 
     @pytest.fixture
     def app(self):
-        """Create a HandFreeApp with mocked dependencies."""
+        """Create a CAWApp with mocked dependencies."""
         with patch('main.create_hotkey_detector') as mock_detector, \
              patch('main.AudioRecorder') as mock_recorder, \
              patch('main.get_transcriber') as mock_get_transcriber, \
@@ -625,7 +625,7 @@ class TestStateMachineSequences:
 
             mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
             config = make_config()
-            app = HandFreeApp(config=config)
+            app = CAWApp(config=config)
             app.recorder = Mock()
             app.transcriber = Mock()
             app.output = Mock()
@@ -690,7 +690,7 @@ class TestConfigProperties:
     def test_valid_type_delays(self, delay, monkeypatch):
         """Valid type delays pass validation."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         config = Config(groq_api_key="test-key", type_delay=delay)
         config.validate()  # Should not raise
@@ -699,7 +699,7 @@ class TestConfigProperties:
     def test_negative_type_delays_rejected(self, delay, monkeypatch):
         """Negative type delays are rejected."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         config = Config(groq_api_key="test-key", type_delay=delay)
         with pytest.raises(ValueError):
@@ -709,7 +709,7 @@ class TestConfigProperties:
     def test_standard_sample_rates(self, rate, monkeypatch):
         """Standard sample rates pass validation."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         config = Config(groq_api_key="test-key", sample_rate=rate)
         config.validate()  # Should not raise
@@ -718,7 +718,7 @@ class TestConfigProperties:
     def test_invalid_sample_rates_rejected(self, rate, monkeypatch):
         """Invalid sample rates are rejected."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         config = Config(groq_api_key="test-key", sample_rate=rate)
         with pytest.raises(ValueError):
@@ -740,8 +740,8 @@ class TestConfigProperties:
     def test_use_paste_parsing(self, use_paste_env, expected, monkeypatch):
         """use_paste environment variable is parsed correctly."""
         monkeypatch.setenv("GROQ_API_KEY", "test-key")
-        monkeypatch.setenv("HANDFREE_USE_PASTE", use_paste_env)
-        from handfree.config import Config
+        monkeypatch.setenv("CAW_USE_PASTE", use_paste_env)
+        from context_aware_whisper.config import Config
 
         config = Config.from_env()
         assert config.use_paste == expected
@@ -757,7 +757,7 @@ class TestRunLoopBehavior:
 
     @pytest.fixture
     def app(self):
-        """Create a HandFreeApp with mocked dependencies."""
+        """Create a CAWApp with mocked dependencies."""
         with patch('main.create_hotkey_detector') as mock_detector, \
              patch('main.AudioRecorder') as mock_recorder, \
              patch('main.get_transcriber') as mock_get_transcriber, \
@@ -765,7 +765,7 @@ class TestRunLoopBehavior:
 
             mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
             config = make_config()
-            app = HandFreeApp(config=config)
+            app = CAWApp(config=config)
             app.recorder = Mock()
             app.transcriber = Mock()
             app.output = Mock()

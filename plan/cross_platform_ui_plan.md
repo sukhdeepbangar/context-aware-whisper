@@ -1,4 +1,4 @@
-# HandFree: Cross-Platform & UI Implementation Plan
+# Context-Aware Whisper: Cross-Platform & UI Implementation Plan
 
 **Related Spec**: [cross_platform_ui_spec.md](../spec/cross_platform_ui_spec.md)
 **Date**: January 2026
@@ -22,10 +22,10 @@ This plan implements two features in priority order:
 **Goal**: Add always-on-top visual indicator showing recording state
 
 ### Step 1.1: Create UI Module Structure
-- [x] 1.1.1 Create `src/handfree/ui/__init__.py`
-- [x] 1.1.2 Create `src/handfree/ui/indicator.py` with `RecordingIndicator` class stub
-- [x] 1.1.3 Create `src/handfree/ui/app.py` with `HandFreeUI` class stub
-- [x] 1.1.4 Update `src/handfree/__init__.py` to export UI classes
+- [x] 1.1.1 Create `src/context_aware_whisper/ui/__init__.py`
+- [x] 1.1.2 Create `src/context_aware_whisper/ui/indicator.py` with `RecordingIndicator` class stub
+- [x] 1.1.3 Create `src/context_aware_whisper/ui/app.py` with `Context-Aware WhisperUI` class stub
+- [x] 1.1.4 Update `src/context_aware_whisper/__init__.py` to export UI classes
 
 ### Step 1.2: Implement Recording Indicator
 - [x] 1.2.1 Implement tkinter window setup (no decorations, always-on-top)
@@ -45,15 +45,15 @@ This plan implements two features in priority order:
 | error | #FF3B30 | ERR |
 
 ### Step 1.3: Implement UI Controller
-- [x] 1.3.1 Implement `HandFreeUI.start()` to run UI in daemon thread
-- [x] 1.3.2 Implement `HandFreeUI._run_ui()` with tkinter mainloop
+- [x] 1.3.1 Implement `Context-Aware WhisperUI.start()` to run UI in daemon thread
+- [x] 1.3.2 Implement `Context-Aware WhisperUI._run_ui()` with tkinter mainloop
 - [x] 1.3.3 Implement thread-safe `set_state()` using `root.after()`
 - [x] 1.3.4 Implement `stop()` to cleanly shutdown UI thread
 
 ### Step 1.4: Integrate with Main Application
-- [x] 1.4.1 Import `HandFreeUI` in `main.py`
-- [x] 1.4.2 Initialize UI in `HandFreeApp.__init__()`
-- [x] 1.4.3 Call `ui.start()` in `HandFreeApp.run()`
+- [x] 1.4.1 Import `Context-Aware WhisperUI` in `main.py`
+- [x] 1.4.2 Initialize UI in `Context-Aware WhisperApp.__init__()`
+- [x] 1.4.3 Call `ui.start()` in `Context-Aware WhisperApp.run()`
 - [x] 1.4.4 Update state machine to call `ui.set_state()`:
   - `handle_unmute()` → `ui.set_state("recording")`
   - `handle_mute()` start → `ui.set_state("transcribing")`
@@ -74,17 +74,17 @@ This plan implements two features in priority order:
 **Goal**: Persist transcriptions and display in history panel
 
 ### Step 2.1: Create Storage Module
-- [x] 2.1.1 Create `src/handfree/storage/__init__.py`
-- [x] 2.1.2 Create `src/handfree/storage/history_store.py`
+- [x] 2.1.1 Create `src/context_aware_whisper/storage/__init__.py`
+- [x] 2.1.2 Create `src/context_aware_whisper/storage/history_store.py`
 - [x] 2.1.3 Implement `HistoryStore.__init__()` with JSONL file storage
-- [x] 2.1.4 Implement JSONL format: one JSON object per line at `~/.handfree/history.jsonl`
+- [x] 2.1.4 Implement JSONL format: one JSON object per line at `~/.context_aware_whisper/history.jsonl`
 - [x] 2.1.5 Implement `add()` method
 - [x] 2.1.6 Implement `get_recent()` method
 - [x] 2.1.7 Implement `search()` method
 - [x] 2.1.8 Implement cleanup to limit entries to 1000
 
 ### Step 2.2: Implement History Panel
-- [x] 2.2.1 Create `src/handfree/ui/history.py`
+- [x] 2.2.1 Create `src/context_aware_whisper/ui/history.py`
 - [x] 2.2.2 Implement `HistoryPanel` as tkinter Toplevel window
 - [x] 2.2.3 Add scrollable frame for entries
 - [x] 2.2.4 Implement `_create_entry_widget()` for individual entry display
@@ -93,8 +93,8 @@ This plan implements two features in priority order:
 - [x] 2.2.7 Add copy button functionality for each entry
 
 ### Step 2.3: Integrate History with UI Controller
-- [x] 2.3.1 Add `HistoryStore` to `HandFreeUI`
-- [x] 2.3.2 Add `HistoryPanel` to `HandFreeUI`
+- [x] 2.3.1 Add `HistoryStore` to `Context-Aware WhisperUI`
+- [x] 2.3.2 Add `HistoryPanel` to `Context-Aware WhisperUI`
 - [x] 2.3.3 Implement `add_transcription()` method (saves to store + updates panel)
 - [x] 2.3.4 Implement `toggle_history()` method
 - [x] 2.3.5 Load recent history on startup
@@ -118,11 +118,11 @@ This plan implements two features in priority order:
 **Goal**: Create abstraction layer to support multiple platforms
 
 ### Step 3.1: Create Platform Module Structure
-- [x] 3.1.1 Create `src/handfree/platform/__init__.py`
-- [x] 3.1.2 Create `src/handfree/platform/base.py` with abstract classes
-- [x] 3.1.3 Create `src/handfree/platform/macos/__init__.py`
-- [x] 3.1.4 Create `src/handfree/platform/windows/__init__.py`
-- [x] 3.1.5 Create `src/handfree/platform/linux/__init__.py`
+- [x] 3.1.1 Create `src/context_aware_whisper/platform/__init__.py`
+- [x] 3.1.2 Create `src/context_aware_whisper/platform/base.py` with abstract classes
+- [x] 3.1.3 Create `src/context_aware_whisper/platform/macos/__init__.py`
+- [x] 3.1.4 Create `src/context_aware_whisper/platform/windows/__init__.py`
+- [x] 3.1.5 Create `src/context_aware_whisper/platform/linux/__init__.py`
 
 ### Step 3.2: Define Abstract Interfaces
 - [x] 3.2.1 Define `HotkeyDetectorBase` ABC:
@@ -214,12 +214,12 @@ This plan implements two features in priority order:
 **Goal**: Configuration options, refinements, and documentation
 
 ### Step 5.1: Configuration
-- [x] 5.1.1 Add `HANDFREE_UI_ENABLED` env var (default: true)
-- [x] 5.1.2 Add `HANDFREE_UI_POSITION` env var (default: top-center)
-- [x] 5.1.3 Add `HANDFREE_HISTORY_ENABLED` env var (default: true)
-- [x] 5.1.4 Add `HANDFREE_HOTKEY` env var for custom hotkey (optional)
+- [x] 5.1.1 Add `CAW_UI_ENABLED` env var (default: true)
+- [x] 5.1.2 Add `CAW_UI_POSITION` env var (default: top-center)
+- [x] 5.1.3 Add `CAW_HISTORY_ENABLED` env var (default: true)
+- [x] 5.1.4 Add `CAW_HOTKEY` env var for custom hotkey (optional)
 - [x] 5.1.5 Update `config.py` to load new settings
-- [x] 5.1.6 Add `HANDFREE_HISTORY_MAX` env var (default: 1000)
+- [x] 5.1.6 Add `CAW_HISTORY_MAX` env var (default: 1000)
 - [x] 5.1.7 Update `main.py` to use `Config.from_env()` consistently
 - [x] 5.1.8 Add 75+ unit tests for new configuration (test_config.py)
 
@@ -234,7 +234,7 @@ This plan implements two features in priority order:
 - [x] 5.3.2 Clear error messages for platform-specific features
 - [x] 5.3.3 Log platform detection and selected handlers
 - [x] 5.3.4 Add new exception types (UIInitializationError, HotkeyDetectorError, OutputHandlerError)
-- [x] 5.3.5 Add debug mode via HANDFREE_DEBUG environment variable
+- [x] 5.3.5 Add debug mode via CAW_DEBUG environment variable
 - [x] 5.3.6 Add 38 unit tests for error handling (test_error_handling.py)
 
 ### Step 5.4: Documentation
@@ -259,33 +259,33 @@ This plan implements two features in priority order:
 
 | File | Phase | Description |
 |------|-------|-------------|
-| `src/handfree/ui/__init__.py` | 1 | UI package |
-| `src/handfree/ui/indicator.py` | 1 | Recording indicator |
-| `src/handfree/ui/app.py` | 1 | UI controller |
-| `src/handfree/ui/history.py` | 2 | History panel |
-| `src/handfree/storage/__init__.py` | 2 | Storage package |
-| `src/handfree/storage/history_store.py` | 2 | SQLite storage |
-| `src/handfree/platform/__init__.py` | 3 | Platform factory |
-| `src/handfree/platform/base.py` | 3 | Abstract interfaces |
-| `src/handfree/platform/macos/__init__.py` | 3 | macOS package |
-| `src/handfree/platform/macos/hotkey_detector.py` | 3 | Move from src/ |
-| `src/handfree/platform/macos/mute_detector.py` | 3 | Move from src/ |
-| `src/handfree/platform/macos/output_handler.py` | 3 | Move from src/ |
-| `src/handfree/platform/windows/__init__.py` | 4 | Windows package |
-| `src/handfree/platform/windows/hotkey_detector.py` | 4 | pynput-based |
-| `src/handfree/platform/windows/output_handler.py` | 4 | pynput-based |
-| `src/handfree/platform/linux/__init__.py` | 4 | Linux package |
-| `src/handfree/platform/linux/hotkey_detector.py` | 4 | pynput-based |
-| `src/handfree/platform/linux/output_handler.py` | 4 | pynput-based |
+| `src/context_aware_whisper/ui/__init__.py` | 1 | UI package |
+| `src/context_aware_whisper/ui/indicator.py` | 1 | Recording indicator |
+| `src/context_aware_whisper/ui/app.py` | 1 | UI controller |
+| `src/context_aware_whisper/ui/history.py` | 2 | History panel |
+| `src/context_aware_whisper/storage/__init__.py` | 2 | Storage package |
+| `src/context_aware_whisper/storage/history_store.py` | 2 | SQLite storage |
+| `src/context_aware_whisper/platform/__init__.py` | 3 | Platform factory |
+| `src/context_aware_whisper/platform/base.py` | 3 | Abstract interfaces |
+| `src/context_aware_whisper/platform/macos/__init__.py` | 3 | macOS package |
+| `src/context_aware_whisper/platform/macos/hotkey_detector.py` | 3 | Move from src/ |
+| `src/context_aware_whisper/platform/macos/mute_detector.py` | 3 | Move from src/ |
+| `src/context_aware_whisper/platform/macos/output_handler.py` | 3 | Move from src/ |
+| `src/context_aware_whisper/platform/windows/__init__.py` | 4 | Windows package |
+| `src/context_aware_whisper/platform/windows/hotkey_detector.py` | 4 | pynput-based |
+| `src/context_aware_whisper/platform/windows/output_handler.py` | 4 | pynput-based |
+| `src/context_aware_whisper/platform/linux/__init__.py` | 4 | Linux package |
+| `src/context_aware_whisper/platform/linux/hotkey_detector.py` | 4 | pynput-based |
+| `src/context_aware_whisper/platform/linux/output_handler.py` | 4 | pynput-based |
 
 ### Files to Modify
 
 | File | Phase | Changes |
 |------|-------|---------|
 | `main.py` | 1, 3 | Add UI integration, use platform factory |
-| `src/handfree/__init__.py` | 1, 3 | Export new classes |
-| `src/handfree/config.py` | 5 | Add UI/platform config |
-| `src/handfree/exceptions.py` | 3 | Add PlatformNotSupportedError |
+| `src/context_aware_whisper/__init__.py` | 1, 3 | Export new classes |
+| `src/context_aware_whisper/config.py` | 5 | Add UI/platform config |
+| `src/context_aware_whisper/exceptions.py` | 3 | Add PlatformNotSupportedError |
 | `pyproject.toml` | 4 | Update dependencies |
 | `requirements.txt` | 4 | Update dependencies |
 | `README.md` | 5 | Cross-platform docs |

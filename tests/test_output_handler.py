@@ -11,8 +11,8 @@ from unittest.mock import patch, MagicMock
 import pytest
 import pyperclip
 
-from handfree.output_handler import OutputHandler, get_clipboard_content
-from handfree.exceptions import OutputError
+from context_aware_whisper.output_handler import OutputHandler, get_clipboard_content
+from context_aware_whisper.exceptions import OutputError
 
 
 class TestOutputHandlerClipboard(unittest.TestCase):
@@ -82,7 +82,7 @@ class TestOutputHandlerTypeText(unittest.TestCase):
         """Set up test fixtures."""
         self.handler = OutputHandler()
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_basic(self, mock_run):
         """Test basic keystroke typing."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -94,13 +94,13 @@ class TestOutputHandlerTypeText(unittest.TestCase):
         self.assertEqual(call_args[0][0][0], 'osascript')
         self.assertIn('Hello', call_args[0][0][2])
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_empty_string(self, mock_run):
         """Test that empty string doesn't call subprocess."""
         self.handler.type_text("")
         mock_run.assert_not_called()
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_escapes_quotes(self, mock_run):
         """Test that quotes are properly escaped."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -112,7 +112,7 @@ class TestOutputHandlerTypeText(unittest.TestCase):
         # Check that quotes are escaped with backslash
         self.assertIn('\\"hello\\"', script)
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_escapes_backslashes(self, mock_run):
         """Test that backslashes are properly escaped."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -124,7 +124,7 @@ class TestOutputHandlerTypeText(unittest.TestCase):
         # Check that backslashes are escaped
         self.assertIn('\\\\', script)
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_handles_subprocess_error(self, mock_run):
         """Test error handling when subprocess fails."""
         mock_run.side_effect = subprocess.CalledProcessError(
@@ -136,7 +136,7 @@ class TestOutputHandlerTypeText(unittest.TestCase):
 
         self.assertIn("Failed to type text", str(context.exception))
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_handles_timeout(self, mock_run):
         """Test error handling on timeout."""
         mock_run.side_effect = subprocess.TimeoutExpired('osascript', 10)
@@ -146,7 +146,7 @@ class TestOutputHandlerTypeText(unittest.TestCase):
 
         self.assertIn("timed out", str(context.exception))
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_handles_missing_osascript(self, mock_run):
         """Test error handling when osascript not found."""
         mock_run.side_effect = FileNotFoundError()
@@ -175,7 +175,7 @@ class TestOutputHandlerOutput(unittest.TestCase):
         except Exception:
             pass
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_output_copies_to_clipboard_and_types(self, mock_run):
         """Test that output copies to clipboard and types."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -187,13 +187,13 @@ class TestOutputHandlerOutput(unittest.TestCase):
         # Check subprocess was called for typing
         mock_run.assert_called_once()
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_output_empty_string(self, mock_run):
         """Test that empty string doesn't trigger actions."""
         self.handler.output("")
         mock_run.assert_not_called()
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_output_use_paste_mode(self, mock_run):
         """Test paste mode uses Cmd+V."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -213,13 +213,13 @@ class TestOutputHandlerViaPaste(unittest.TestCase):
         """Set up test fixtures."""
         self.handler = OutputHandler()
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_via_paste_empty(self, mock_run):
         """Test empty string doesn't trigger paste."""
         self.handler.type_text_via_paste("")
         mock_run.assert_not_called()
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_type_text_via_paste_copies_and_pastes(self, mock_run):
         """Test that paste method copies to clipboard and pastes."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -279,7 +279,7 @@ class TestOutputHandlerEscaping(unittest.TestCase):
         """Set up test fixtures."""
         self.handler = OutputHandler()
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_escape_single_quotes(self, mock_run):
         """Test single quotes in text."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -291,7 +291,7 @@ class TestOutputHandlerEscaping(unittest.TestCase):
         # Single quotes don't need escaping in double-quoted AppleScript strings
         self.assertIn("It's working", script)
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_escape_mixed_quotes(self, mock_run):
         """Test mixed quote types."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -303,7 +303,7 @@ class TestOutputHandlerEscaping(unittest.TestCase):
         # Double quotes should be escaped
         self.assertIn('\\"it\'s fine\\"', script)
 
-    @patch('handfree.output_handler.subprocess.run')
+    @patch('context_aware_whisper.output_handler.subprocess.run')
     def test_escape_backslash_and_quote(self, mock_run):
         """Test backslash followed by quote."""
         mock_run.return_value = MagicMock(returncode=0)

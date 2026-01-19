@@ -1,4 +1,4 @@
-# HandFree
+# Context-Aware Whisper
 
 Cross-platform speech-to-text application. Hold a hotkey to record, release to transcribe and type.
 
@@ -41,8 +41,8 @@ Cross-platform speech-to-text application. Hold a hotkey to record, release to t
 
 ```bash
 # Clone the repository
-git clone https://github.com/sukhdeepsingh/handfree.git
-cd handfree
+git clone https://github.com/sukhdeepsingh/context-aware-whisper.git
+cd context-aware-whisper
 
 # Create and activate virtual environment
 python3 -m venv venv
@@ -59,8 +59,8 @@ pip install -r requirements.txt
 
 ```bash
 # Clone the repository
-git clone https://github.com/sukhdeepsingh/handfree.git
-cd handfree
+git clone https://github.com/sukhdeepsingh/context-aware-whisper.git
+cd context-aware-whisper
 
 # Create and activate virtual environment
 python -m venv venv
@@ -77,8 +77,8 @@ pip install -r requirements.txt
 
 ```bash
 # Clone the repository
-git clone https://github.com/sukhdeepsingh/handfree.git
-cd handfree
+git clone https://github.com/sukhdeepsingh/context-aware-whisper.git
+cd context-aware-whisper
 
 # Create and activate virtual environment
 python3 -m venv venv
@@ -187,13 +187,13 @@ For offline, private transcription, you can use whisper.cpp instead of the Groq 
 
 2. **Download a model**:
    ```bash
-   python -m handfree.model_manager download base.en
+   python -m context_aware_whisper.model_manager download base.en
    ```
 
 3. **Enable local transcription**:
    ```bash
    # Add to your .env file
-   HANDFREE_TRANSCRIBER=local
+   CAW_TRANSCRIBER=local
    ```
 
 ### Model Selection Guide
@@ -212,51 +212,51 @@ For offline, private transcription, you can use whisper.cpp instead of the Groq 
 
 ```bash
 # List all available models and download status
-python -m handfree.model_manager list
+python -m context_aware_whisper.model_manager list
 
 # Download a specific model
-python -m handfree.model_manager download base.en
+python -m context_aware_whisper.model_manager download base.en
 
 # Show detailed model info
-python -m handfree.model_manager info base.en
+python -m context_aware_whisper.model_manager info base.en
 
 # Force re-download a model
-python -m handfree.model_manager download base.en --force
+python -m context_aware_whisper.model_manager download base.en --force
 ```
 
 ## Environment Variables
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `GROQ_API_KEY` | Conditional* | - | Groq API key (required when `HANDFREE_TRANSCRIBER=groq`) |
-| `HANDFREE_TRANSCRIBER` | No | `groq` | Transcription backend: `groq` (cloud) or `local` (whisper.cpp) |
-| `HANDFREE_WHISPER_MODEL` | No | `base.en` | Whisper model for local transcription |
-| `HANDFREE_MODELS_DIR` | No | `~/.cache/whisper` | Directory for whisper model files |
-| `HANDFREE_LANGUAGE` | No | auto | Language code (e.g., "en", "es", "fr") |
-| `HANDFREE_TYPE_DELAY` | No | 0 | Delay between keystrokes in seconds |
-| `HANDFREE_SAMPLE_RATE` | No | 16000 | Audio sample rate in Hz |
-| `HANDFREE_USE_PASTE` | No | false | Use clipboard paste instead of keystrokes |
-| `HANDFREE_UI_ENABLED` | No | true | Enable visual recording indicator |
-| `HANDFREE_UI_POSITION` | No | top-center | Indicator position (top-center, top-right, top-left, bottom-center, bottom-right, bottom-left) |
-| `HANDFREE_HISTORY_ENABLED` | No | true | Enable transcription history storage |
-| `HANDFREE_HISTORY_MAX` | No | 1000 | Maximum number of history entries |
-| `HANDFREE_HOTKEY` | No | - | Custom hotkey (e.g., "ctrl+shift+r") |
-| `HANDFREE_DEBUG` | No | false | Enable debug logging (verbose output) |
+| `GROQ_API_KEY` | Conditional* | - | Groq API key (required when `CAW_TRANSCRIBER=groq`) |
+| `CAW_TRANSCRIBER` | No | `groq` | Transcription backend: `groq` (cloud) or `local` (whisper.cpp) |
+| `CAW_WHISPER_MODEL` | No | `base.en` | Whisper model for local transcription |
+| `CAW_MODELS_DIR` | No | `~/.cache/whisper` | Directory for whisper model files |
+| `CAW_LANGUAGE` | No | auto | Language code (e.g., "en", "es", "fr") |
+| `CAW_TYPE_DELAY` | No | 0 | Delay between keystrokes in seconds |
+| `CAW_SAMPLE_RATE` | No | 16000 | Audio sample rate in Hz |
+| `CAW_USE_PASTE` | No | false | Use clipboard paste instead of keystrokes |
+| `CAW_UI_ENABLED` | No | true | Enable visual recording indicator |
+| `CAW_UI_POSITION` | No | top-center | Indicator position (top-center, top-right, top-left, bottom-center, bottom-right, bottom-left) |
+| `CAW_HISTORY_ENABLED` | No | true | Enable transcription history storage |
+| `CAW_HISTORY_MAX` | No | 1000 | Maximum number of history entries |
+| `CAW_HOTKEY` | No | - | Custom hotkey (e.g., "ctrl+shift+r") |
+| `CAW_DEBUG` | No | false | Enable debug logging (verbose output) |
 
 Example `.env` file:
 
 ```bash
 GROQ_API_KEY=gsk_your_key_here
-HANDFREE_LANGUAGE=en
-HANDFREE_TYPE_DELAY=0
-HANDFREE_UI_POSITION=top-right
+CAW_LANGUAGE=en
+CAW_TYPE_DELAY=0
+CAW_UI_POSITION=top-right
 ```
 
 ## Permissions Setup
 
 ### macOS
 
-HandFree requires two system permissions to function:
+Context-Aware Whisper requires two system permissions to function:
 
 #### 1. Microphone Access
 
@@ -295,7 +295,7 @@ To verify:
 Some antivirus software may block keyboard monitoring. If hotkeys don't work:
 1. Right-click on Command Prompt or PowerShell
 2. Select **Run as administrator**
-3. Navigate to handfree directory and run `python main.py`
+3. Navigate to context-aware-whisper directory and run `python main.py`
 
 ### Linux
 
@@ -334,11 +334,11 @@ sudo apt install wtype wl-clipboard  # Debian/Ubuntu
 
 ### Verifying Permissions
 
-After granting permissions, restart the terminal and run HandFree again. You should see:
+After granting permissions, restart the terminal and run Context-Aware Whisper again. You should see:
 
 ```
 =======================================================
-  HandFree - Speech-to-Text
+  Context-Aware Whisper - Speech-to-Text
 =======================================================
 
   Mode: HOTKEY (Ctrl+Shift+Space)  # or Fn/Globe key on macOS
@@ -379,7 +379,7 @@ export GROQ_API_KEY=your_key_here
 **Solutions:**
 1. Check platform-specific permissions (see [Permissions Setup](#permissions-setup))
 2. Try pasting from clipboard manually - text is always copied there
-3. Set `HANDFREE_USE_PASTE=true` in `.env` to use clipboard paste instead of keystrokes
+3. Set `CAW_USE_PASTE=true` in `.env` to use clipboard paste instead of keystrokes
 4. On Linux Wayland: Install wtype (`sudo apt install wtype`)
 
 ### Hotkey not working
@@ -408,7 +408,7 @@ export GROQ_API_KEY=your_key_here
 1. Speak clearly at a normal pace
 2. Check that your Groq API key is valid
 3. Verify internet connection
-4. Try setting a specific language: `HANDFREE_LANGUAGE=en`
+4. Try setting a specific language: `CAW_LANGUAGE=en`
 
 ### "Rate limited" errors
 
@@ -436,7 +436,7 @@ export GROQ_API_KEY=your_key_here
 - tkinter not available
 
 **Solutions:**
-1. Check `HANDFREE_UI_ENABLED` is not set to `false`
+1. Check `CAW_UI_ENABLED` is not set to `false`
 2. Install tkinter if missing:
    - macOS: Included with Python from python.org
    - Ubuntu/Debian: `sudo apt install python3-tk`
@@ -448,7 +448,7 @@ export GROQ_API_KEY=your_key_here
 
 **Solution**: Download the model first:
 ```bash
-python -m handfree.model_manager download base.en
+python -m context_aware_whisper.model_manager download base.en
 ```
 
 #### Slow local transcription
@@ -460,7 +460,7 @@ python -m handfree.model_manager download base.en
 **Solutions:**
 1. Use a smaller model:
    ```bash
-   export HANDFREE_WHISPER_MODEL=tiny.en
+   export CAW_WHISPER_MODEL=tiny.en
    ```
 2. Check that Metal acceleration is enabled (macOS Apple Silicon)
 3. Ensure sufficient RAM is available (base model needs ~2GB)
@@ -472,7 +472,7 @@ python -m handfree.model_manager download base.en
 **Solutions:**
 1. Use smaller models: `tiny` (~1GB), `base` (~2GB), `small` (~3GB)
 2. Restart the app to unload the model from memory
-3. Set a smaller model: `HANDFREE_WHISPER_MODEL=tiny.en`
+3. Set a smaller model: `CAW_WHISPER_MODEL=tiny.en`
 
 #### Local transcription quality issues
 
@@ -482,7 +482,7 @@ python -m handfree.model_manager download base.en
 - Speaking non-English with English-only model
 
 **Solutions:**
-1. Try a larger model: `export HANDFREE_WHISPER_MODEL=small.en`
+1. Try a larger model: `export CAW_WHISPER_MODEL=small.en`
 2. Ensure clear audio input with minimal background noise
 3. For non-English, use multilingual models (without `.en` suffix): `base`, `small`, `medium`, `large-v3`
 
@@ -534,7 +534,7 @@ pytest -v
 pytest tests/test_transcriber.py
 
 # Run with coverage
-pytest --cov=handfree
+pytest --cov=context_aware_whisper
 
 # Run integration tests (requires hardware/whisper model)
 pytest tests/integration/ -v -m integration
@@ -543,9 +543,9 @@ pytest tests/integration/ -v -m integration
 ### Project Structure
 
 ```
-handfree/
+context-aware-whisper/
 ├── main.py                     # Application entry point
-├── src/handfree/
+├── src/context_aware_whisper/
 │   ├── __init__.py
 │   ├── audio_recorder.py       # Microphone audio capture
 │   ├── transcriber.py          # Groq Whisper API client (cloud)

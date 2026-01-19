@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from handfree.platform import (
+from context_aware_whisper.platform import (
     get_platform,
     create_hotkey_detector,
     create_output_handler,
@@ -20,7 +20,7 @@ from handfree.platform import (
     HotkeyDetectorBase,
     OutputHandlerBase,
 )
-from handfree.exceptions import PlatformNotSupportedError
+from context_aware_whisper.exceptions import PlatformNotSupportedError
 
 
 class TestGetPlatform(unittest.TestCase):
@@ -278,8 +278,8 @@ class TestCreateHotkeyDetectorFactory(unittest.TestCase):
         on_stop = MagicMock()
 
         # Patch the macOS-specific import
-        with patch('handfree.platform.macos.hotkey_detector.Quartz') as mock_quartz:
-            from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+        with patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz') as mock_quartz:
+            from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
             detector = create_hotkey_detector(on_start, on_stop)
             self.assertIsInstance(detector, MacOSHotkeyDetector)
             self.assertEqual(detector.get_hotkey_description(), "Fn/Globe key")
@@ -299,7 +299,7 @@ class TestCreateOutputHandlerFactory(unittest.TestCase):
     @patch.object(sys, 'platform', 'darwin')
     def test_creates_macos_handler(self):
         """Test factory creates macOS output handler on darwin."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         handler = create_output_handler(type_delay=0.05)
         self.assertIsInstance(handler, MacOSOutputHandler)
         self.assertEqual(handler.type_delay, 0.05)
@@ -316,11 +316,11 @@ class TestCreateOutputHandlerFactory(unittest.TestCase):
 class TestMacOSHotkeyDetector(unittest.TestCase):
     """Tests for MacOSHotkeyDetector implementation."""
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_initialization(self, mock_tap_create, mock_quartz):
         """Test MacOSHotkeyDetector initialization."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -330,11 +330,11 @@ class TestMacOSHotkeyDetector(unittest.TestCase):
         self.assertEqual(detector.on_stop, on_stop)
         self.assertFalse(detector.is_recording)
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_hotkey_description(self, mock_tap_create, mock_quartz):
         """Test MacOSHotkeyDetector returns correct hotkey description."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
         detector = MacOSHotkeyDetector(lambda: None, lambda: None)
         self.assertEqual(detector.get_hotkey_description(), "Fn/Globe key")
@@ -345,42 +345,42 @@ class TestMacOSOutputHandler(unittest.TestCase):
 
     def test_initialization(self):
         """Test MacOSOutputHandler initialization."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
 
         handler = MacOSOutputHandler(type_delay=0.1)
         self.assertEqual(handler.type_delay, 0.1)
 
     def test_default_type_delay(self):
         """Test MacOSOutputHandler default type delay."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
 
         handler = MacOSOutputHandler()
         self.assertEqual(handler.type_delay, 0.0)
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
     def test_copy_to_clipboard(self, mock_pyperclip):
         """Test clipboard copy functionality."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
 
         handler = MacOSOutputHandler()
         handler.copy_to_clipboard("Test text")
 
         mock_pyperclip.copy.assert_called_once_with("Test text")
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
     def test_copy_to_clipboard_empty(self, mock_pyperclip):
         """Test clipboard copy with empty string."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
 
         handler = MacOSOutputHandler()
         handler.copy_to_clipboard("")
 
         mock_pyperclip.copy.assert_not_called()
 
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
     def test_type_text_basic(self, mock_run):
         """Test basic keystroke typing."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
 
         mock_run.return_value = MagicMock(returncode=0)
         handler = MacOSOutputHandler()
@@ -391,10 +391,10 @@ class TestMacOSOutputHandler(unittest.TestCase):
         self.assertEqual(call_args[0][0][0], 'osascript')
         self.assertIn('Hello', call_args[0][0][2])
 
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
     def test_type_text_escapes_quotes(self, mock_run):
         """Test that quotes are properly escaped."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
 
         mock_run.return_value = MagicMock(returncode=0)
         handler = MacOSOutputHandler()
@@ -404,10 +404,10 @@ class TestMacOSOutputHandler(unittest.TestCase):
         script = call_args[0][0][2]
         self.assertIn('\\"hello\\"', script)
 
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
     def test_type_text_escapes_backslashes(self, mock_run):
         """Test that backslashes are properly escaped."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
 
         mock_run.return_value = MagicMock(returncode=0)
         handler = MacOSOutputHandler()
@@ -417,11 +417,11 @@ class TestMacOSOutputHandler(unittest.TestCase):
         script = call_args[0][0][2]
         self.assertIn('\\\\', script)
 
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
     def test_type_text_via_paste(self, mock_pyperclip, mock_run):
         """Test paste-based typing."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
 
         mock_run.return_value = MagicMock(returncode=0)
         handler = MacOSOutputHandler()
@@ -440,14 +440,14 @@ class TestPlatformNotSupportedError(unittest.TestCase):
     """Tests for PlatformNotSupportedError exception."""
 
     def test_exception_inheritance(self):
-        """Test PlatformNotSupportedError inherits from HandFreeError."""
-        from handfree.exceptions import HandFreeError, PlatformNotSupportedError
+        """Test PlatformNotSupportedError inherits from Context-Aware WhisperError."""
+        from context_aware_whisper.exceptions import Context-Aware WhisperError, PlatformNotSupportedError
 
-        self.assertTrue(issubclass(PlatformNotSupportedError, HandFreeError))
+        self.assertTrue(issubclass(PlatformNotSupportedError, Context-Aware WhisperError))
 
     def test_exception_message(self):
         """Test exception can be raised with message."""
-        from handfree.exceptions import PlatformNotSupportedError
+        from context_aware_whisper.exceptions import PlatformNotSupportedError
 
         with self.assertRaises(PlatformNotSupportedError) as context:
             raise PlatformNotSupportedError("Test error message")
@@ -494,54 +494,54 @@ class TestHistoryToggleHotkey(unittest.TestCase):
         detector = ConcreteDetector(lambda: None, lambda: None)
         self.assertIsNone(detector.on_history_toggle)
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_macos_history_toggle_description(self, mock_tap_create, mock_quartz):
         """Test MacOSHotkeyDetector returns correct history toggle description."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
         detector = MacOSHotkeyDetector(lambda: None, lambda: None)
         self.assertEqual(detector.get_history_toggle_description(), "Cmd+Shift+H")
 
-    @patch('handfree.platform.macos.hotkey_detector.Quartz')
-    @patch('handfree.platform.macos.hotkey_detector.CGEventTapCreate')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz')
+    @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_macos_accepts_history_toggle_callback(self, mock_tap_create, mock_quartz):
         """Test MacOSHotkeyDetector accepts on_history_toggle callback."""
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
         on_history_toggle = MagicMock()
         detector = MacOSHotkeyDetector(lambda: None, lambda: None, on_history_toggle)
         self.assertEqual(detector.on_history_toggle, on_history_toggle)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_windows_history_toggle_description(self, mock_keyboard):
         """Test WindowsHotkeyDetector returns correct history toggle description."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
         self.assertEqual(detector.get_history_toggle_description(), "Ctrl+H")
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_windows_accepts_history_toggle_callback(self, mock_keyboard):
         """Test WindowsHotkeyDetector accepts on_history_toggle callback."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         on_history_toggle = MagicMock()
         detector = WindowsHotkeyDetector(lambda: None, lambda: None, on_history_toggle)
         self.assertEqual(detector.on_history_toggle, on_history_toggle)
 
-    @patch('handfree.platform.linux.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.linux.hotkey_detector.keyboard')
     def test_linux_history_toggle_description(self, mock_keyboard):
         """Test LinuxHotkeyDetector returns correct history toggle description."""
-        from handfree.platform.linux.hotkey_detector import LinuxHotkeyDetector
+        from context_aware_whisper.platform.linux.hotkey_detector import LinuxHotkeyDetector
 
         detector = LinuxHotkeyDetector(lambda: None, lambda: None)
         self.assertEqual(detector.get_history_toggle_description(), "Ctrl+H")
 
-    @patch('handfree.platform.linux.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.linux.hotkey_detector.keyboard')
     def test_linux_accepts_history_toggle_callback(self, mock_keyboard):
         """Test LinuxHotkeyDetector accepts on_history_toggle callback."""
-        from handfree.platform.linux.hotkey_detector import LinuxHotkeyDetector
+        from context_aware_whisper.platform.linux.hotkey_detector import LinuxHotkeyDetector
 
         on_history_toggle = MagicMock()
         detector = LinuxHotkeyDetector(lambda: None, lambda: None, on_history_toggle)
@@ -551,7 +551,7 @@ class TestHistoryToggleHotkey(unittest.TestCase):
     def test_factory_passes_history_toggle_macos(self):
         """Test factory passes on_history_toggle to macOS detector."""
         on_history_toggle = MagicMock()
-        with patch('handfree.platform.macos.hotkey_detector.Quartz'):
+        with patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz'):
             detector = create_hotkey_detector(
                 lambda: None, lambda: None, on_history_toggle
             )
@@ -570,7 +570,7 @@ class TestPlatformConsistency(unittest.TestCase):
 
         for platform in platforms:
             for module in required_modules:
-                module_path = f'handfree.platform.{platform}.{module}'
+                module_path = f'context_aware_whisper.platform.{platform}.{module}'
                 try:
                     importlib.import_module(module_path)
                 except ImportError as e:
@@ -587,10 +587,10 @@ class TestPlatformConsistency(unittest.TestCase):
 class TestWindowsHotkeyDetector(unittest.TestCase):
     """Tests for WindowsHotkeyDetector implementation."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_initialization(self, mock_keyboard):
         """Test WindowsHotkeyDetector initialization."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -600,10 +600,10 @@ class TestWindowsHotkeyDetector(unittest.TestCase):
         self.assertEqual(detector.on_stop, on_stop)
         self.assertFalse(detector.is_recording)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_hotkey_description(self, mock_keyboard):
         """Test WindowsHotkeyDetector returns correct hotkey description."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
         self.assertEqual(detector.get_hotkey_description(), "Ctrl+Shift+Space")
@@ -612,10 +612,10 @@ class TestWindowsHotkeyDetector(unittest.TestCase):
 class TestLinuxHotkeyDetector(unittest.TestCase):
     """Tests for LinuxHotkeyDetector implementation."""
 
-    @patch('handfree.platform.linux.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.linux.hotkey_detector.keyboard')
     def test_initialization(self, mock_keyboard):
         """Test LinuxHotkeyDetector initialization."""
-        from handfree.platform.linux.hotkey_detector import LinuxHotkeyDetector
+        from context_aware_whisper.platform.linux.hotkey_detector import LinuxHotkeyDetector
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -625,10 +625,10 @@ class TestLinuxHotkeyDetector(unittest.TestCase):
         self.assertEqual(detector.on_stop, on_stop)
         self.assertFalse(detector.is_recording)
 
-    @patch('handfree.platform.linux.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.linux.hotkey_detector.keyboard')
     def test_hotkey_description(self, mock_keyboard):
         """Test LinuxHotkeyDetector returns correct hotkey description."""
-        from handfree.platform.linux.hotkey_detector import LinuxHotkeyDetector
+        from context_aware_whisper.platform.linux.hotkey_detector import LinuxHotkeyDetector
 
         detector = LinuxHotkeyDetector(lambda: None, lambda: None)
         self.assertEqual(detector.get_hotkey_description(), "Ctrl+Shift+Space")

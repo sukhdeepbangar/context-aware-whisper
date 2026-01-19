@@ -64,10 +64,10 @@ class MockKeyCode:
 class TestWindowsHotkeyDetectorInitialization(unittest.TestCase):
     """Tests for WindowsHotkeyDetector initialization."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_initialization_with_callbacks(self, mock_kb):
         """Test detector initializes with required callbacks."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -79,10 +79,10 @@ class TestWindowsHotkeyDetectorInitialization(unittest.TestCase):
         self.assertIsNone(detector.on_history_toggle)
         self.assertFalse(detector.is_recording)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_initialization_with_history_toggle(self, mock_kb):
         """Test detector initializes with optional history toggle callback."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         on_start = MagicMock()
         on_stop = MagicMock()
@@ -92,10 +92,10 @@ class TestWindowsHotkeyDetectorInitialization(unittest.TestCase):
 
         self.assertEqual(detector.on_history_toggle, on_history)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_initial_state(self, mock_kb):
         """Test detector has correct initial state."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
 
@@ -107,19 +107,19 @@ class TestWindowsHotkeyDetectorInitialization(unittest.TestCase):
 class TestWindowsHotkeyDetectorDescriptions(unittest.TestCase):
     """Tests for hotkey description methods."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_hotkey_description(self, mock_kb):
         """Test correct hotkey description is returned."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
 
         self.assertEqual(detector.get_hotkey_description(), "Ctrl+Shift+Space")
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_history_toggle_description(self, mock_kb):
         """Test correct history toggle description is returned."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
 
@@ -129,10 +129,10 @@ class TestWindowsHotkeyDetectorDescriptions(unittest.TestCase):
 class TestWindowsHotkeyDetectorKeyNormalization(unittest.TestCase):
     """Tests for key normalization."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_normalize_ctrl_r_to_ctrl_l(self, mock_kb):
         """Test right Ctrl is normalized to left Ctrl."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -141,10 +141,10 @@ class TestWindowsHotkeyDetectorKeyNormalization(unittest.TestCase):
 
         self.assertEqual(normalized, MockKeyEnum.ctrl_l)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_normalize_shift_r_to_shift(self, mock_kb):
         """Test right Shift is normalized to left Shift."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -153,10 +153,10 @@ class TestWindowsHotkeyDetectorKeyNormalization(unittest.TestCase):
 
         self.assertEqual(normalized, MockKeyEnum.shift)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_normalize_other_keys_unchanged(self, mock_kb):
         """Test other keys are not modified during normalization."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -169,10 +169,10 @@ class TestWindowsHotkeyDetectorKeyNormalization(unittest.TestCase):
 class TestWindowsHotkeyDetectorTriggerDetection(unittest.TestCase):
     """Tests for trigger key combination detection."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_check_trigger_all_keys_pressed(self, mock_kb):
         """Test trigger returns True when all required keys are pressed."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -184,10 +184,10 @@ class TestWindowsHotkeyDetectorTriggerDetection(unittest.TestCase):
 
         self.assertTrue(detector._check_trigger())
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_check_trigger_right_ctrl_variant(self, mock_kb):
         """Test trigger works with right Ctrl key."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -199,10 +199,10 @@ class TestWindowsHotkeyDetectorTriggerDetection(unittest.TestCase):
 
         self.assertTrue(detector._check_trigger())
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_check_trigger_partial_keys(self, mock_kb):
         """Test trigger returns False when only some keys are pressed."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -216,10 +216,10 @@ class TestWindowsHotkeyDetectorTriggerDetection(unittest.TestCase):
         detector._pressed_keys = {MockKeyEnum.ctrl_l, MockKeyEnum.shift}
         self.assertFalse(detector._check_trigger())
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_check_trigger_no_keys(self, mock_kb):
         """Test trigger returns False when no keys are pressed."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -233,10 +233,10 @@ class TestWindowsHotkeyDetectorTriggerDetection(unittest.TestCase):
 class TestWindowsHotkeyDetectorCtrlCheck(unittest.TestCase):
     """Tests for Ctrl key detection."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_is_ctrl_pressed_left(self, mock_kb):
         """Test detects left Ctrl as pressed."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -245,10 +245,10 @@ class TestWindowsHotkeyDetectorCtrlCheck(unittest.TestCase):
 
         self.assertTrue(detector._is_ctrl_pressed())
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_is_ctrl_pressed_right(self, mock_kb):
         """Test detects right Ctrl as pressed."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -257,10 +257,10 @@ class TestWindowsHotkeyDetectorCtrlCheck(unittest.TestCase):
 
         self.assertTrue(detector._is_ctrl_pressed())
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_is_ctrl_not_pressed(self, mock_kb):
         """Test detects when no Ctrl key is pressed."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -273,10 +273,10 @@ class TestWindowsHotkeyDetectorCtrlCheck(unittest.TestCase):
 class TestWindowsHotkeyDetectorKeyPress(unittest.TestCase):
     """Tests for key press event handling."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_on_press_adds_key(self, mock_kb):
         """Test key press adds key to pressed set."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -285,10 +285,10 @@ class TestWindowsHotkeyDetectorKeyPress(unittest.TestCase):
 
         self.assertIn(MockKeyEnum.ctrl_l, detector._pressed_keys)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_on_press_triggers_recording_start(self, mock_kb):
         """Test pressing all trigger keys starts recording."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_start = MagicMock()
@@ -305,10 +305,10 @@ class TestWindowsHotkeyDetectorKeyPress(unittest.TestCase):
         on_start.assert_called_once()
         self.assertTrue(detector.is_recording)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_on_press_no_double_start(self, mock_kb):
         """Test pressing trigger while already recording doesn't call start again."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_start = MagicMock()
@@ -329,10 +329,10 @@ class TestWindowsHotkeyDetectorKeyPress(unittest.TestCase):
 class TestWindowsHotkeyDetectorKeyRelease(unittest.TestCase):
     """Tests for key release event handling."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_on_release_removes_key(self, mock_kb):
         """Test key release removes key from pressed set."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -342,10 +342,10 @@ class TestWindowsHotkeyDetectorKeyRelease(unittest.TestCase):
 
         self.assertNotIn(MockKeyEnum.ctrl_l, detector._pressed_keys)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_on_release_triggers_recording_stop(self, mock_kb):
         """Test releasing a trigger key stops recording."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_start = MagicMock()
@@ -363,10 +363,10 @@ class TestWindowsHotkeyDetectorKeyRelease(unittest.TestCase):
         on_stop.assert_called_once()
         self.assertFalse(detector.is_recording)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_on_release_no_stop_if_not_recording(self, mock_kb):
         """Test releasing keys when not recording doesn't call stop."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_stop = MagicMock()
@@ -377,10 +377,10 @@ class TestWindowsHotkeyDetectorKeyRelease(unittest.TestCase):
 
         on_stop.assert_not_called()
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_on_release_nonexistent_key(self, mock_kb):
         """Test releasing a key that wasn't pressed doesn't raise error."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -393,10 +393,10 @@ class TestWindowsHotkeyDetectorKeyRelease(unittest.TestCase):
 class TestWindowsHotkeyDetectorHistoryToggle(unittest.TestCase):
     """Tests for history toggle hotkey (Ctrl+H)."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_history_toggle_on_ctrl_h(self, mock_kb):
         """Test Ctrl+H triggers history toggle."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_history = MagicMock()
@@ -411,10 +411,10 @@ class TestWindowsHotkeyDetectorHistoryToggle(unittest.TestCase):
 
         on_history.assert_called_once()
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_history_toggle_uppercase_h(self, mock_kb):
         """Test Ctrl+H works with uppercase H."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_history = MagicMock()
@@ -427,10 +427,10 @@ class TestWindowsHotkeyDetectorHistoryToggle(unittest.TestCase):
 
         on_history.assert_called_once()
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_history_toggle_not_triggered_with_shift(self, mock_kb):
         """Test Ctrl+Shift+H does not trigger history toggle."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_history = MagicMock()
@@ -444,10 +444,10 @@ class TestWindowsHotkeyDetectorHistoryToggle(unittest.TestCase):
 
         on_history.assert_not_called()
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_history_toggle_not_triggered_without_ctrl(self, mock_kb):
         """Test 'H' alone does not trigger history toggle."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_history = MagicMock()
@@ -458,10 +458,10 @@ class TestWindowsHotkeyDetectorHistoryToggle(unittest.TestCase):
 
         on_history.assert_not_called()
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_history_toggle_no_callback_configured(self, mock_kb):
         """Test no error when history toggle not configured."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)  # No history callback
@@ -476,10 +476,10 @@ class TestWindowsHotkeyDetectorHistoryToggle(unittest.TestCase):
 class TestWindowsHotkeyDetectorLifecycle(unittest.TestCase):
     """Tests for start/stop lifecycle."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_start_creates_listener(self, mock_kb):
         """Test start() creates and starts a listener."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_listener_instance = MagicMock()
         mock_kb.Listener.return_value = mock_listener_instance
@@ -491,10 +491,10 @@ class TestWindowsHotkeyDetectorLifecycle(unittest.TestCase):
         mock_listener_instance.start.assert_called_once()
         self.assertEqual(detector._listener, mock_listener_instance)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_stop_stops_listener(self, mock_kb):
         """Test stop() stops and clears the listener."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_listener_instance = MagicMock()
         mock_kb.Listener.return_value = mock_listener_instance
@@ -506,10 +506,10 @@ class TestWindowsHotkeyDetectorLifecycle(unittest.TestCase):
         mock_listener_instance.stop.assert_called_once()
         self.assertIsNone(detector._listener)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_stop_clears_pressed_keys(self, mock_kb):
         """Test stop() clears pressed keys set."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
@@ -519,10 +519,10 @@ class TestWindowsHotkeyDetectorLifecycle(unittest.TestCase):
 
         self.assertEqual(len(detector._pressed_keys), 0)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_stop_without_start(self, mock_kb):
         """Test stop() without start() doesn't raise error."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         detector = WindowsHotkeyDetector(lambda: None, lambda: None)
 
@@ -533,10 +533,10 @@ class TestWindowsHotkeyDetectorLifecycle(unittest.TestCase):
 class TestWindowsHotkeyDetectorStateMachine(unittest.TestCase):
     """Property-based tests for state machine behavior."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_full_recording_cycle(self, mock_kb):
         """Test complete recording cycle: press all -> recording -> release any -> stop."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_start = MagicMock()
@@ -559,10 +559,10 @@ class TestWindowsHotkeyDetectorStateMachine(unittest.TestCase):
         self.assertFalse(detector.is_recording)
         on_stop.assert_called_once()
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_multiple_recording_cycles(self, mock_kb):
         """Test multiple consecutive recording cycles."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_start = MagicMock()
@@ -589,12 +589,12 @@ class TestWindowsHotkeyDetectorStateMachine(unittest.TestCase):
 class TestWindowsHotkeyDetectorStateMachineHypothesis:
     """Property-based tests using Hypothesis."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     @given(st.lists(st.booleans(), min_size=3, max_size=3))
     @settings(max_examples=50)
     def test_recording_state_consistency(self, mock_kb, key_states):
         """Test recording state is consistent with pressed keys."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_start = MagicMock()
@@ -619,10 +619,10 @@ class TestWindowsHotkeyDetectorStateMachineHypothesis:
 class TestWindowsHotkeyDetectorEdgeCases(unittest.TestCase):
     """Edge case tests."""
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_rapid_key_events(self, mock_kb):
         """Test rapid key press/release events are handled correctly."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_start = MagicMock()
@@ -643,10 +643,10 @@ class TestWindowsHotkeyDetectorEdgeCases(unittest.TestCase):
         self.assertEqual(on_start.call_count, 10)
         self.assertEqual(on_stop.call_count, 10)
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_key_without_char_attribute(self, mock_kb):
         """Test key without char attribute doesn't cause error in history toggle check."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_history = MagicMock()
@@ -662,10 +662,10 @@ class TestWindowsHotkeyDetectorEdgeCases(unittest.TestCase):
 
         on_history.assert_not_called()
 
-    @patch('handfree.platform.windows.hotkey_detector.keyboard')
+    @patch('context_aware_whisper.platform.windows.hotkey_detector.keyboard')
     def test_key_with_none_char(self, mock_kb):
         """Test key with None char attribute doesn't trigger history toggle."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
 
         mock_kb.Key = MockKeyEnum
         on_history = MagicMock()

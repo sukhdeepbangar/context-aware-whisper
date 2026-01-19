@@ -38,9 +38,9 @@ This document provides a detailed step-by-step guide to add local transcription 
 
 ### Phase 3: Configuration Updates
 - [x] 3.1 Update `config.py` with new environment variables
-- [x] 3.2 Add `HANDFREE_TRANSCRIBER` option (groq/local)
-- [x] 3.3 Add `HANDFREE_WHISPER_MODEL` option
-- [x] 3.4 Add `HANDFREE_MODELS_DIR` option
+- [x] 3.2 Add `CAW_TRANSCRIBER` option (groq/local)
+- [x] 3.3 Add `CAW_WHISPER_MODEL` option
+- [x] 3.4 Add `CAW_MODELS_DIR` option
 - [x] 3.5 Update `.env.example` with new options
 
 ### Phase 4: Main App Integration
@@ -54,7 +54,7 @@ This document provides a detailed step-by-step guide to add local transcription 
 - [x] 5.1 Create `model_manager.py` utility
 - [x] 5.2 Implement model download progress display
 - [x] 5.3 Implement model listing command
-- [x] 5.4 Add CLI option to download models: `python -m handfree.model_manager download base.en`
+- [x] 5.4 Add CLI option to download models: `python -m context_aware_whisper.model_manager download base.en`
 - [x] 5.5 Verify: Model download works correctly
 
 ### Phase 6: Documentation & Testing
@@ -76,7 +76,7 @@ This document provides a detailed step-by-step guide to add local transcription 
 
 **Commands:**
 ```bash
-cd /Users/sukhdeepsingh/projects/ClaudeProjects/handfree
+cd /Users/sukhdeepsingh/projects/ClaudeProjects/context_aware_whisper
 source venv/bin/activate
 pip install pywhispercpp
 ```
@@ -139,7 +139,7 @@ Expected performance on Apple Silicon:
 
 ### Step 2.1-2.6: Create `local_transcriber.py`
 
-**File:** `src/handfree/local_transcriber.py`
+**File:** `src/context_aware_whisper/local_transcriber.py`
 
 ```python
 """
@@ -359,24 +359,24 @@ class Config:
     # ... existing config ...
 
     # Transcription backend
-    TRANSCRIBER = os.environ.get("HANDFREE_TRANSCRIBER", "groq")  # "groq" or "local"
+    TRANSCRIBER = os.environ.get("CAW_TRANSCRIBER", "groq")  # "groq" or "local"
 
     # Local transcription settings (whisper.cpp)
-    WHISPER_MODEL = os.environ.get("HANDFREE_WHISPER_MODEL", "base.en")
-    MODELS_DIR = os.environ.get("HANDFREE_MODELS_DIR", os.path.expanduser("~/.cache/whisper"))
+    WHISPER_MODEL = os.environ.get("CAW_WHISPER_MODEL", "base.en")
+    MODELS_DIR = os.environ.get("CAW_MODELS_DIR", os.path.expanduser("~/.cache/whisper"))
 
     @classmethod
     def validate(cls) -> None:
         """Validate required configuration."""
         if cls.TRANSCRIBER == "groq" and not cls.GROQ_API_KEY:
             raise ValueError(
-                "GROQ_API_KEY required when HANDFREE_TRANSCRIBER=groq.\n"
-                "Set HANDFREE_TRANSCRIBER=local to use local transcription."
+                "GROQ_API_KEY required when CAW_TRANSCRIBER=groq.\n"
+                "Set CAW_TRANSCRIBER=local to use local transcription."
             )
 
         if cls.TRANSCRIBER not in ("groq", "local"):
             raise ValueError(
-                f"Invalid HANDFREE_TRANSCRIBER: {cls.TRANSCRIBER}. "
+                f"Invalid CAW_TRANSCRIBER: {cls.TRANSCRIBER}. "
                 "Must be 'groq' or 'local'."
             )
 ```
@@ -388,12 +388,12 @@ class Config:
 ```bash
 # Transcription Backend
 # Options: "groq" (cloud, requires API key) or "local" (whisper.cpp, offline)
-HANDFREE_TRANSCRIBER=groq
+CAW_TRANSCRIBER=groq
 
 # Local Transcription Settings (only used when TRANSCRIBER=local)
 # Model options: tiny.en, base.en, small.en, medium.en, large
-HANDFREE_WHISPER_MODEL=base.en
-HANDFREE_MODELS_DIR=~/.cache/whisper
+CAW_WHISPER_MODEL=base.en
+CAW_MODELS_DIR=~/.cache/whisper
 ```
 
 ---
@@ -422,7 +422,7 @@ def get_transcriber():
         return Transcriber()
 ```
 
-**Update `HandFreeApp.__init__`:**
+**Update `Context-Aware WhisperApp.__init__`:**
 
 ```python
 def __init__(self):
@@ -468,7 +468,7 @@ def get_transcriber_with_fallback():
 
 ### Step 5.1-5.4: Create `model_manager.py`
 
-**File:** `src/handfree/model_manager.py`
+**File:** `src/context_aware_whisper/model_manager.py`
 
 ```python
 """
@@ -519,11 +519,11 @@ def main():
     """CLI entry point."""
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python -m handfree.model_manager list       - List available models")
-        print("  python -m handfree.model_manager download <model>  - Download a model")
+        print("  python -m context_aware_whisper.model_manager list       - List available models")
+        print("  python -m context_aware_whisper.model_manager download <model>  - Download a model")
         print("")
         print("Example:")
-        print("  python -m handfree.model_manager download base.en")
+        print("  python -m context_aware_whisper.model_manager download base.en")
         return
 
     command = sys.argv[1]
@@ -563,12 +563,12 @@ For offline, private transcription, you can use whisper.cpp instead of Groq API:
 
 2. Download a model:
    ```bash
-   python -m handfree.model_manager download base.en
+   python -m context_aware_whisper.model_manager download base.en
    ```
 
 3. Enable local transcription:
    ```bash
-   export HANDFREE_TRANSCRIBER=local
+   export CAW_TRANSCRIBER=local
    # or add to .env file
    ```
 
@@ -602,10 +602,10 @@ For most users, `base.en` provides the best balance of speed and accuracy.
 ### Troubleshooting Local Transcription
 
 **"Model not found" error**
-- Run: `python -m handfree.model_manager download base.en`
+- Run: `python -m context_aware_whisper.model_manager download base.en`
 
 **Slow transcription**
-- Use a smaller model: `export HANDFREE_WHISPER_MODEL=tiny.en`
+- Use a smaller model: `export CAW_WHISPER_MODEL=tiny.en`
 - Ensure Apple Silicon acceleration is working (check for Metal GPU usage)
 
 **High memory usage**
@@ -613,7 +613,7 @@ For most users, `base.en` provides the best balance of speed and accuracy.
 - Unload model when not in use (restart app)
 
 **Transcription quality issues**
-- Try a larger model: `export HANDFREE_WHISPER_MODEL=small.en`
+- Try a larger model: `export CAW_WHISPER_MODEL=small.en`
 - Ensure audio is 16kHz mono WAV (handled automatically by AudioRecorder)
 ```
 

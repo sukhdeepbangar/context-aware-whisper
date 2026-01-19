@@ -25,7 +25,7 @@
 ### Architecture
 
 ```
-Main Process (HandFree)                 Subprocess (Indicator)
+Main Process (Context-Aware Whisper)                 Subprocess (Indicator)
         |                                        |
         | -- spawn subprocess -----------------> |
         |                                        | set NSApplicationActivationPolicyProhibited
@@ -46,7 +46,7 @@ Main Process (HandFree)                 Subprocess (Indicator)
 
 ### Phase 1: Create Subprocess Indicator Script
 
-**File:** `src/handfree/ui/subprocess_indicator.py` (NEW)
+**File:** `src/context_aware_whisper/ui/subprocess_indicator.py` (NEW)
 
 **Tasks:**
 - [x] Set `NSApplicationActivationPolicyProhibited` IMMEDIATELY on import
@@ -81,7 +81,7 @@ class IndicatorPanel:
 
 ### Phase 2: Create Subprocess Client
 
-**File:** `src/handfree/ui/subprocess_indicator_client.py` (NEW)
+**File:** `src/context_aware_whisper/ui/subprocess_indicator_client.py` (NEW)
 
 **Tasks:**
 - [x] `SubprocessIndicator` class
@@ -105,7 +105,7 @@ class SubprocessIndicator:
 
 ### Phase 3: Integrate with UI Controller
 
-**File:** `src/handfree/ui/app.py` (MODIFY)
+**File:** `src/context_aware_whisper/ui/app.py` (MODIFY)
 
 **Tasks:**
 - [x] Add `_subprocess_indicator: Optional[SubprocessIndicator]`
@@ -113,7 +113,7 @@ class SubprocessIndicator:
 - [x] In `set_state()`: Forward state to subprocess indicator
 - [x] In `stop()`: Cleanup subprocess
 
-**Changes to HandFreeUI:**
+**Changes to Context-Aware WhisperUI:**
 ```python
 def start(self) -> None:
     # ... existing code ...
@@ -121,7 +121,7 @@ def start(self) -> None:
     # Launch subprocess indicator (replaces disabled tkinter indicator)
     if sys.platform == "darwin":
         try:
-            from handfree.ui.subprocess_indicator_client import SubprocessIndicator
+            from context_aware_whisper.ui.subprocess_indicator_client import SubprocessIndicator
             self._subprocess_indicator = SubprocessIndicator()
             self._subprocess_indicator.start()
         except Exception as e:
@@ -165,13 +165,13 @@ def set_state(self, state: str) -> None:
 ### Create
 | File | Purpose |
 |------|---------|
-| `src/handfree/ui/subprocess_indicator.py` | Standalone subprocess that shows overlay |
-| `src/handfree/ui/subprocess_indicator_client.py` | Client wrapper for main app |
+| `src/context_aware_whisper/ui/subprocess_indicator.py` | Standalone subprocess that shows overlay |
+| `src/context_aware_whisper/ui/subprocess_indicator_client.py` | Client wrapper for main app |
 
 ### Modify
 | File | Changes |
 |------|---------|
-| `src/handfree/ui/app.py` | Integrate subprocess indicator |
+| `src/context_aware_whisper/ui/app.py` | Integrate subprocess indicator |
 
 ---
 

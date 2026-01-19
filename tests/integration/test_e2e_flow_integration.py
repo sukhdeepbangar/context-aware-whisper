@@ -33,8 +33,8 @@ class TestE2EFlow:
 
     def test_audio_file_to_clipboard(self, audio_fixtures_dir):
         """Test complete flow: audio file -> transcription -> clipboard."""
-        from handfree.local_transcriber import LocalTranscriber
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.local_transcriber import LocalTranscriber
+        from context_aware_whisper.output_handler import OutputHandler
 
         audio_path = audio_fixtures_dir / "hello_world.wav"
         if not audio_path.exists():
@@ -59,7 +59,7 @@ class TestE2EFlow:
 
     def test_silence_produces_minimal_output(self, audio_fixtures_dir):
         """Test that silence audio doesn't produce false transcriptions."""
-        from handfree.local_transcriber import LocalTranscriber
+        from context_aware_whisper.local_transcriber import LocalTranscriber
 
         audio_path = audio_fixtures_dir / "silence.wav"
         if not audio_path.exists():
@@ -85,9 +85,9 @@ class TestE2EWithRecording:
         Note: This test records actual audio, so results depend on environment.
         """
         import time
-        from handfree.audio_recorder import AudioRecorder
-        from handfree.local_transcriber import LocalTranscriber
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.audio_recorder import AudioRecorder
+        from context_aware_whisper.local_transcriber import LocalTranscriber
+        from context_aware_whisper.output_handler import OutputHandler
 
         # Record
         recorder = AudioRecorder(sample_rate=16000, channels=1)
@@ -115,7 +115,7 @@ class TestStateTransitions:
 
     def test_idle_to_recording_state(self):
         """Test transition from IDLE to RECORDING."""
-        from handfree.audio_recorder import AudioRecorder
+        from context_aware_whisper.audio_recorder import AudioRecorder
 
         recorder = AudioRecorder()
 
@@ -132,7 +132,7 @@ class TestStateTransitions:
 
     def test_multiple_state_transitions(self):
         """Test multiple state transitions work correctly."""
-        from handfree.audio_recorder import AudioRecorder
+        from context_aware_whisper.audio_recorder import AudioRecorder
 
         recorder = AudioRecorder()
 

@@ -4,7 +4,7 @@ Integration tests for text cleanup module.
 Tests the integration of TextCleaner with:
 - Configuration system (Config)
 - Factory function (get_text_cleaner)
-- HandFreeApp pipeline
+- CAWApp pipeline
 - Environment variable handling
 - Mode switching and fallback behavior
 """
@@ -14,8 +14,8 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from io import StringIO
 
-from handfree.config import Config, VALID_CLEANUP_MODES
-from handfree.text_cleanup import TextCleaner, CleanupMode
+from context_aware_whisper.config import Config, VALID_CLEANUP_MODES
+from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
 
 class TestGetTextCleanerFactory:
@@ -211,55 +211,55 @@ class TestEnvironmentVariableIntegration:
     """Tests for cleanup mode via environment variables."""
 
     def test_config_reads_cleanup_mode_off_from_env(self):
-        """Config.from_env() reads HANDFREE_TEXT_CLEANUP=off."""
+        """Config.from_env() reads CAW_TEXT_CLEANUP=off."""
         with patch.dict(os.environ, {
-            "HANDFREE_TEXT_CLEANUP": "off",
-            "HANDFREE_TRANSCRIBER": "local"
+            "CAW_TEXT_CLEANUP": "off",
+            "CAW_TRANSCRIBER": "local"
         }, clear=False):
             config = Config.from_env()
             assert config.text_cleanup == "off"
 
     def test_config_reads_cleanup_mode_light_from_env(self):
-        """Config.from_env() reads HANDFREE_TEXT_CLEANUP=light."""
+        """Config.from_env() reads CAW_TEXT_CLEANUP=light."""
         with patch.dict(os.environ, {
-            "HANDFREE_TEXT_CLEANUP": "light",
-            "HANDFREE_TRANSCRIBER": "local"
+            "CAW_TEXT_CLEANUP": "light",
+            "CAW_TRANSCRIBER": "local"
         }, clear=False):
             config = Config.from_env()
             assert config.text_cleanup == "light"
 
     def test_config_reads_cleanup_mode_standard_from_env(self):
-        """Config.from_env() reads HANDFREE_TEXT_CLEANUP=standard."""
+        """Config.from_env() reads CAW_TEXT_CLEANUP=standard."""
         with patch.dict(os.environ, {
-            "HANDFREE_TEXT_CLEANUP": "standard",
-            "HANDFREE_TRANSCRIBER": "local"
+            "CAW_TEXT_CLEANUP": "standard",
+            "CAW_TRANSCRIBER": "local"
         }, clear=False):
             config = Config.from_env()
             assert config.text_cleanup == "standard"
 
     def test_config_reads_cleanup_mode_aggressive_from_env(self):
-        """Config.from_env() reads HANDFREE_TEXT_CLEANUP=aggressive."""
+        """Config.from_env() reads CAW_TEXT_CLEANUP=aggressive."""
         with patch.dict(os.environ, {
-            "HANDFREE_TEXT_CLEANUP": "aggressive",
-            "HANDFREE_TRANSCRIBER": "local"
+            "CAW_TEXT_CLEANUP": "aggressive",
+            "CAW_TRANSCRIBER": "local"
         }, clear=False):
             config = Config.from_env()
             assert config.text_cleanup == "aggressive"
 
     def test_config_reads_preserve_intentional_true_from_env(self):
-        """Config.from_env() reads HANDFREE_PRESERVE_INTENTIONAL=true."""
+        """Config.from_env() reads CAW_PRESERVE_INTENTIONAL=true."""
         with patch.dict(os.environ, {
-            "HANDFREE_PRESERVE_INTENTIONAL": "true",
-            "HANDFREE_TRANSCRIBER": "local"
+            "CAW_PRESERVE_INTENTIONAL": "true",
+            "CAW_TRANSCRIBER": "local"
         }, clear=False):
             config = Config.from_env()
             assert config.preserve_intentional is True
 
     def test_config_reads_preserve_intentional_false_from_env(self):
-        """Config.from_env() reads HANDFREE_PRESERVE_INTENTIONAL=false."""
+        """Config.from_env() reads CAW_PRESERVE_INTENTIONAL=false."""
         with patch.dict(os.environ, {
-            "HANDFREE_PRESERVE_INTENTIONAL": "false",
-            "HANDFREE_TRANSCRIBER": "local"
+            "CAW_PRESERVE_INTENTIONAL": "false",
+            "CAW_TRANSCRIBER": "local"
         }, clear=False):
             config = Config.from_env()
             assert config.preserve_intentional is False
@@ -268,8 +268,8 @@ class TestEnvironmentVariableIntegration:
         """Config defaults to standard cleanup mode."""
         # Clear the specific env var
         env_copy = os.environ.copy()
-        env_copy.pop("HANDFREE_TEXT_CLEANUP", None)
-        env_copy["HANDFREE_TRANSCRIBER"] = "local"
+        env_copy.pop("CAW_TEXT_CLEANUP", None)
+        env_copy["CAW_TRANSCRIBER"] = "local"
 
         with patch.dict(os.environ, env_copy, clear=True):
             config = Config.from_env()
@@ -278,8 +278,8 @@ class TestEnvironmentVariableIntegration:
     def test_config_defaults_to_preserve_intentional_true(self):
         """Config defaults to preserve_intentional=True."""
         env_copy = os.environ.copy()
-        env_copy.pop("HANDFREE_PRESERVE_INTENTIONAL", None)
-        env_copy["HANDFREE_TRANSCRIBER"] = "local"
+        env_copy.pop("CAW_PRESERVE_INTENTIONAL", None)
+        env_copy["CAW_TRANSCRIBER"] = "local"
 
         with patch.dict(os.environ, env_copy, clear=True):
             config = Config.from_env()
@@ -288,8 +288,8 @@ class TestEnvironmentVariableIntegration:
     def test_config_normalizes_uppercase_cleanup_mode(self):
         """Config normalizes uppercase cleanup mode to lowercase."""
         with patch.dict(os.environ, {
-            "HANDFREE_TEXT_CLEANUP": "STANDARD",
-            "HANDFREE_TRANSCRIBER": "local"
+            "CAW_TEXT_CLEANUP": "STANDARD",
+            "CAW_TRANSCRIBER": "local"
         }, clear=False):
             config = Config.from_env()
             assert config.text_cleanup == "standard"
@@ -313,7 +313,7 @@ class TestConfigValidation:
         )
         with pytest.raises(ValueError) as exc_info:
             config.validate()
-        assert "HANDFREE_TEXT_CLEANUP" in str(exc_info.value)
+        assert "CAW_TEXT_CLEANUP" in str(exc_info.value)
         assert "invalid" in str(exc_info.value)
 
     def test_validate_accepts_valid_cleanup_modes(self):
@@ -340,7 +340,7 @@ class TestConfigValidation:
 class TestAggressiveModeFallback:
     """Tests for AGGRESSIVE mode fallback behavior."""
 
-    @patch('handfree.local_llm.is_available', return_value=False)
+    @patch('context_aware_whisper.local_llm.is_available', return_value=False)
     def test_aggressive_falls_back_when_mlx_unavailable(self, mock_available):
         """AGGRESSIVE mode falls back to STANDARD when MLX unavailable."""
         cleaner = TextCleaner(mode=CleanupMode.AGGRESSIVE)
@@ -352,7 +352,7 @@ class TestAggressiveModeFallback:
         assert "Um" not in result
         assert "hello" in result.lower()
 
-    @patch('handfree.local_llm.is_available', return_value=False)
+    @patch('context_aware_whisper.local_llm.is_available', return_value=False)
     def test_aggressive_mode_cleans_basic_fillers_on_fallback(self, mock_available):
         """AGGRESSIVE mode cleans fillers when falling back."""
         cleaner = TextCleaner(mode=CleanupMode.AGGRESSIVE)
@@ -365,8 +365,8 @@ class TestAggressiveModeFallback:
         assert "you know" not in result.lower()
         assert "great" in result
 
-    @patch('handfree.local_llm.is_available', return_value=True)
-    @patch('handfree.local_llm.generate')
+    @patch('context_aware_whisper.local_llm.is_available', return_value=True)
+    @patch('context_aware_whisper.local_llm.generate')
     def test_aggressive_falls_back_on_generation_error(self, mock_generate, mock_available):
         """AGGRESSIVE mode falls back to STANDARD on generation error."""
         mock_generate.side_effect = Exception("Generation error")
@@ -424,7 +424,7 @@ class TestCleanupSkippedWhenOff:
 class TestLoggingIntegration:
     """Tests for cleanup logging behavior."""
 
-    @patch('handfree.local_llm.is_available', return_value=False)
+    @patch('context_aware_whisper.local_llm.is_available', return_value=False)
     def test_aggressive_mode_logs_warning_on_fallback(self, mock_available):
         """AGGRESSIVE mode logs warning when falling back due to MLX unavailable."""
         import logging
@@ -439,15 +439,15 @@ class TestLoggingIntegration:
         # Verify fallback happened (standard mode behavior)
         assert "Um" not in result
 
-    @patch('handfree.local_llm.is_available', return_value=True)
-    @patch('handfree.local_llm.generate')
+    @patch('context_aware_whisper.local_llm.is_available', return_value=True)
+    @patch('context_aware_whisper.local_llm.generate')
     def test_aggressive_mode_logs_warning_on_generation_error(self, mock_generate, mock_available):
         """AGGRESSIVE mode logs warning on generation error."""
         import logging
 
         mock_generate.side_effect = Exception("Generation failed")
 
-        with patch('handfree.text_cleanup.logger') as mock_logger:
+        with patch('context_aware_whisper.text_cleanup.logger') as mock_logger:
             cleaner = TextCleaner(mode=CleanupMode.AGGRESSIVE)
             result = cleaner.clean("Um, hello")
 
@@ -464,12 +464,12 @@ class TestStartupBannerIntegration:
         """Startup banner should include text cleanup mode."""
         # We can verify the _print_banner method includes cleanup mode
         # by checking the main.py code structure
-        from main import HandFreeApp
+        from main import CAWApp
 
         # The banner print includes: print(f"  Text cleanup: {self.config.text_cleanup}")
         # We verify this pattern exists in the code
         import inspect
-        source = inspect.getsource(HandFreeApp._print_banner)
+        source = inspect.getsource(CAWApp._print_banner)
 
         assert "text_cleanup" in source.lower() or "cleanup" in source.lower()
 

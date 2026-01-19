@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/src/handfree/config.py
+# hypothesis_version: 6.150.2
+
+[0.0, 1000, 8000, 16000, 22050, 44100, 48000, 100000, '0', '1', '1000', '16000', 'Config', 'GROQ_API_KEY', 'HANDFREE_HISTORY_MAX', 'HANDFREE_HOTKEY', 'HANDFREE_LANGUAGE', 'HANDFREE_LOCAL_MODEL', 'HANDFREE_MODELS_DIR', 'HANDFREE_SAMPLE_RATE', 'HANDFREE_TRANSCRIBER', 'HANDFREE_TYPE_DELAY', 'HANDFREE_UI_ENABLED', 'HANDFREE_UI_POSITION', 'HANDFREE_USE_PASTE', 'aggressive', 'base', 'base.en', 'bottom-center', 'bottom-left', 'bottom-right', 'groq', 'large-v1', 'large-v2', 'large-v3', 'light', 'local', 'medium', 'medium.en', 'off', 'small', 'small.en', 'standard', 'tiny', 'tiny.en', 'top-center', 'top-left', 'top-right', 'true', 'yes', '~/.cache/whisper']

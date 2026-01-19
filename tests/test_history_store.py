@@ -12,8 +12,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from handfree.storage.history_store import HistoryStore, TranscriptionRecord
-from handfree.exceptions import StorageError
+from context_aware_whisper.storage.history_store import HistoryStore, TranscriptionRecord
+from context_aware_whisper.exceptions import StorageError
 
 
 @pytest.fixture
@@ -57,7 +57,7 @@ class TestHistoryStoreInit:
     def test_has_default_path(self):
         """Test that DEFAULT_PATH is defined."""
         assert hasattr(HistoryStore, "DEFAULT_PATH")
-        assert HistoryStore.DEFAULT_PATH == Path.home() / ".handfree" / "history.jsonl"
+        assert HistoryStore.DEFAULT_PATH == Path.home() / ".context-aware-whisper" / "history.jsonl"
 
     def test_loads_existing_entries(self, temp_file):
         """Test that existing entries are loaded on init."""
@@ -429,10 +429,10 @@ class TestStorageError:
 
     def test_storage_error_exists(self):
         """Test that StorageError is defined."""
-        from handfree.exceptions import StorageError
+        from context_aware_whisper.exceptions import StorageError
         assert StorageError is not None
 
-    def test_storage_error_is_handfree_error(self):
-        """Test that StorageError inherits from HandFreeError."""
-        from handfree.exceptions import StorageError, HandFreeError
-        assert issubclass(StorageError, HandFreeError)
+    def test_storage_error_is_caw_error(self):
+        """Test that StorageError inherits from Context-Aware WhisperError."""
+        from context_aware_whisper.exceptions import StorageError, Context-Aware WhisperError
+        assert issubclass(StorageError, Context-Aware WhisperError)

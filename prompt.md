@@ -1,6 +1,6 @@
 
-study (spec/spec.md). (spec/cross_platform_ui_spec.md)(spec/ui_improvements_spec.md)
-study (plan/focus_preservation_fix_plan.md)
+study (spec/README.md)
+study (plan/text_cleanup_plan.md)
 
  IMPORTANT
 

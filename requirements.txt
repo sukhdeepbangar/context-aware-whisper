@@ -19,7 +19,7 @@ python-dotenv>=1.0.0
 # macOS-specific dependencies (optional on other platforms)
 # These provide Fn key detection, AirPods mute detection, and AppleScript support
 # Install with: pip install -r requirements-macos.txt
-# or: pip install handfree[macos]
+# or: pip install context-aware-whisper[macos]
 pyobjc-core>=9.0
 pyobjc-framework-Cocoa>=9.0
 pyobjc-framework-AVFoundation>=9.0

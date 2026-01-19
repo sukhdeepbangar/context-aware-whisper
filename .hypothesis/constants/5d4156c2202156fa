@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/scripts/verify_feature.py
+# hypothesis_version: 6.150.2
+
+['\x1b[0m', '\x1b[1m', '\x1b[91m', '\x1b[92m', '\x1b[93m', '\x1b[94m', '\x1b[96m', '--all', '--cached', '--file', '--integration', '--name-only', '--unit', '-m', '-v', '.py', 'FAIL', 'HEAD~1', 'Integration Tests', 'PASS', 'Run all tests', 'Run only unit tests', 'Running all tests...', 'Targeted Tests', 'Tests failed', 'Tests passed', 'Unit Tests', 'Unit tests failed', '__main__', 'audio_recorder', 'blue', 'bold', 'config', 'cyan', 'diff', 'git', 'green', 'history', 'hotkey', 'local_transcriber', 'main', 'model_manager', 'mute_detector', 'not integration', 'output_handler', 'platform', 'pytest', 'red', 'reset', 'src/handfree/', 'store_true', 'tests/', 'tests/integration/', 'tests/test_config.py', 'tests/test_e2e.py', 'tests/test_ui.py', 'tests/test_z_main.py', 'transcriber', 'ui', 'yellow']

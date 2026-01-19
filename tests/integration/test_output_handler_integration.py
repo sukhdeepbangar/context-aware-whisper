@@ -32,7 +32,7 @@ class TestClipboardIntegration:
 
     def test_clipboard_roundtrip_basic(self):
         """Test basic clipboard copy/paste roundtrip."""
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.output_handler import OutputHandler
 
         handler = OutputHandler()
         test_text = "Hello, this is a test!"
@@ -44,7 +44,7 @@ class TestClipboardIntegration:
 
     def test_clipboard_roundtrip_unicode(self):
         """Test clipboard preserves unicode characters."""
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.output_handler import OutputHandler
 
         handler = OutputHandler()
         test_text = "Hello cafe 2+2=4 Japanese: konnichiwa"
@@ -59,7 +59,7 @@ class TestClipboardIntegration:
 
     def test_clipboard_empty_string(self):
         """Test clipboard handles empty string without error."""
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.output_handler import OutputHandler
 
         handler = OutputHandler()
         # Should not raise an error when copying empty string
@@ -75,7 +75,7 @@ class TestClipboardIntegration:
 
     def test_clipboard_whitespace(self):
         """Test clipboard preserves whitespace."""
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.output_handler import OutputHandler
 
         handler = OutputHandler()
         test_text = "  spaced  text  "
@@ -87,7 +87,7 @@ class TestClipboardIntegration:
 
     def test_clipboard_multiline(self):
         """Test clipboard handles multiline text."""
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.output_handler import OutputHandler
 
         handler = OutputHandler()
         test_text = "Line 1\nLine 2\nLine 3"
@@ -108,7 +108,7 @@ class TestTypeTextIntegration:
 
     def test_type_text_available(self):
         """Test that type_text method exists and is callable."""
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.output_handler import OutputHandler
 
         handler = OutputHandler()
         assert hasattr(handler, 'type_text') or hasattr(handler, 'type_text_instant')
@@ -120,14 +120,14 @@ class TestOutputHandlerUnit:
 
     def test_output_handler_initialization(self):
         """Test OutputHandler can be instantiated."""
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.output_handler import OutputHandler
 
         handler = OutputHandler()
         assert handler is not None
 
     def test_output_handler_has_copy_method(self):
         """Test OutputHandler has copy_to_clipboard method."""
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.output_handler import OutputHandler
 
         handler = OutputHandler()
         assert hasattr(handler, 'copy_to_clipboard')

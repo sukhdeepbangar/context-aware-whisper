@@ -19,7 +19,7 @@ while true; do
 
     # Create new tmux session and run claude with the prompt
     # Using --dangerously-skip-permissions to run without prompts
-    tmux new-session -d -s "$SESSION_NAME" "cd /Users/sukhdeepsingh/projects/ClaudeProjects/handfree && claude --dangerously-skip-permissions -p \"$PROMPT\" 2>&1 | tee -a agent_run.log; echo 'AGENT_COMPLETE' >> agent_status.txt"
+    tmux new-session -d -s "$SESSION_NAME" "cd /Users/sukhdeepsingh/projects/ClaudeProjects/context-aware-whisper && claude --dangerously-skip-permissions -p \"$PROMPT\" 2>&1 | tee -a agent_run.log; echo 'AGENT_COMPLETE' >> agent_status.txt"
 
     echo "$(date): Agent started in tmux session '$SESSION_NAME'" >> "$LOG_FILE"
 

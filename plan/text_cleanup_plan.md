@@ -40,7 +40,7 @@ Natural speech contains disfluencies that degrade written output:
 ### Phase 3: Integration
 - [x] 3.1 Add `TextCleaner` import to `main.py`
 - [x] 3.2 Create `get_text_cleaner()` factory function
-- [x] 3.3 Initialize `TextCleaner` in `HandFreeApp.__init__()`
+- [x] 3.3 Initialize `TextCleaner` in `Context-Aware WhisperApp.__init__()`
 - [x] 3.4 Integrate cleanup in `handle_stop()` after transcription
 - [x] 3.5 Add cleanup mode to startup banner
 - [x] 3.6 Update `__init__.py` exports
@@ -55,16 +55,16 @@ Natural speech contains disfluencies that degrade written output:
 
 ### Phase 5: Verification
 - [x] 5.1 Run all tests: `pytest tests/test_text_cleanup.py -v`
-- [x] 5.2 Manual test with `HANDFREE_TEXT_CLEANUP=off`
-- [x] 5.3 Manual test with `HANDFREE_TEXT_CLEANUP=light`
-- [x] 5.4 Manual test with `HANDFREE_TEXT_CLEANUP=standard`
+- [x] 5.2 Manual test with `CAW_TEXT_CLEANUP=off`
+- [x] 5.3 Manual test with `CAW_TEXT_CLEANUP=light`
+- [x] 5.4 Manual test with `CAW_TEXT_CLEANUP=standard`
 - [x] 5.5 Performance benchmark (<5ms for standard mode)
 - [x] 5.6 End-to-end test with real speech
 
 ### Phase 6: Integration Tests
 - [x] 6.1 Create `tests/test_text_cleanup_integration.py`
 - [x] 6.2 Test `get_text_cleaner()` factory creates correct cleaner from Config
-- [x] 6.3 Test `HandFreeApp` initializes `text_cleaner` correctly
+- [x] 6.3 Test `Context-Aware WhisperApp` initializes `text_cleaner` correctly
 - [x] 6.4 Test pipeline integration: mock transcriber output → text_cleaner → verify cleaned output
 - [x] 6.5 Test cleanup mode switching via environment variables
 - [x] 6.6 Test AGGRESSIVE mode fallback when local model unavailable
@@ -78,7 +78,7 @@ Natural speech contains disfluencies that degrade written output:
 - [x] 7.3 Implement lazy model loading (load on first use)
 - [x] 7.4 Update `clean_aggressive()` to use MLX instead of Groq
 - [x] 7.5 Update LLM_PROMPT for grammar and tense correction
-- [x] 7.6 Add `HANDFREE_LOCAL_MODEL` config option (default: Phi-3-mini)
+- [x] 7.6 Add `CAW_LOCAL_MODEL` config option (default: Phi-3-mini)
 - [x] 7.7 Add model download/cache management
 - [x] 7.8 Add fallback to STANDARD mode if MLX unavailable
 - [ ] 7.9 Performance optimization: batch processing for long texts
@@ -96,19 +96,19 @@ Natural speech contains disfluencies that degrade written output:
 
 ### Step 1.1: Add TextCleanupError
 
-**File:** `src/handfree/exceptions.py`
+**File:** `src/context_aware_whisper/exceptions.py`
 
 Add after `OutputHandlerError`:
 
 ```python
-class TextCleanupError(HandFreeError):
+class TextCleanupError(Context-Aware WhisperError):
     """Error cleaning transcribed text."""
     pass
 ```
 
 ### Step 1.2: Create text_cleanup.py
 
-**File:** `src/handfree/text_cleanup.py`
+**File:** `src/context_aware_whisper/text_cleanup.py`
 
 ```python
 """
@@ -120,7 +120,7 @@ import re
 from enum import Enum, auto
 from typing import Optional, Set, List
 
-from handfree.exceptions import TextCleanupError
+from context_aware_whisper.exceptions import TextCleanupError
 
 
 class CleanupMode(Enum):
@@ -374,7 +374,7 @@ def _normalize_whitespace(self, text: str) -> str:
 
 ### Step 2.1-2.5: Update config.py
 
-**File:** `src/handfree/config.py`
+**File:** `src/context_aware_whisper/config.py`
 
 Add after `VALID_WHISPER_MODELS`:
 
@@ -400,8 +400,8 @@ Update `from_env()`:
 ```python
 return cls(
     # ... existing fields ...
-    text_cleanup=os.environ.get("HANDFREE_TEXT_CLEANUP", "standard").lower(),
-    preserve_intentional=parse_bool(os.environ.get("HANDFREE_PRESERVE_INTENTIONAL", "true"), True),
+    text_cleanup=os.environ.get("CAW_TEXT_CLEANUP", "standard").lower(),
+    preserve_intentional=parse_bool(os.environ.get("CAW_PRESERVE_INTENTIONAL", "true"), True),
 )
 ```
 
@@ -411,14 +411,14 @@ Update `validate()`:
 # Validate text cleanup mode
 if self.text_cleanup not in VALID_CLEANUP_MODES:
     raise ValueError(
-        f"HANDFREE_TEXT_CLEANUP must be one of: {', '.join(VALID_CLEANUP_MODES)}. "
+        f"CAW_TEXT_CLEANUP must be one of: {', '.join(VALID_CLEANUP_MODES)}. "
         f"Got: {self.text_cleanup}"
     )
 
 # Warn if aggressive mode without API key
 if self.text_cleanup == "aggressive" and not self.groq_api_key:
     warnings.append(
-        "HANDFREE_TEXT_CLEANUP=aggressive requires GROQ_API_KEY. "
+        "CAW_TEXT_CLEANUP=aggressive requires GROQ_API_KEY. "
         "Will fall back to 'standard' mode."
     )
 ```
@@ -429,10 +429,10 @@ if self.text_cleanup == "aggressive" and not self.groq_api_key:
 # Text Cleanup Settings
 # Removes speech disfluencies (um, uh, false starts, etc.)
 # Options: off, light, standard, aggressive
-HANDFREE_TEXT_CLEANUP=standard
+CAW_TEXT_CLEANUP=standard
 
 # Preserve intentional patterns like "I like pizza" vs filler "like"
-HANDFREE_PRESERVE_INTENTIONAL=true
+CAW_PRESERVE_INTENTIONAL=true
 ```
 
 ---
@@ -443,7 +443,7 @@ HANDFREE_PRESERVE_INTENTIONAL=true
 
 Add import:
 ```python
-from handfree.text_cleanup import TextCleaner, CleanupMode
+from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 ```
 
 Add factory function:
@@ -465,7 +465,7 @@ def get_text_cleaner(config: Config) -> TextCleaner:
     )
 ```
 
-Update `HandFreeApp.__init__()`:
+Update `Context-Aware WhisperApp.__init__()`:
 ```python
 # Initialize text cleaner
 self.text_cleaner = get_text_cleaner(config)
@@ -495,8 +495,8 @@ print(f"  Text cleanup: {self.config.text_cleanup}")
 ### Step 3.6: Update __init__.py
 
 ```python
-from handfree.text_cleanup import TextCleaner, CleanupMode
-from handfree.exceptions import TextCleanupError
+from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
+from context_aware_whisper.exceptions import TextCleanupError
 
 __all__ = [
     # ... existing exports ...
@@ -518,7 +518,7 @@ __all__ = [
 """Tests for text cleanup module."""
 
 import pytest
-from handfree.text_cleanup import TextCleaner, CleanupMode
+from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
 
 class TestCleanupModeOff:
@@ -671,7 +671,7 @@ class TestPropertyBased:
 ### Step 5.1: Run all tests
 
 ```bash
-cd /Users/sukhdeepsingh/projects/ClaudeProjects/handfree
+cd /Users/sukhdeepsingh/projects/ClaudeProjects/context_aware_whisper
 source venv/bin/activate
 pytest tests/test_text_cleanup.py -v
 ```
@@ -680,17 +680,17 @@ pytest tests/test_text_cleanup.py -v
 
 ```bash
 # Test with cleanup off
-HANDFREE_TEXT_CLEANUP=off python main.py
+CAW_TEXT_CLEANUP=off python main.py
 # Speak: "Um, hello"
 # Expected: "Um, hello" (unchanged)
 
 # Test with light mode
-HANDFREE_TEXT_CLEANUP=light python main.py
+CAW_TEXT_CLEANUP=light python main.py
 # Speak: "Um, uh, hello there"
 # Expected: "hello there"
 
 # Test with standard mode (default)
-HANDFREE_TEXT_CLEANUP=standard python main.py
+CAW_TEXT_CLEANUP=standard python main.py
 # Speak: "Hey, um, can you, like, you know, send this?"
 # Expected: "Hey, can you send this?"
 ```
@@ -699,7 +699,7 @@ HANDFREE_TEXT_CLEANUP=standard python main.py
 
 ```python
 import time
-from handfree.text_cleanup import TextCleaner, CleanupMode
+from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
 cleaner = TextCleaner(mode=CleanupMode.STANDARD)
 text = "Um, I I think, you know, like, we should, basically, actually do this."
@@ -718,7 +718,7 @@ print(f"Average cleanup time: {avg_ms:.2f}ms")
 
 ### Step 5.6: End-to-end test
 
-1. Start HandFree with default settings
+1. Start Context-Aware Whisper with default settings
 2. Record speech with intentional disfluencies
 3. Verify cleaned output appears in active app
 4. Check that meaning is preserved
@@ -737,7 +737,7 @@ Integration tests for text cleanup module.
 
 Tests the integration of TextCleaner with:
 - Configuration system
-- HandFreeApp pipeline
+- Context-Aware WhisperApp pipeline
 - Environment variable handling
 """
 
@@ -745,8 +745,8 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 import os
 
-from handfree.config import Config
-from handfree.text_cleanup import TextCleaner, CleanupMode
+from context_aware_whisper.config import Config
+from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 ```
 
 ### Step 6.2: Test get_text_cleaner() factory
@@ -757,7 +757,7 @@ class TestGetTextCleanerFactory:
 
     def test_creates_off_mode_cleaner(self):
         """Factory creates OFF mode cleaner from config."""
-        from handfree.main import get_text_cleaner
+        from context_aware_whisper.main import get_text_cleaner
         config = Mock()
         config.text_cleanup = "off"
         config.preserve_intentional = True
@@ -769,7 +769,7 @@ class TestGetTextCleanerFactory:
 
     def test_creates_light_mode_cleaner(self):
         """Factory creates LIGHT mode cleaner from config."""
-        from handfree.main import get_text_cleaner
+        from context_aware_whisper.main import get_text_cleaner
         config = Mock()
         config.text_cleanup = "light"
         config.preserve_intentional = True
@@ -781,7 +781,7 @@ class TestGetTextCleanerFactory:
 
     def test_creates_standard_mode_cleaner(self):
         """Factory creates STANDARD mode cleaner from config."""
-        from handfree.main import get_text_cleaner
+        from context_aware_whisper.main import get_text_cleaner
         config = Mock()
         config.text_cleanup = "standard"
         config.preserve_intentional = True
@@ -793,7 +793,7 @@ class TestGetTextCleanerFactory:
 
     def test_creates_aggressive_mode_with_api_key(self):
         """Factory creates AGGRESSIVE mode cleaner with API key."""
-        from handfree.main import get_text_cleaner
+        from context_aware_whisper.main import get_text_cleaner
         config = Mock()
         config.text_cleanup = "aggressive"
         config.preserve_intentional = True
@@ -806,7 +806,7 @@ class TestGetTextCleanerFactory:
 
     def test_preserve_intentional_passed_to_cleaner(self):
         """Factory passes preserve_intentional flag to cleaner."""
-        from handfree.main import get_text_cleaner
+        from context_aware_whisper.main import get_text_cleaner
         config = Mock()
         config.text_cleanup = "standard"
         config.preserve_intentional = False
@@ -817,20 +817,20 @@ class TestGetTextCleanerFactory:
         assert cleaner.preserve_intentional is False
 ```
 
-### Step 6.3: Test HandFreeApp initialization
+### Step 6.3: Test Context-Aware WhisperApp initialization
 
 ```python
-class TestHandFreeAppTextCleanerInit:
-    """Tests for HandFreeApp text_cleaner initialization."""
+class TestContext-Aware WhisperAppTextCleanerInit:
+    """Tests for Context-Aware WhisperApp text_cleaner initialization."""
 
-    @patch('handfree.main.get_transcriber')
-    @patch('handfree.main.get_output_handler')
-    @patch('handfree.main.get_text_cleaner')
+    @patch('context_aware_whisper.main.get_transcriber')
+    @patch('context_aware_whisper.main.get_output_handler')
+    @patch('context_aware_whisper.main.get_text_cleaner')
     def test_app_initializes_text_cleaner(
         self, mock_get_cleaner, mock_get_output, mock_get_transcriber
     ):
-        """HandFreeApp initializes text_cleaner from config."""
-        from handfree.main import HandFreeApp
+        """Context-Aware WhisperApp initializes text_cleaner from config."""
+        from context_aware_whisper.main import Context-Aware WhisperApp
 
         mock_cleaner = Mock()
         mock_get_cleaner.return_value = mock_cleaner
@@ -841,8 +841,8 @@ class TestHandFreeAppTextCleanerInit:
         config.text_cleanup = "standard"
         config.validate.return_value = []
 
-        # This may need adjustment based on actual HandFreeApp constructor
-        app = HandFreeApp(config)
+        # This may need adjustment based on actual Context-Aware WhisperApp constructor
+        app = Context-Aware WhisperApp(config)
 
         mock_get_cleaner.assert_called_once_with(config)
         assert app.text_cleaner == mock_cleaner
@@ -856,7 +856,7 @@ class TestPipelineIntegration:
 
     def test_transcription_passes_through_cleaner(self):
         """Transcribed text is cleaned before output."""
-        from handfree.main import get_text_cleaner
+        from context_aware_whisper.main import get_text_cleaner
 
         config = Mock()
         config.text_cleanup = "standard"
@@ -876,7 +876,7 @@ class TestPipelineIntegration:
 
     def test_pipeline_preserves_text_when_off(self):
         """Text passes through unchanged when cleanup is OFF."""
-        from handfree.main import get_text_cleaner
+        from context_aware_whisper.main import get_text_cleaner
 
         config = Mock()
         config.text_cleanup = "off"
@@ -898,14 +898,14 @@ class TestEnvironmentVariableIntegration:
     """Tests for cleanup mode via environment variables."""
 
     def test_config_reads_cleanup_mode_from_env(self):
-        """Config.from_env() reads HANDFREE_TEXT_CLEANUP."""
-        with patch.dict(os.environ, {"HANDFREE_TEXT_CLEANUP": "light"}):
+        """Config.from_env() reads CAW_TEXT_CLEANUP."""
+        with patch.dict(os.environ, {"CAW_TEXT_CLEANUP": "light"}):
             config = Config.from_env()
             assert config.text_cleanup == "light"
 
     def test_config_reads_preserve_intentional_from_env(self):
-        """Config.from_env() reads HANDFREE_PRESERVE_INTENTIONAL."""
-        with patch.dict(os.environ, {"HANDFREE_PRESERVE_INTENTIONAL": "false"}):
+        """Config.from_env() reads CAW_PRESERVE_INTENTIONAL."""
+        with patch.dict(os.environ, {"CAW_PRESERVE_INTENTIONAL": "false"}):
             config = Config.from_env()
             assert config.preserve_intentional is False
 
@@ -934,7 +934,7 @@ class TestAggressiveModeFallback:
         assert "Um" not in result
         assert "hello" in result.lower()
 
-    @patch('handfree.text_cleanup.Groq')
+    @patch('context_aware_whisper.text_cleanup.Groq')
     def test_aggressive_falls_back_on_api_error(self, mock_groq):
         """AGGRESSIVE mode falls back to STANDARD on API error."""
         mock_groq.side_effect = Exception("API error")
@@ -970,7 +970,7 @@ class TestCleanupSkippedWhenOff:
 class TestLoggingIntegration:
     """Tests for cleanup logging."""
 
-    @patch('handfree.main.logger')
+    @patch('context_aware_whisper.main.logger')
     def test_logs_when_text_is_cleaned(self, mock_logger):
         """Debug log is emitted when text is cleaned."""
         # This test would need to be run against actual handle_stop()
@@ -1006,7 +1006,7 @@ local-llm = [
 
 ### Step 7.2: Create local_llm.py module
 
-**File:** `src/handfree/local_llm.py`
+**File:** `src/context_aware_whisper/local_llm.py`
 
 ```python
 """
@@ -1113,7 +1113,7 @@ def unload_model():
 
 ### Step 7.3-7.4: Update text_cleanup.py for MLX
 
-**File:** `src/handfree/text_cleanup.py`
+**File:** `src/context_aware_whisper/text_cleanup.py`
 
 Update the `clean_aggressive()` method:
 
@@ -1139,7 +1139,7 @@ def clean_aggressive(self, text: str) -> str:
         return text
 
     try:
-        from handfree.local_llm import generate, is_available
+        from context_aware_whisper.local_llm import generate, is_available
 
         if not is_available():
             logger.warning("MLX not available, falling back to standard cleanup")
@@ -1191,7 +1191,7 @@ def __init__(
 
 ### Step 7.6: Update config.py
 
-**File:** `src/handfree/config.py`
+**File:** `src/context_aware_whisper/config.py`
 
 Add to Config dataclass:
 ```python
@@ -1202,7 +1202,7 @@ local_model: str = "mlx-community/Phi-3-mini-4k-instruct-4bit"
 Update `from_env()`:
 ```python
 local_model=os.environ.get(
-    "HANDFREE_LOCAL_MODEL",
+    "CAW_LOCAL_MODEL",
     "mlx-community/Phi-3-mini-4k-instruct-4bit"
 ),
 ```
@@ -1233,15 +1233,15 @@ def get_text_cleaner(config: Config) -> TextCleaner:
 # Text Cleanup Settings
 # Removes speech disfluencies and corrects grammar/tenses
 # Options: off, light, standard, aggressive
-HANDFREE_TEXT_CLEANUP=standard
+CAW_TEXT_CLEANUP=standard
 
 # Local model for AGGRESSIVE mode (MLX model from HuggingFace)
 # Default: mlx-community/Phi-3-mini-4k-instruct-4bit (~2GB)
 # Alternative: mlx-community/Mistral-7B-Instruct-v0.3-4bit (~4GB, better quality)
-HANDFREE_LOCAL_MODEL=mlx-community/Phi-3-mini-4k-instruct-4bit
+CAW_LOCAL_MODEL=mlx-community/Phi-3-mini-4k-instruct-4bit
 
 # Preserve intentional patterns like "I like pizza" vs filler "like"
-HANDFREE_PRESERVE_INTENTIONAL=true
+CAW_PRESERVE_INTENTIONAL=true
 ```
 
 ---
@@ -1260,15 +1260,15 @@ HANDFREE_PRESERVE_INTENTIONAL=true
 ## Files Summary
 
 ### New Files
-- `src/handfree/text_cleanup.py`
-- `src/handfree/local_llm.py` - MLX model management (Phase 7)
+- `src/context_aware_whisper/text_cleanup.py`
+- `src/context_aware_whisper/local_llm.py` - MLX model management (Phase 7)
 - `tests/test_text_cleanup.py`
 - `tests/test_text_cleanup_integration.py` - Integration tests (Phase 6)
 
 ### Modified Files
-- `src/handfree/exceptions.py` - Add `TextCleanupError`
-- `src/handfree/config.py` - Add cleanup config options + local_model
-- `src/handfree/__init__.py` - Export new classes
+- `src/context_aware_whisper/exceptions.py` - Add `TextCleanupError`
+- `src/context_aware_whisper/config.py` - Add cleanup config options + local_model
+- `src/context_aware_whisper/__init__.py` - Export new classes
 - `main.py` - Integrate cleanup in pipeline
 - `.env.example` - Document new env vars
 - `pyproject.toml` - Add mlx/mlx-lm optional dependencies

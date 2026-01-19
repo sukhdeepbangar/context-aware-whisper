@@ -11,8 +11,8 @@ import io
 from scipy.io import wavfile
 import numpy as np
 
-from handfree.transcriber import Transcriber
-from handfree.exceptions import TranscriptionError
+from context_aware_whisper.transcriber import Transcriber
+from context_aware_whisper.exceptions import TranscriptionError
 
 
 class TestTranscriberUnit(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestTranscriberUnit(unittest.TestCase):
             Transcriber()
         self.assertIn("GROQ_API_KEY", str(context.exception))
 
-    @patch('handfree.transcriber.Groq')
+    @patch('context_aware_whisper.transcriber.Groq')
     def test_transcribe_success(self, mock_groq_class):
         """Test successful transcription."""
         # Set up mock
@@ -64,14 +64,14 @@ class TestTranscriberUnit(unittest.TestCase):
         self.assertEqual(result, "Hello world")
         mock_client.audio.transcriptions.create.assert_called_once()
 
-    @patch('handfree.transcriber.Groq')
+    @patch('context_aware_whisper.transcriber.Groq')
     def test_transcribe_empty_audio(self, mock_groq_class):
         """Test transcription with empty audio returns empty string."""
         transcriber = Transcriber()
         result = transcriber.transcribe(b"")
         self.assertEqual(result, "")
 
-    @patch('handfree.transcriber.Groq')
+    @patch('context_aware_whisper.transcriber.Groq')
     def test_transcribe_with_language(self, mock_groq_class):
         """Test transcription with language parameter."""
         mock_client = MagicMock()
@@ -86,7 +86,7 @@ class TestTranscriberUnit(unittest.TestCase):
         call_kwargs = mock_client.audio.transcriptions.create.call_args[1]
         self.assertEqual(call_kwargs['language'], "fr")
 
-    @patch('handfree.transcriber.Groq')
+    @patch('context_aware_whisper.transcriber.Groq')
     def test_transcribe_strips_whitespace(self, mock_groq_class):
         """Test that transcription result is stripped of whitespace."""
         mock_client = MagicMock()
@@ -99,7 +99,7 @@ class TestTranscriberUnit(unittest.TestCase):
 
         self.assertEqual(result, "Hello world")
 
-    @patch('handfree.transcriber.Groq')
+    @patch('context_aware_whisper.transcriber.Groq')
     @patch('time.sleep')  # Mock sleep to speed up test
     def test_transcribe_retry_on_rate_limit(self, mock_sleep, mock_groq_class):
         """Test retry logic on rate limit error."""
@@ -120,7 +120,7 @@ class TestTranscriberUnit(unittest.TestCase):
         self.assertEqual(mock_client.audio.transcriptions.create.call_count, 2)
         mock_sleep.assert_called_once_with(1)  # 2^0 = 1
 
-    @patch('handfree.transcriber.Groq')
+    @patch('context_aware_whisper.transcriber.Groq')
     @patch('time.sleep')
     def test_transcribe_max_retries_exceeded(self, mock_sleep, mock_groq_class):
         """Test that TranscriptionError is raised after max retries."""
@@ -137,7 +137,7 @@ class TestTranscriberUnit(unittest.TestCase):
         self.assertIn("failed after 3 attempts", str(context.exception))
         self.assertEqual(mock_client.audio.transcriptions.create.call_count, 3)
 
-    @patch('handfree.transcriber.Groq')
+    @patch('context_aware_whisper.transcriber.Groq')
     def test_transcribe_handles_text_response(self, mock_groq_class):
         """Test handling of text response format."""
         mock_client = MagicMock()
@@ -150,7 +150,7 @@ class TestTranscriberUnit(unittest.TestCase):
 
         self.assertEqual(result, "Direct text response")
 
-    @patch('handfree.transcriber.Groq')
+    @patch('context_aware_whisper.transcriber.Groq')
     def test_transcribe_handles_object_response(self, mock_groq_class):
         """Test handling of object response with text attribute."""
         mock_client = MagicMock()

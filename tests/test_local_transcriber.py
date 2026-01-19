@@ -15,8 +15,8 @@ import numpy as np
 from hypothesis import given, settings, strategies as st
 from scipy.io import wavfile
 
-from handfree.local_transcriber import LocalTranscriber
-from handfree.exceptions import LocalTranscriptionError
+from context_aware_whisper.local_transcriber import LocalTranscriber
+from context_aware_whisper.exceptions import LocalTranscriptionError
 
 
 class TestLocalTranscriberUnit(unittest.TestCase):
@@ -53,7 +53,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
         for model in expected_models:
             self.assertIn(model, LocalTranscriber.AVAILABLE_MODELS)
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_transcribe_empty_audio(self, mock_model_class):
         """Test transcription with empty audio returns empty string."""
         transcriber = LocalTranscriber()
@@ -61,7 +61,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
         self.assertEqual(result, "")
         mock_model_class.assert_not_called()
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_transcribe_success(self, mock_model_class):
         """Test successful transcription."""
         mock_model = MagicMock()
@@ -78,7 +78,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
         self.assertEqual(result, "Hello world")
         mock_model.transcribe.assert_called_once()
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_transcribe_multiple_segments(self, mock_model_class):
         """Test transcription with multiple segments."""
         mock_model = MagicMock()
@@ -96,7 +96,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
 
         self.assertEqual(result, "Hello world")
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_transcribe_strips_whitespace(self, mock_model_class):
         """Test that transcription result is stripped of whitespace."""
         mock_model = MagicMock()
@@ -112,7 +112,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
 
         self.assertEqual(result, "Hello world")
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_transcribe_empty_segments(self, mock_model_class):
         """Test transcription with empty/whitespace-only segments."""
         mock_model = MagicMock()
@@ -132,7 +132,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
 
         self.assertEqual(result, "Hello")
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_transcribe_failure_raises_error(self, mock_model_class):
         """Test that transcription failure raises LocalTranscriptionError."""
         mock_model = MagicMock()
@@ -146,7 +146,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
             transcriber.transcribe(audio_bytes)
         self.assertIn("Transcription failed", str(context.exception))
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_model_load_failure_raises_error(self, mock_model_class):
         """Test that model loading failure raises LocalTranscriptionError."""
         mock_model_class.side_effect = Exception("Failed to load model")
@@ -158,7 +158,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
             transcriber.transcribe(audio_bytes)
         self.assertIn("Failed to load whisper model", str(context.exception))
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_model_loaded_property(self, mock_model_class):
         """Test model_loaded property."""
         mock_model = MagicMock()
@@ -174,7 +174,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
         transcriber.transcribe(self._create_test_audio())
         self.assertTrue(transcriber.model_loaded)
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_unload_model(self, mock_model_class):
         """Test unload_model clears model from memory."""
         mock_model = MagicMock()
@@ -212,7 +212,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
             transcriber = LocalTranscriber(models_dir=temp_dir)
             self.assertTrue(transcriber.is_model_downloaded())
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_download_model_already_exists(self, mock_model_class):
         """Test download_model when model already exists."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -224,7 +224,7 @@ class TestLocalTranscriberUnit(unittest.TestCase):
 
             mock_model_class.assert_not_called()
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_download_model_triggers_download(self, mock_model_class):
         """Test download_model triggers model loading when not present."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -274,7 +274,7 @@ class TestLocalTranscriberProperties(unittest.TestCase):
 class TestLocalTranscriberTempFileCleanup(unittest.TestCase):
     """Tests for temporary file cleanup."""
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_temp_file_cleaned_on_success(self, mock_model_class):
         """Test temp file is cleaned up after successful transcription."""
         mock_model = MagicMock()
@@ -293,7 +293,7 @@ class TestLocalTranscriberTempFileCleanup(unittest.TestCase):
         new_files = temp_files_after - temp_files_before
         self.assertEqual(len(new_files), 0, "Temp file not cleaned up")
 
-    @patch('handfree.local_transcriber.Model')
+    @patch('context_aware_whisper.local_transcriber.Model')
     def test_temp_file_cleaned_on_error(self, mock_model_class):
         """Test temp file is cleaned up even when transcription fails."""
         mock_model = MagicMock()

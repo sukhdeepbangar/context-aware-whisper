@@ -1,6 +1,6 @@
 # Integration Testing - Implementation Plan
 
-Step-by-step guide to implement functional/integration testing for HandFree.
+Step-by-step guide to implement functional/integration testing for Context-Aware Whisper.
 
 **Spec:** [../spec/integration_testing_spec.md](../spec/integration_testing_spec.md)
 
@@ -327,7 +327,7 @@ import pytest
 import numpy as np
 from scipy.io import wavfile
 
-from handfree.audio_recorder import AudioRecorder
+from context_aware_whisper.audio_recorder import AudioRecorder
 
 
 @pytest.mark.integration
@@ -380,7 +380,7 @@ class TestLocalTranscriberIntegration:
 
     @pytest.fixture
     def transcriber(self):
-        from handfree.local_transcriber import LocalTranscriber
+        from context_aware_whisper.local_transcriber import LocalTranscriber
         return LocalTranscriber(model_name="base.en")
 
     def test_transcribe_fixture(self, transcriber, audio_fixtures_dir):
@@ -424,7 +424,7 @@ class TestLocalTranscriberIntegration:
 import pytest
 import pyperclip
 
-from handfree.output_handler import OutputHandler
+from context_aware_whisper.output_handler import OutputHandler
 
 
 @pytest.mark.integration
@@ -468,8 +468,8 @@ class TestE2EFlow:
 
     def test_audio_to_clipboard(self, audio_fixtures_dir):
         """Test: audio file -> transcription -> clipboard."""
-        from handfree.local_transcriber import LocalTranscriber
-        from handfree.output_handler import OutputHandler
+        from context_aware_whisper.local_transcriber import LocalTranscriber
+        from context_aware_whisper.output_handler import OutputHandler
 
         audio_path = audio_fixtures_dir / "hello_world.wav"
         if not audio_path.exists():
@@ -517,14 +517,14 @@ Add integration job:
         continue-on-error: true
 
       - name: Download whisper model
-        run: python -m handfree.model_manager download tiny.en
+        run: python -m context_aware_whisper.model_manager download tiny.en
         continue-on-error: true
 
       - name: Run integration tests
         run: |
           pytest tests/integration/ -v -m "integration and not requires_microphone"
         env:
-          HANDFREE_WHISPER_MODEL: tiny.en
+          CAW_WHISPER_MODEL: tiny.en
 ```
 
 ---

@@ -1,7 +1,7 @@
-# HandFree Project - Session Context
+# Context-Aware Whisper Project - Session Context
 
 ## Project Overview
-HandFree is a speech-to-text app for macOS that:
+Context-Aware Whisper is a speech-to-text app for macOS that:
 - Records audio via Fn key press/release
 - Transcribes using Groq Whisper API
 - Auto-types transcribed text at cursor position
@@ -85,16 +85,16 @@ pip install ollama
 
 ## File Structure
 ```
-handfree/
+context-aware-whisper/
 ├── main.py                    # Main entry point
-├── src/handfree/
+├── src/context-aware-whisper/
 │   ├── audio_recorder.py     # Audio capture
 │   ├── transcriber.py        # Groq Whisper API
 │   ├── output_handler.py     # Auto-typing
 │   ├── hotkey_detector.py    # Fn key detection
 │   └── mute_detector.py      # AirPods mute (not working)
-├── handfree.sh               # Management script
-├── handfree.log              # Runtime logs
+├── context-aware-whisper.sh               # Management script
+├── context-aware-whisper.log              # Runtime logs
 └── .env                      # API keys
 ```
 
@@ -153,7 +153,7 @@ handfree/
 - `whispercpp` - Alternative binding
 
 **Integration Points:**
-1. `src/handfree/transcriber.py` - Add `WhisperCppTranscriber` class
+1. `src/context-aware-whisper/transcriber.py` - Add `WhisperCppTranscriber` class
 2. Configuration option to choose backend (groq vs local)
 3. Model download/management utility
 
@@ -182,5 +182,5 @@ See `future_plans.md` for detailed implementation plan.
 ## Current Environment
 - Mac: Darwin 24.5.0
 - Python: 3.14
-- Running in: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree
+- Running in: /Users/sukhdeepsingh/projects/ClaudeProjects/context-aware-whisper
 - App running in background: PID 33289

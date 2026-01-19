@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "handfree"
+name = "context-aware-whisper"
 version = "0.1.0"
 description = "Cross-platform speech-to-text using hotkey triggers and Groq Whisper API"
 readme = "README.md"
@@ -72,16 +72,16 @@ dev = [
 ]
 # All optional dependencies for development
 all = [
-    "handfree[macos,local,local-llm,dev]",
+    "context-aware-whisper[macos,local,local-llm,dev]",
 ]
 
 [project.scripts]
-handfree = "main:main"
-handfree-models = "handfree.model_manager:main"
+context-aware-whisper = "main:main"
+caw-models = "context_aware_whisper.model_manager:main"
 
 [project.urls]
-Homepage = "https://github.com/sukhdeepsingh/handfree"
-Repository = "https://github.com/sukhdeepsingh/handfree"
+Homepage = "https://github.com/sukhdeepsingh/context-aware-whisper"
+Repository = "https://github.com/sukhdeepsingh/context-aware-whisper"
 
 [tool.setuptools.packages.find]
 where = ["src"]

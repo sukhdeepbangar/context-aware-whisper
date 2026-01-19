@@ -1,6 +1,6 @@
 # Integration Testing Specification
 
-Specification for functional/integration testing of HandFree application with real hardware and whisper.cpp.
+Specification for functional/integration testing of Context-Aware Whisper application with real hardware and whisper.cpp.
 
 ---
 

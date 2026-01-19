@@ -1,4 +1,4 @@
-# HandFree - Quick Reference
+# Context-Aware Whisper - Quick Reference
 
 ## Current Status
 - ✅ Working: Fn key → Record → Transcribe → Type
@@ -7,11 +7,11 @@
 
 ## Management Commands
 ```bash
-./handfree.sh status    # Check if running
-./handfree.sh start     # Start app
-./handfree.sh stop      # Stop app
-./handfree.sh logs      # View logs
-./handfree.sh restart   # Restart
+./context-aware-whisper.sh status    # Check if running
+./context-aware-whisper.sh start     # Start app
+./context-aware-whisper.sh stop      # Stop app
+./context-aware-whisper.sh logs      # View logs
+./context-aware-whisper.sh restart   # Restart
 ```
 
 ## Next Features to Implement
@@ -21,8 +21,8 @@
 
 ## Key Files
 - `main.py` - Main application
-- `src/handfree/transcriber.py` - Groq Whisper integration
-- `src/handfree/audio_recorder.py` - Audio capture
+- `src/context-aware-whisper/transcriber.py` - Groq Whisper integration
+- `src/context-aware-whisper/audio_recorder.py` - Audio capture
 - `SESSION_CONTEXT.md` - Full project context
 - `NEXT_SESSION_PROMPT.md` - Planning prompt
 

@@ -20,12 +20,12 @@ class TestMacOSTypeTextInstant(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         self.handler = MacOSOutputHandler()
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_instant_paste_saves_and_restores_clipboard(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that clipboard is saved and restored after paste."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -42,9 +42,9 @@ class TestMacOSTypeTextInstant(unittest.TestCase):
         # Verify order: paste (save), copy (new), copy (restore)
         self.assertEqual(mock_pyperclip.copy.call_count, 2)
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_instant_paste_sends_cmd_v(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that Cmd+V is sent to paste."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -58,8 +58,8 @@ class TestMacOSTypeTextInstant(unittest.TestCase):
         self.assertIn('keystroke "v"', script)
         self.assertIn('command down', script)
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
     def test_instant_paste_empty_string_does_nothing(self, mock_run, mock_pyperclip):
         """Test that empty string doesn't trigger any actions."""
         self.handler.type_text_instant("")
@@ -67,9 +67,9 @@ class TestMacOSTypeTextInstant(unittest.TestCase):
         mock_run.assert_not_called()
         mock_pyperclip.copy.assert_not_called()
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_instant_paste_handles_empty_clipboard(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that empty clipboard is handled gracefully."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -81,38 +81,38 @@ class TestMacOSTypeTextInstant(unittest.TestCase):
         # Should still copy the new text
         mock_pyperclip.copy.assert_called_with("new text")
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_instant_paste_restores_clipboard_even_on_error(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that clipboard is restored even if paste fails."""
         mock_pyperclip.paste.return_value = "original content"
         mock_run.side_effect = subprocess.CalledProcessError(1, 'osascript', stderr=b"error")
 
-        from handfree.exceptions import OutputError
+        from context_aware_whisper.exceptions import OutputError
         with self.assertRaises(OutputError):
             self.handler.type_text_instant("new text")
 
         # Original clipboard should still be restored
         mock_pyperclip.copy.assert_called_with("original content")
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_instant_paste_timeout_raises_error(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that timeout raises OutputError."""
         mock_pyperclip.paste.return_value = ""
         mock_run.side_effect = subprocess.TimeoutExpired('osascript', 10)
 
-        from handfree.exceptions import OutputError
+        from context_aware_whisper.exceptions import OutputError
         with self.assertRaises(OutputError) as context:
             self.handler.type_text_instant("test")
 
         self.assertIn("timed out", str(context.exception))
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_instant_paste_waits_for_completion(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that sleep is called to wait for paste completion."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -126,25 +126,25 @@ class TestMacOSTypeTextInstant(unittest.TestCase):
 class TestWindowsTypeTextInstant(unittest.TestCase):
     """Tests for Windows type_text_instant() method."""
 
-    @patch('handfree.platform.windows.output_handler.Controller')
+    @patch('context_aware_whisper.platform.windows.output_handler.Controller')
     def setUp(self, mock_controller):
         """Set up test fixtures."""
         self.mock_keyboard = MagicMock()
         mock_controller.return_value = self.mock_keyboard
 
-        from handfree.platform.windows.output_handler import WindowsOutputHandler
+        from context_aware_whisper.platform.windows.output_handler import WindowsOutputHandler
         self.handler = WindowsOutputHandler()
 
-    @patch('handfree.platform.windows.output_handler.pyperclip')
-    @patch('handfree.platform.windows.output_handler.time.sleep')
-    @patch('handfree.platform.windows.output_handler.Controller')
+    @patch('context_aware_whisper.platform.windows.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.windows.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.windows.output_handler.Controller')
     def test_instant_paste_saves_and_restores_clipboard(self, mock_controller, mock_sleep, mock_pyperclip):
         """Test that clipboard is saved and restored after paste."""
         mock_keyboard = MagicMock()
         mock_controller.return_value = mock_keyboard
         mock_pyperclip.paste.return_value = "original content"
 
-        from handfree.platform.windows.output_handler import WindowsOutputHandler
+        from context_aware_whisper.platform.windows.output_handler import WindowsOutputHandler
         handler = WindowsOutputHandler()
         handler.type_text_instant("new text")
 
@@ -156,9 +156,9 @@ class TestWindowsTypeTextInstant(unittest.TestCase):
         self.assertEqual(copy_calls[0][0][0], "new text")
         self.assertEqual(copy_calls[1][0][0], "original content")
 
-    @patch('handfree.platform.windows.output_handler.pyperclip')
-    @patch('handfree.platform.windows.output_handler.time.sleep')
-    @patch('handfree.platform.windows.output_handler.Controller')
+    @patch('context_aware_whisper.platform.windows.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.windows.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.windows.output_handler.Controller')
     def test_instant_paste_sends_ctrl_v(self, mock_controller, mock_sleep, mock_pyperclip):
         """Test that Ctrl+V is sent to paste."""
         from pynput.keyboard import Key
@@ -167,7 +167,7 @@ class TestWindowsTypeTextInstant(unittest.TestCase):
         mock_controller.return_value = mock_keyboard
         mock_pyperclip.paste.return_value = ""
 
-        from handfree.platform.windows.output_handler import WindowsOutputHandler
+        from context_aware_whisper.platform.windows.output_handler import WindowsOutputHandler
         handler = WindowsOutputHandler()
         handler.type_text_instant("test text")
 
@@ -177,14 +177,14 @@ class TestWindowsTypeTextInstant(unittest.TestCase):
         mock_keyboard.release.assert_any_call('v')
         mock_keyboard.release.assert_any_call(Key.ctrl)
 
-    @patch('handfree.platform.windows.output_handler.pyperclip')
-    @patch('handfree.platform.windows.output_handler.Controller')
+    @patch('context_aware_whisper.platform.windows.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.windows.output_handler.Controller')
     def test_instant_paste_empty_string_does_nothing(self, mock_controller, mock_pyperclip):
         """Test that empty string doesn't trigger any actions."""
         mock_keyboard = MagicMock()
         mock_controller.return_value = mock_keyboard
 
-        from handfree.platform.windows.output_handler import WindowsOutputHandler
+        from context_aware_whisper.platform.windows.output_handler import WindowsOutputHandler
         handler = WindowsOutputHandler()
         handler.type_text_instant("")
 
@@ -195,11 +195,11 @@ class TestWindowsTypeTextInstant(unittest.TestCase):
 class TestLinuxTypeTextInstant(unittest.TestCase):
     """Tests for Linux type_text_instant() method."""
 
-    @patch("handfree.platform.linux.output_handler.is_tool_available")
-    @patch("handfree.platform.linux.output_handler.get_display_server")
-    @patch("handfree.platform.linux.output_handler.Controller")
-    @patch("handfree.platform.linux.output_handler.pyperclip")
-    @patch("handfree.platform.linux.output_handler.time.sleep")
+    @patch("context_aware_whisper.platform.linux.output_handler.is_tool_available")
+    @patch("context_aware_whisper.platform.linux.output_handler.get_display_server")
+    @patch("context_aware_whisper.platform.linux.output_handler.Controller")
+    @patch("context_aware_whisper.platform.linux.output_handler.pyperclip")
+    @patch("context_aware_whisper.platform.linux.output_handler.time.sleep")
     def test_instant_paste_x11_saves_and_restores_clipboard(
         self, mock_sleep, mock_pyperclip, mock_controller, mock_display, mock_tool
     ):
@@ -210,7 +210,7 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
         mock_controller.return_value = mock_keyboard
         mock_pyperclip.paste.return_value = "original content"
 
-        from handfree.platform.linux.output_handler import LinuxOutputHandler
+        from context_aware_whisper.platform.linux.output_handler import LinuxOutputHandler
         handler = LinuxOutputHandler()
         handler.type_text_instant("new text")
 
@@ -220,11 +220,11 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
         self.assertEqual(copy_calls[0][0][0], "new text")
         self.assertEqual(copy_calls[1][0][0], "original content")
 
-    @patch("handfree.platform.linux.output_handler.is_tool_available")
-    @patch("handfree.platform.linux.output_handler.get_display_server")
-    @patch("handfree.platform.linux.output_handler.Controller")
-    @patch("handfree.platform.linux.output_handler.pyperclip")
-    @patch("handfree.platform.linux.output_handler.time.sleep")
+    @patch("context_aware_whisper.platform.linux.output_handler.is_tool_available")
+    @patch("context_aware_whisper.platform.linux.output_handler.get_display_server")
+    @patch("context_aware_whisper.platform.linux.output_handler.Controller")
+    @patch("context_aware_whisper.platform.linux.output_handler.pyperclip")
+    @patch("context_aware_whisper.platform.linux.output_handler.time.sleep")
     def test_instant_paste_x11_sends_ctrl_v(
         self, mock_sleep, mock_pyperclip, mock_controller, mock_display, mock_tool
     ):
@@ -237,7 +237,7 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
         mock_controller.return_value = mock_keyboard
         mock_pyperclip.paste.return_value = ""
 
-        from handfree.platform.linux.output_handler import LinuxOutputHandler
+        from context_aware_whisper.platform.linux.output_handler import LinuxOutputHandler
         handler = LinuxOutputHandler()
         handler.type_text_instant("test text")
 
@@ -245,11 +245,11 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
         mock_keyboard.press.assert_any_call(Key.ctrl)
         mock_keyboard.press.assert_any_call('v')
 
-    @patch("handfree.platform.linux.output_handler.is_tool_available")
-    @patch("handfree.platform.linux.output_handler.get_display_server")
-    @patch("handfree.platform.linux.output_handler.Controller")
-    @patch("handfree.platform.linux.output_handler.subprocess.run")
-    @patch("handfree.platform.linux.output_handler.time.sleep")
+    @patch("context_aware_whisper.platform.linux.output_handler.is_tool_available")
+    @patch("context_aware_whisper.platform.linux.output_handler.get_display_server")
+    @patch("context_aware_whisper.platform.linux.output_handler.Controller")
+    @patch("context_aware_whisper.platform.linux.output_handler.subprocess.run")
+    @patch("context_aware_whisper.platform.linux.output_handler.time.sleep")
     def test_instant_paste_wayland_uses_wtype(
         self, mock_sleep, mock_run, mock_controller, mock_display, mock_tool
     ):
@@ -259,7 +259,7 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
         mock_controller.return_value = MagicMock()
         mock_run.return_value = MagicMock(returncode=0, stdout=b"original")
 
-        from handfree.platform.linux.output_handler import LinuxOutputHandler
+        from context_aware_whisper.platform.linux.output_handler import LinuxOutputHandler
         handler = LinuxOutputHandler()
         handler.type_text_instant("test text")
 
@@ -268,10 +268,10 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
         # wl-paste for getting original, wl-copy for new text, wtype for paste, wl-copy for restore
         self.assertTrue(any("wtype" in str(c) for c in calls))
 
-    @patch("handfree.platform.linux.output_handler.is_tool_available")
-    @patch("handfree.platform.linux.output_handler.get_display_server")
-    @patch("handfree.platform.linux.output_handler.Controller")
-    @patch("handfree.platform.linux.output_handler.pyperclip")
+    @patch("context_aware_whisper.platform.linux.output_handler.is_tool_available")
+    @patch("context_aware_whisper.platform.linux.output_handler.get_display_server")
+    @patch("context_aware_whisper.platform.linux.output_handler.Controller")
+    @patch("context_aware_whisper.platform.linux.output_handler.pyperclip")
     def test_instant_paste_empty_string_does_nothing(
         self, mock_pyperclip, mock_controller, mock_display, mock_tool
     ):
@@ -281,18 +281,18 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
         mock_keyboard = MagicMock()
         mock_controller.return_value = mock_keyboard
 
-        from handfree.platform.linux.output_handler import LinuxOutputHandler
+        from context_aware_whisper.platform.linux.output_handler import LinuxOutputHandler
         handler = LinuxOutputHandler()
         handler.type_text_instant("")
 
         mock_keyboard.press.assert_not_called()
 
-    @patch("handfree.platform.linux.output_handler.is_tool_available")
-    @patch("handfree.platform.linux.output_handler.get_display_server")
-    @patch("handfree.platform.linux.output_handler.Controller")
-    @patch("handfree.platform.linux.output_handler.subprocess.run")
-    @patch("handfree.platform.linux.output_handler.pyperclip")
-    @patch("handfree.platform.linux.output_handler.time.sleep")
+    @patch("context_aware_whisper.platform.linux.output_handler.is_tool_available")
+    @patch("context_aware_whisper.platform.linux.output_handler.get_display_server")
+    @patch("context_aware_whisper.platform.linux.output_handler.Controller")
+    @patch("context_aware_whisper.platform.linux.output_handler.subprocess.run")
+    @patch("context_aware_whisper.platform.linux.output_handler.pyperclip")
+    @patch("context_aware_whisper.platform.linux.output_handler.time.sleep")
     def test_instant_paste_x11_xdotool_fallback(
         self, mock_sleep, mock_pyperclip, mock_run, mock_controller, mock_display, mock_tool
     ):
@@ -305,7 +305,7 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
         mock_run.return_value = MagicMock(returncode=0)
         mock_pyperclip.paste.return_value = "original"
 
-        from handfree.platform.linux.output_handler import LinuxOutputHandler
+        from context_aware_whisper.platform.linux.output_handler import LinuxOutputHandler
         handler = LinuxOutputHandler()
         handler.type_text_instant("test text")
 
@@ -317,15 +317,15 @@ class TestLinuxTypeTextInstant(unittest.TestCase):
 class TestBaseOutputMethodUsesInstant(unittest.TestCase):
     """Test that the base output() method now uses type_text_instant()."""
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_output_method_uses_instant_paste(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that output() uses type_text_instant() internally."""
         mock_run.return_value = MagicMock(returncode=0)
         mock_pyperclip.paste.return_value = "original"
 
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         handler = MacOSOutputHandler()
         handler.output("test text")
 
@@ -335,27 +335,27 @@ class TestBaseOutputMethodUsesInstant(unittest.TestCase):
         self.assertEqual(copy_calls[0][0][0], "test text")
         self.assertEqual(copy_calls[1][0][0], "original")
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_output_method_empty_string_does_nothing(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that output() with empty string doesn't trigger actions."""
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         handler = MacOSOutputHandler()
         handler.output("")
 
         mock_run.assert_not_called()
         mock_pyperclip.copy.assert_not_called()
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_output_method_use_paste_param_ignored(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that use_paste parameter is now ignored (always uses instant paste)."""
         mock_run.return_value = MagicMock(returncode=0)
         mock_pyperclip.paste.return_value = ""
 
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         handler = MacOSOutputHandler()
 
         # Both with and without use_paste should behave the same
@@ -369,15 +369,15 @@ class TestBaseOutputMethodUsesInstant(unittest.TestCase):
 class TestClipboardRestoreEdgeCases(unittest.TestCase):
     """Test edge cases for clipboard restoration."""
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_none_clipboard_not_restored(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that None clipboard content doesn't attempt restore."""
         mock_run.return_value = MagicMock(returncode=0)
         mock_pyperclip.paste.side_effect = Exception("Clipboard empty")
 
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         handler = MacOSOutputHandler()
         handler.type_text_instant("new text")
 
@@ -385,9 +385,9 @@ class TestClipboardRestoreEdgeCases(unittest.TestCase):
         self.assertEqual(mock_pyperclip.copy.call_count, 1)
         mock_pyperclip.copy.assert_called_with("new text")
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_restore_failure_silently_ignored(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that clipboard restore failure doesn't raise exception."""
         mock_run.return_value = MagicMock(returncode=0)
@@ -396,21 +396,21 @@ class TestClipboardRestoreEdgeCases(unittest.TestCase):
         # Make the second copy (restore) fail
         mock_pyperclip.copy.side_effect = [None, Exception("Restore failed")]
 
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         handler = MacOSOutputHandler()
 
         # Should not raise, even though restore failed
         handler.type_text_instant("new text")
 
-    @patch('handfree.platform.macos.output_handler.pyperclip')
-    @patch('handfree.platform.macos.output_handler.subprocess.run')
-    @patch('handfree.platform.macos.output_handler.time.sleep')
+    @patch('context_aware_whisper.platform.macos.output_handler.pyperclip')
+    @patch('context_aware_whisper.platform.macos.output_handler.subprocess.run')
+    @patch('context_aware_whisper.platform.macos.output_handler.time.sleep')
     def test_special_characters_in_text(self, mock_sleep, mock_run, mock_pyperclip):
         """Test that special characters are handled correctly."""
         mock_run.return_value = MagicMock(returncode=0)
         mock_pyperclip.paste.return_value = "original"
 
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         handler = MacOSOutputHandler()
 
         # Text with special characters

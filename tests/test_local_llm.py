@@ -19,19 +19,19 @@ class TestIsAvailable:
         """is_available() returns True when MLX is installed."""
         with patch.dict('sys.modules', {'mlx': Mock(), 'mlx_lm': Mock()}):
             # Need to reload the module to pick up the mocked imports
-            from handfree import local_llm
+            from context_aware_whisper import local_llm
             # Reset the module state
             local_llm._model = None
             local_llm._tokenizer = None
             local_llm._current_model_name = None
 
             # Check availability with mocked imports
-            with patch('handfree.local_llm.is_available', return_value=True):
+            with patch('context_aware_whisper.local_llm.is_available', return_value=True):
                 assert local_llm.is_available() is True
 
     def test_returns_false_when_mlx_not_available(self):
         """is_available() returns False when MLX is not installed."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         # Test the actual is_available function behavior
         # It should return False if MLX is not installed
@@ -56,10 +56,10 @@ class TestIsAvailable:
 class TestGetModel:
     """Tests for get_model() function."""
 
-    @patch('handfree.local_llm.is_available', return_value=False)
+    @patch('context_aware_whisper.local_llm.is_available', return_value=False)
     def test_raises_when_mlx_not_available(self, mock_available):
         """get_model() raises ImportError when MLX not installed."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         # Reset module state
         local_llm._model = None
@@ -72,7 +72,7 @@ class TestGetModel:
 
     def test_returns_cached_model_on_second_call(self):
         """get_model() returns cached model on subsequent calls."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         # Set up cached model
         mock_model = Mock()
@@ -98,7 +98,7 @@ class TestGenerate:
 
     def test_generate_raises_import_error_when_mlx_not_installed(self):
         """generate() raises ImportError when mlx_lm not installed."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         # Reset module state
         local_llm._model = None
@@ -111,7 +111,7 @@ class TestGenerate:
 
     def test_generate_error_handling(self):
         """generate() handles errors gracefully."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         # Reset module state
         local_llm._model = None
@@ -128,7 +128,7 @@ class TestUnloadModel:
 
     def test_clears_model_state(self):
         """unload_model() clears all model state."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         # Set up some state
         local_llm._model = Mock()
@@ -145,7 +145,7 @@ class TestUnloadModel:
 
     def test_safe_to_call_multiple_times(self):
         """unload_model() is safe to call multiple times."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         # Should not raise
         local_llm.unload_model()
@@ -158,7 +158,7 @@ class TestGetCurrentModelName:
 
     def test_returns_none_when_no_model_loaded(self):
         """get_current_model_name() returns None when no model loaded."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         local_llm._model = None
         local_llm._current_model_name = None
@@ -167,7 +167,7 @@ class TestGetCurrentModelName:
 
     def test_returns_model_name_when_loaded(self):
         """get_current_model_name() returns model name when loaded."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         local_llm._current_model_name = "test-model"
 
@@ -182,7 +182,7 @@ class TestModelSwitching:
 
     def test_model_state_cleared_on_switch_request(self):
         """Model state is cleared when different model is requested."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         # Set up initial model state
         local_llm._model = Mock()
@@ -209,7 +209,7 @@ class TestModelSwitching:
 
     def test_same_model_reuses_cache(self):
         """Same model name reuses cached model."""
-        from handfree import local_llm
+        from context_aware_whisper import local_llm
 
         mock_model = Mock()
         mock_tokenizer = Mock()
@@ -236,7 +236,7 @@ class TestTextCleanerWithLocalLLM:
 
     def test_aggressive_mode_with_model_name(self):
         """TextCleaner accepts model_name for aggressive mode."""
-        from handfree.text_cleanup import TextCleaner, CleanupMode
+        from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
         cleaner = TextCleaner(
             mode=CleanupMode.AGGRESSIVE,
@@ -248,16 +248,16 @@ class TestTextCleanerWithLocalLLM:
 
     def test_aggressive_mode_default_model(self):
         """TextCleaner uses default model when none specified."""
-        from handfree.text_cleanup import TextCleaner, CleanupMode
+        from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
         cleaner = TextCleaner(mode=CleanupMode.AGGRESSIVE)
 
         assert cleaner.model_name == cleaner.DEFAULT_MODEL
 
-    @patch('handfree.local_llm.is_available', return_value=False)
+    @patch('context_aware_whisper.local_llm.is_available', return_value=False)
     def test_aggressive_falls_back_when_mlx_unavailable(self, mock_available):
         """Aggressive mode falls back to standard when MLX unavailable."""
-        from handfree.text_cleanup import TextCleaner, CleanupMode
+        from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
         cleaner = TextCleaner(mode=CleanupMode.AGGRESSIVE)
 
@@ -268,11 +268,11 @@ class TestTextCleanerWithLocalLLM:
         assert "Um" not in result
         assert "hello" in result.lower()
 
-    @patch('handfree.local_llm.is_available', return_value=True)
-    @patch('handfree.local_llm.generate')
+    @patch('context_aware_whisper.local_llm.is_available', return_value=True)
+    @patch('context_aware_whisper.local_llm.generate')
     def test_aggressive_uses_local_llm_when_available(self, mock_generate, mock_available):
         """Aggressive mode uses local LLM when available."""
-        from handfree.text_cleanup import TextCleaner, CleanupMode
+        from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
         mock_generate.return_value = "Hello there"
 
@@ -284,11 +284,11 @@ class TestTextCleanerWithLocalLLM:
         mock_generate.assert_called_once()
         assert result == "Hello there"
 
-    @patch('handfree.local_llm.is_available', return_value=True)
-    @patch('handfree.local_llm.generate')
+    @patch('context_aware_whisper.local_llm.is_available', return_value=True)
+    @patch('context_aware_whisper.local_llm.generate')
     def test_aggressive_falls_back_on_generation_error(self, mock_generate, mock_available):
         """Aggressive mode falls back on LLM generation error."""
-        from handfree.text_cleanup import TextCleaner, CleanupMode
+        from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
         mock_generate.side_effect = Exception("Generation failed")
 
@@ -301,11 +301,11 @@ class TestTextCleanerWithLocalLLM:
         assert "Um" not in result
         assert "hello" in result.lower()
 
-    @patch('handfree.local_llm.is_available', return_value=True)
-    @patch('handfree.local_llm.generate')
+    @patch('context_aware_whisper.local_llm.is_available', return_value=True)
+    @patch('context_aware_whisper.local_llm.generate')
     def test_aggressive_falls_back_when_too_much_removed(self, mock_generate, mock_available):
         """Aggressive mode falls back when LLM removes too much text."""
-        from handfree.text_cleanup import TextCleaner, CleanupMode
+        from context_aware_whisper.text_cleanup import TextCleaner, CleanupMode
 
         # Return very short text (< 30% of original)
         mock_generate.return_value = "Hi"
@@ -324,21 +324,21 @@ class TestConfigLocalModel:
 
     def test_config_has_local_model_field(self):
         """Config dataclass has local_model field."""
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         config = Config(transcriber="local")
         assert hasattr(config, 'local_model')
         assert config.local_model == "mlx-community/Phi-3-mini-4k-instruct-4bit"
 
     def test_config_reads_local_model_from_env(self):
-        """Config reads HANDFREE_LOCAL_MODEL from environment."""
+        """Config reads CAW_LOCAL_MODEL from environment."""
         import os
         from unittest.mock import patch
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         with patch.dict(os.environ, {
-            "HANDFREE_LOCAL_MODEL": "custom-model",
-            "HANDFREE_TRANSCRIBER": "local"
+            "CAW_LOCAL_MODEL": "custom-model",
+            "CAW_TRANSCRIBER": "local"
         }, clear=False):
             config = Config.from_env()
             assert config.local_model == "custom-model"
@@ -347,11 +347,11 @@ class TestConfigLocalModel:
         """Config uses default local model when not specified."""
         import os
         from unittest.mock import patch
-        from handfree.config import Config
+        from context_aware_whisper.config import Config
 
         env_copy = os.environ.copy()
-        env_copy.pop("HANDFREE_LOCAL_MODEL", None)
-        env_copy["HANDFREE_TRANSCRIBER"] = "local"
+        env_copy.pop("CAW_LOCAL_MODEL", None)
+        env_copy["CAW_TRANSCRIBER"] = "local"
 
         with patch.dict(os.environ, env_copy, clear=True):
             config = Config.from_env()
@@ -378,7 +378,7 @@ class TestFactoryWithLocalModel:
     def test_factory_creates_aggressive_mode_cleaner(self):
         """Factory creates aggressive mode cleaner with model name."""
         from main import get_text_cleaner
-        from handfree.text_cleanup import CleanupMode
+        from context_aware_whisper.text_cleanup import CleanupMode
         from unittest.mock import Mock
 
         config = Mock()

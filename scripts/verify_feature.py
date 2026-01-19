@@ -154,7 +154,7 @@ class Verifier:
                     tests.add(filepath)
 
             # If it's a source file, find its test
-            if filepath.startswith("src/handfree/") and filepath.endswith(".py"):
+            if filepath.startswith("src/context_aware_whisper/") and filepath.endswith(".py"):
                 module_name = Path(filepath).stem
                 test_file = f"tests/test_{module_name}.py"
                 test_path = self.project_root / test_file

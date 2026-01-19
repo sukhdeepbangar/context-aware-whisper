@@ -34,9 +34,9 @@ def create_indicator_with_mocks(position="top-center", width=60, height=24):
     """Create a RecordingIndicator with mocked tkinter."""
     mock_window, mock_canvas = create_mock_tkinter()
 
-    with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-         patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
-        from handfree.ui.indicator import RecordingIndicator
+    with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+         patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         indicator = RecordingIndicator(width=width, height=height, position=position)
         return indicator, mock_window, mock_canvas
 
@@ -50,42 +50,42 @@ class TestBarAnimationConstants:
 
     def test_bar_count_is_four(self):
         """Verify BAR_COUNT is set to 4 as per spec."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         assert RecordingIndicator.BAR_COUNT == 4
 
     def test_bar_width_is_six_pixels(self):
         """Verify BAR_WIDTH is 6 pixels."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         assert RecordingIndicator.BAR_WIDTH == 6
 
     def test_bar_gap_is_three_pixels(self):
         """Verify BAR_GAP is 3 pixels."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         assert RecordingIndicator.BAR_GAP == 3
 
     def test_bar_min_height_is_four_pixels(self):
         """Verify BAR_MIN_HEIGHT is 4 pixels."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         assert RecordingIndicator.BAR_MIN_HEIGHT == 4
 
     def test_bar_max_height_is_sixteen_pixels(self):
         """Verify BAR_MAX_HEIGHT is 16 pixels."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         assert RecordingIndicator.BAR_MAX_HEIGHT == 16
 
     def test_bar_animation_interval_approx_12_fps(self):
         """Verify BAR_ANIMATION_INTERVAL_MS is ~80ms (~12.5 FPS)."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         assert RecordingIndicator.BAR_ANIMATION_INTERVAL_MS == 80
 
     def test_bar_colors_has_four_colors(self):
         """Verify BAR_COLORS has exactly 4 colors."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         assert len(RecordingIndicator.BAR_COLORS) == 4
 
     def test_bar_colors_are_valid_hex(self):
         """Verify all BAR_COLORS are valid hex strings."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         for color in RecordingIndicator.BAR_COLORS:
             assert isinstance(color, str)
             assert color.startswith("#")
@@ -93,7 +93,7 @@ class TestBarAnimationConstants:
 
     def test_bar_bg_color_is_dark(self):
         """Verify BAR_BG_COLOR is the dark slate color."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         assert RecordingIndicator.BAR_BG_COLOR == "#1C1C1E"
 
 
@@ -112,7 +112,7 @@ class TestBarAnimationStateInit:
     def test_bar_heights_initialized_to_min(self):
         """Verify _bar_heights are initialized to BAR_MIN_HEIGHT."""
         indicator, _, _ = create_indicator_with_mocks()
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         expected = [RecordingIndicator.BAR_MIN_HEIGHT] * RecordingIndicator.BAR_COUNT
         assert indicator._bar_heights == expected
 

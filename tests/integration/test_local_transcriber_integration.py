@@ -13,7 +13,7 @@ class TestLocalTranscriberIntegration:
     @pytest.fixture
     def transcriber(self):
         """Create a LocalTranscriber instance."""
-        from handfree.local_transcriber import LocalTranscriber
+        from context_aware_whisper.local_transcriber import LocalTranscriber
         return LocalTranscriber(model_name="base.en")
 
     def test_transcribe_hello_world(self, transcriber, audio_fixtures_dir, fixture_manifest):
@@ -114,7 +114,7 @@ class TestLocalTranscriberUnit:
     def test_import_local_transcriber(self):
         """Test LocalTranscriber can be imported."""
         try:
-            from handfree.local_transcriber import LocalTranscriber
+            from context_aware_whisper.local_transcriber import LocalTranscriber
             assert LocalTranscriber is not None
         except ImportError as e:
             pytest.skip(f"LocalTranscriber not available: {e}")

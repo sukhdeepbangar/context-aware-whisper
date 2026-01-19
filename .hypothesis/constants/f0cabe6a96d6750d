@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/src/handfree/text_cleanup.py
+# hypothesis_version: 6.150.2
+
+[0.1, 0.3, ' +', ',?\\s*', '. ', '\\.\\s+\\.{2,}\\s*', '\\.{2,}', '\\1', '\\s+([.,!?])', '^\\s*\\.{2,}\\s*', 'actually', 'ah', 'anyway', 'basically', 'correction', 'er', 'hmm', 'i mean', 'kind of', 'let me rephrase', 'like', 'literally', 'mhm', 'mm', 'much', 'no wait', 'okay', 'rather', 'really', 'right', 'so', 'sorry', 'sort of', 'super', 'too', 'uh', 'um', 'very', 'well', 'you know', 'you see']

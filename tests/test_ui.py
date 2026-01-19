@@ -1,5 +1,5 @@
 """
-Tests for HandFree UI Components
+Tests for Context-Aware Whisper UI Components
 
 Tests the recording indicator and UI controller.
 Note: These tests verify the UI module's structure and interface without requiring a display.
@@ -10,7 +10,7 @@ PERFORMANCE NOTE: Mocks are set up in conftest.py - no need to duplicate here.
 import pytest
 from unittest.mock import Mock, MagicMock, patch
 
-from handfree.config import Config
+from context_aware_whisper.config import Config
 
 # tkinter mocking is handled by conftest.py
 
@@ -38,7 +38,7 @@ class TestRecordingIndicatorStructure:
 
     def test_state_config_exists(self):
         """Test that STATE_CONFIG exists and has correct structure."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'STATE_CONFIG')
         config = RecordingIndicator.STATE_CONFIG
@@ -47,7 +47,7 @@ class TestRecordingIndicatorStructure:
 
     def test_state_config_has_all_states(self):
         """Test that STATE_CONFIG contains all required states."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         required_states = ["idle", "recording", "transcribing", "success", "error"]
         config = RecordingIndicator.STATE_CONFIG
@@ -65,7 +65,7 @@ class TestRecordingIndicatorStructure:
 
     def test_state_colors(self):
         """Test that states have correct colors."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         config = RecordingIndicator.STATE_CONFIG
 
@@ -86,7 +86,7 @@ class TestRecordingIndicatorStructure:
 
     def test_state_text(self):
         """Test that states have correct display text."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         config = RecordingIndicator.STATE_CONFIG
 
@@ -98,7 +98,7 @@ class TestRecordingIndicatorStructure:
 
     def test_indicator_has_required_methods(self):
         """Test that RecordingIndicator has all required methods."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         required_methods = ['set_state', 'show', 'hide', 'destroy']
         for method in required_methods:
@@ -106,47 +106,47 @@ class TestRecordingIndicatorStructure:
             assert callable(getattr(RecordingIndicator, method)), f"{method} should be callable"
 
 
-class TestHandFreeUIStructure:
-    """Tests for HandFreeUI controller class structure."""
+class TestCAWUIStructure:
+    """Tests for CAWUI controller class structure."""
 
     def test_ui_class_exists(self):
-        """Test that HandFreeUI class exists."""
-        from handfree.ui.app import HandFreeUI
-        assert HandFreeUI is not None
+        """Test that CAWUI class exists."""
+        from context_aware_whisper.ui.app import CAWUI
+        assert CAWUI is not None
 
     def test_ui_has_required_methods(self):
-        """Test that HandFreeUI has all required methods."""
-        from handfree.ui.app import HandFreeUI
+        """Test that CAWUI has all required methods."""
+        from context_aware_whisper.ui.app import CAWUI
 
         required_methods = ['start', 'stop', 'set_state']
         for method in required_methods:
-            assert hasattr(HandFreeUI, method), f"Missing method: {method}"
-            assert callable(getattr(HandFreeUI, method)), f"{method} should be callable"
+            assert hasattr(CAWUI, method), f"Missing method: {method}"
+            assert callable(getattr(CAWUI, method)), f"{method} should be callable"
 
     def test_ui_can_be_instantiated(self):
-        """Test that HandFreeUI can be instantiated."""
-        from handfree.ui.app import HandFreeUI
+        """Test that CAWUI can be instantiated."""
+        from context_aware_whisper.ui.app import CAWUI
 
         # Should not raise exception
-        ui = HandFreeUI()
+        ui = CAWUI()
         assert ui is not None
         assert hasattr(ui, '_running')
         assert ui._running is False
 
     def test_ui_set_state_when_not_running(self):
         """Test that set_state doesn't crash when UI not running."""
-        from handfree.ui.app import HandFreeUI
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI()
+        ui = CAWUI()
         # Should not raise exception even when not running
         ui.set_state("recording")
         ui.set_state("idle")
 
     def test_ui_stop_when_not_running(self):
         """Test that stop doesn't crash when UI not running."""
-        from handfree.ui.app import HandFreeUI
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI()
+        ui = CAWUI()
         # Should not raise exception
         ui.stop()
 
@@ -156,17 +156,17 @@ class TestUIModule:
 
     def test_ui_module_exports(self):
         """Test that ui module exports required classes."""
-        from handfree.ui import HandFreeUI, RecordingIndicator
+        from context_aware_whisper.ui import CAWUI, RecordingIndicator
 
-        assert HandFreeUI is not None
+        assert CAWUI is not None
         assert RecordingIndicator is not None
 
-    def test_handfree_main_package_exports_ui(self):
-        """Test that main handfree package exports UI classes."""
-        from handfree import HandFreeUI, RecordingIndicator
+    def test_caw_main_package_exports_ui(self):
+        """Test that main context-aware-whisper package exports UI classes."""
+        from context_aware_whisper import CAWUI, RecordingIndicator
 
         # Should be available from main package
-        assert HandFreeUI is not None or HandFreeUI is None  # May be None if tkinter not available
+        assert CAWUI is not None or CAWUI is None  # May be None if tkinter not available
         assert RecordingIndicator is not None or RecordingIndicator is None
 
 
@@ -174,7 +174,7 @@ class TestUIDisabling:
     """Tests for UI disabling functionality."""
 
     def test_main_app_accepts_ui_enabled_parameter(self):
-        """Test that HandFreeApp accepts ui_enabled via Config."""
+        """Test that CAWApp accepts ui_enabled via Config."""
         import inspect
         import sys
         import os
@@ -182,11 +182,11 @@ class TestUIDisabling:
         # Add parent directory to path to import main
         sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-        from main import HandFreeApp
+        from main import CAWApp
 
         # Check that __init__ accepts config parameter (which contains ui_enabled)
-        sig = inspect.signature(HandFreeApp.__init__)
-        assert 'config' in sig.parameters, "HandFreeApp should accept config parameter"
+        sig = inspect.signature(CAWApp.__init__)
+        assert 'config' in sig.parameters, "CAWApp should accept config parameter"
 
         # Check that Config has ui_enabled attribute
         config = make_config()
@@ -194,7 +194,7 @@ class TestUIDisabling:
         assert isinstance(config.ui_enabled, bool), "ui_enabled should be a boolean"
 
     def test_main_app_can_disable_ui(self):
-        """Test that HandFreeApp can be created with UI disabled."""
+        """Test that CAWApp can be created with UI disabled."""
         import sys
         import os
 
@@ -208,13 +208,13 @@ class TestUIDisabling:
              patch('main.create_hotkey_detector'), \
              patch('main.load_dotenv'):
 
-            from main import HandFreeApp
+            from main import CAWApp
 
             mock_get_transcriber.return_value = (Mock(), "groq (cloud)")
 
             # Should not raise exception
             config = make_config(ui_enabled=False)
-            app = HandFreeApp(config=config)
+            app = CAWApp(config=config)
             assert app.ui is None  # UI should be None when disabled
 
 
@@ -223,7 +223,7 @@ class TestStateTransitions:
 
     def test_valid_states(self):
         """Test that all expected states are defined."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         valid_states = ["idle", "recording", "transcribing", "success", "error"]
         config = RecordingIndicator.STATE_CONFIG
@@ -233,7 +233,7 @@ class TestStateTransitions:
 
     def test_state_opacity_values(self):
         """Test that state opacity values are correct."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         config = RecordingIndicator.STATE_CONFIG
 
@@ -250,15 +250,15 @@ class TestUIThreadSafety:
 
     def test_ui_start_is_idempotent(self):
         """Test that calling start multiple times is safe."""
-        from handfree.ui.app import HandFreeUI
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI()
+        ui = CAWUI()
 
-        with patch('handfree.ui.app.tk.Tk') as mock_tk:
+        with patch('context_aware_whisper.ui.app.tk.Tk') as mock_tk:
             mock_root = MagicMock()
             mock_tk.return_value = mock_root
 
-            with patch('handfree.ui.app.RecordingIndicator'):
+            with patch('context_aware_whisper.ui.app.RecordingIndicator'):
                 ui.start()
                 first_call_count = mock_tk.call_count
 
@@ -270,15 +270,15 @@ class TestUIThreadSafety:
 
     def test_ui_runs_on_main_thread(self):
         """Test that UI creates tkinter root on main thread (required for macOS)."""
-        from handfree.ui.app import HandFreeUI
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI()
+        ui = CAWUI()
 
-        with patch('handfree.ui.app.tk.Tk') as mock_tk:
+        with patch('context_aware_whisper.ui.app.tk.Tk') as mock_tk:
             mock_root = MagicMock()
             mock_tk.return_value = mock_root
 
-            with patch('handfree.ui.app.RecordingIndicator'):
+            with patch('context_aware_whisper.ui.app.RecordingIndicator'):
                 ui.start()
 
             # Verify Tk root was created directly (not in a thread)
@@ -292,14 +292,14 @@ class TestIndicatorPosition:
 
     def test_valid_positions_constant_exists(self):
         """Test that VALID_POSITIONS constant exists in indicator module."""
-        from handfree.ui.indicator import VALID_POSITIONS
+        from context_aware_whisper.ui.indicator import VALID_POSITIONS
 
         assert isinstance(VALID_POSITIONS, list)
         assert len(VALID_POSITIONS) == 6
 
     def test_valid_positions_values(self):
         """Test that VALID_POSITIONS contains expected values."""
-        from handfree.ui.indicator import VALID_POSITIONS
+        from context_aware_whisper.ui.indicator import VALID_POSITIONS
 
         expected = ["top-center", "top-right", "top-left",
                     "bottom-center", "bottom-right", "bottom-left"]
@@ -308,7 +308,7 @@ class TestIndicatorPosition:
     def test_indicator_accepts_position_parameter(self):
         """Test that RecordingIndicator accepts position parameter."""
         import inspect
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         sig = inspect.signature(RecordingIndicator.__init__)
         assert 'position' in sig.parameters, "RecordingIndicator should accept position parameter"
@@ -320,27 +320,27 @@ class TestIndicatorPosition:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
             yield {'window': mock_window, 'canvas': mock_canvas}
 
     def test_indicator_stores_position(self, mock_tkinter):
         """Test that indicator stores the position value."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator = RecordingIndicator(position="bottom-right")
         assert indicator._position == "bottom-right"
 
     def test_indicator_defaults_to_top_center(self, mock_tkinter):
         """Test that indicator defaults to top-center position."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator = RecordingIndicator()
         assert indicator._position == "top-center"
 
     def test_indicator_position_property(self, mock_tkinter):
         """Test that indicator has position property."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator = RecordingIndicator(position="top-right")
         assert hasattr(indicator, 'position')
@@ -348,7 +348,7 @@ class TestIndicatorPosition:
 
     def test_indicator_set_position_method(self, mock_tkinter):
         """Test that indicator has set_position method."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator = RecordingIndicator(position="top-center")
         assert hasattr(indicator, 'set_position')
@@ -356,7 +356,7 @@ class TestIndicatorPosition:
 
     def test_indicator_set_position_changes_position(self, mock_tkinter):
         """Test that set_position changes the position."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator = RecordingIndicator(position="top-center")
         indicator.set_position("bottom-left")
@@ -364,7 +364,7 @@ class TestIndicatorPosition:
 
     def test_indicator_set_position_invalid_raises(self, mock_tkinter):
         """Test that set_position raises error for invalid position."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator = RecordingIndicator()
 
@@ -379,55 +379,55 @@ class TestIndicatorPosition:
     ])
     def test_indicator_accepts_all_valid_positions(self, position):
         """Test that indicator accepts all valid positions."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
             indicator = RecordingIndicator(position=position)
             assert indicator._position == position
 
     def test_indicator_invalid_position_falls_back_to_default(self, mock_tkinter):
         """Test that invalid position falls back to top-center."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator = RecordingIndicator(position="invalid")
         assert indicator._position == "top-center"
 
     def test_indicator_edge_margin_constant(self):
         """Test that EDGE_MARGIN constant exists."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'EDGE_MARGIN')
         assert RecordingIndicator.EDGE_MARGIN > 0
 
 
-class TestHandFreeUIPosition:
-    """Tests for HandFreeUI indicator_position parameter."""
+class TestCAWUIPosition:
+    """Tests for CAWUI indicator_position parameter."""
 
     def test_ui_accepts_indicator_position(self):
-        """Test that HandFreeUI accepts indicator_position parameter."""
+        """Test that CAWUI accepts indicator_position parameter."""
         import inspect
-        from handfree.ui.app import HandFreeUI
+        from context_aware_whisper.ui.app import CAWUI
 
-        sig = inspect.signature(HandFreeUI.__init__)
+        sig = inspect.signature(CAWUI.__init__)
         assert 'indicator_position' in sig.parameters
         assert sig.parameters['indicator_position'].default == "top-center"
 
     def test_ui_stores_indicator_position(self):
-        """Test that HandFreeUI stores indicator_position."""
-        from handfree.ui.app import HandFreeUI
+        """Test that CAWUI stores indicator_position."""
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI(indicator_position="bottom-right")
+        ui = CAWUI(indicator_position="bottom-right")
         assert ui._indicator_position == "bottom-right"
 
     def test_ui_defaults_to_top_center(self):
-        """Test that HandFreeUI defaults to top-center."""
-        from handfree.ui.app import HandFreeUI
+        """Test that CAWUI defaults to top-center."""
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI()
+        ui = CAWUI()
         assert ui._indicator_position == "top-center"
 
     @pytest.mark.parametrize("position", [
@@ -435,10 +435,10 @@ class TestHandFreeUIPosition:
         "bottom-center", "bottom-right", "bottom-left"
     ])
     def test_ui_accepts_all_valid_positions(self, position):
-        """Test that HandFreeUI accepts all valid positions."""
-        from handfree.ui.app import HandFreeUI
+        """Test that CAWUI accepts all valid positions."""
+        from context_aware_whisper.ui.app import CAWUI
 
-        ui = HandFreeUI(indicator_position=position)
+        ui = CAWUI(indicator_position=position)
         assert ui._indicator_position == position
 
 
@@ -447,28 +447,28 @@ class TestFlashAnimation:
 
     def test_flash_duration_constant_exists(self):
         """Test that FLASH_DURATION_MS constant exists."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'FLASH_DURATION_MS')
         assert RecordingIndicator.FLASH_DURATION_MS > 0
 
     def test_flash_steps_constant_exists(self):
         """Test that FLASH_STEPS constant exists."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'FLASH_STEPS')
         assert RecordingIndicator.FLASH_STEPS > 0
 
     def test_flash_interval_constant_exists(self):
         """Test that FLASH_INTERVAL_MS constant exists."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, 'FLASH_INTERVAL_MS')
         assert RecordingIndicator.FLASH_INTERVAL_MS > 0
 
     def test_flash_animation_timing_is_consistent(self):
         """Test that flash animation timing adds up correctly."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         # Animation should fit within total duration
         animation_time = RecordingIndicator.FLASH_STEPS * RecordingIndicator.FLASH_INTERVAL_MS
@@ -476,14 +476,14 @@ class TestFlashAnimation:
 
     def test_indicator_has_cancel_animations_method(self):
         """Test that RecordingIndicator has _cancel_animations method."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, '_cancel_animations')
         assert callable(getattr(RecordingIndicator, '_cancel_animations'))
 
     def test_indicator_has_schedule_flash_animation_method(self):
         """Test that RecordingIndicator has _schedule_flash_animation method."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, '_schedule_flash_animation')
         assert callable(getattr(RecordingIndicator, '_schedule_flash_animation'))
@@ -493,9 +493,9 @@ class TestFlashAnimation:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
-            from handfree.ui.indicator import RecordingIndicator
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             indicator = RecordingIndicator()
             assert hasattr(indicator, '_flash_after_ids')
@@ -507,8 +507,8 @@ class TestFlashAnimation:
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
             yield {'window': mock_window, 'canvas': mock_canvas}
 
 
@@ -517,46 +517,46 @@ class TestPlatformTransparency:
 
     def test_get_current_platform_function_exists(self):
         """Test that get_current_platform function exists in indicator module."""
-        from handfree.ui.indicator import get_current_platform
+        from context_aware_whisper.ui.indicator import get_current_platform
 
         assert callable(get_current_platform)
 
     def test_get_current_platform_returns_valid_value(self):
         """Test that get_current_platform returns a valid platform string."""
-        from handfree.ui.indicator import get_current_platform
+        from context_aware_whisper.ui.indicator import get_current_platform
 
         platform = get_current_platform()
         assert platform in ["macos", "windows", "linux", "unknown"]
 
     def test_indicator_has_platform_property(self):
         """Test that RecordingIndicator has platform property."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
             indicator = RecordingIndicator()
             assert hasattr(indicator, 'platform')
             assert indicator.platform in ["macos", "windows", "linux", "unknown"]
 
     def test_indicator_has_transparency_supported_property(self):
         """Test that RecordingIndicator has transparency_supported property."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
             indicator = RecordingIndicator()
             assert hasattr(indicator, 'transparency_supported')
             assert isinstance(indicator.transparency_supported, bool)
 
     def test_indicator_has_setup_transparency_method(self):
         """Test that RecordingIndicator has _setup_transparency method."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, '_setup_transparency')
         assert callable(getattr(RecordingIndicator, '_setup_transparency'))
@@ -570,8 +570,8 @@ class TestPlatformTransparency:
     ])
     def test_get_current_platform_detection(self, mock_platform, expected):
         """Test platform detection for various sys.platform values."""
-        with patch('handfree.ui.indicator.sys.platform', mock_platform):
-            from handfree.ui import indicator
+        with patch('context_aware_whisper.ui.indicator.sys.platform', mock_platform):
+            from context_aware_whisper.ui import indicator
             # Need to reimport to get fresh function with mocked platform
             import importlib
             importlib.reload(indicator)
@@ -583,14 +583,14 @@ class TestMultiMonitorSupport:
 
     def test_indicator_has_get_primary_display_geometry_method(self):
         """Test that RecordingIndicator has _get_primary_display_geometry method."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         assert hasattr(RecordingIndicator, '_get_primary_display_geometry')
         assert callable(getattr(RecordingIndicator, '_get_primary_display_geometry'))
 
     def test_get_primary_display_geometry_returns_tuple(self):
         """Test that _get_primary_display_geometry returns correct tuple format."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         mock_window = MagicMock()
         mock_window.winfo_screenwidth.return_value = 1920
@@ -599,8 +599,8 @@ class TestMultiMonitorSupport:
         mock_window.winfo_vrooty.return_value = 0
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
             indicator = RecordingIndicator()
             result = indicator._get_primary_display_geometry()
 
@@ -615,7 +615,7 @@ class TestMultiMonitorSupport:
 
     def test_position_window_uses_display_offset(self):
         """Test that _position_window uses display offset for multi-monitor."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         mock_window = MagicMock()
         mock_window.winfo_screenwidth.return_value = 3840  # Dual monitors
@@ -624,8 +624,8 @@ class TestMultiMonitorSupport:
         mock_window.winfo_vrooty.return_value = 0
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
             indicator = RecordingIndicator(position="top-center")
 
             # Get the geometry call argument
@@ -646,51 +646,51 @@ class TestHistoryPanelKeyboardShortcuts:
 
     def test_get_modifier_key_function_exists(self):
         """Test that _get_modifier_key function exists in history module."""
-        from handfree.ui.history import _get_modifier_key
+        from context_aware_whisper.ui.history import _get_modifier_key
 
         assert callable(_get_modifier_key)
 
     def test_get_modifier_key_returns_cmd_on_macos(self):
         """Test that _get_modifier_key returns 'Cmd' on macOS."""
-        with patch('handfree.ui.history.sys.platform', 'darwin'):
-            from handfree.ui import history
+        with patch('context_aware_whisper.ui.history.sys.platform', 'darwin'):
+            from context_aware_whisper.ui import history
             import importlib
             importlib.reload(history)
             assert history._get_modifier_key() == "Cmd"
 
     def test_get_modifier_key_returns_ctrl_on_windows(self):
         """Test that _get_modifier_key returns 'Ctrl' on Windows."""
-        with patch('handfree.ui.history.sys.platform', 'win32'):
-            from handfree.ui import history
+        with patch('context_aware_whisper.ui.history.sys.platform', 'win32'):
+            from context_aware_whisper.ui import history
             import importlib
             importlib.reload(history)
             assert history._get_modifier_key() == "Ctrl"
 
     def test_get_modifier_key_returns_ctrl_on_linux(self):
         """Test that _get_modifier_key returns 'Ctrl' on Linux."""
-        with patch('handfree.ui.history.sys.platform', 'linux'):
-            from handfree.ui import history
+        with patch('context_aware_whisper.ui.history.sys.platform', 'linux'):
+            from context_aware_whisper.ui import history
             import importlib
             importlib.reload(history)
             assert history._get_modifier_key() == "Ctrl"
 
     def test_history_panel_has_hint_color_constant(self):
         """Test that HistoryPanel has HINT_COLOR constant."""
-        from handfree.ui.history import HistoryPanel
+        from context_aware_whisper.ui.history import HistoryPanel
 
         assert hasattr(HistoryPanel, 'HINT_COLOR')
         assert isinstance(HistoryPanel.HINT_COLOR, str)
 
     def test_history_panel_has_footer_height_constant(self):
         """Test that HistoryPanel has FOOTER_HEIGHT constant."""
-        from handfree.ui.history import HistoryPanel
+        from context_aware_whisper.ui.history import HistoryPanel
 
         assert hasattr(HistoryPanel, 'FOOTER_HEIGHT')
         assert HistoryPanel.FOOTER_HEIGHT > 0
 
     def test_history_panel_has_create_footer_hints_method(self):
         """Test that HistoryPanel has _create_footer_hints method."""
-        from handfree.ui.history import HistoryPanel
+        from context_aware_whisper.ui.history import HistoryPanel
 
         assert hasattr(HistoryPanel, '_create_footer_hints')
         assert callable(getattr(HistoryPanel, '_create_footer_hints'))
@@ -702,7 +702,7 @@ class TestDrawStateOpacityOverride:
     def test_draw_state_accepts_opacity_override(self):
         """Test that _draw_state accepts opacity_override parameter."""
         import inspect
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         sig = inspect.signature(RecordingIndicator._draw_state)
         assert 'opacity_override' in sig.parameters
@@ -714,13 +714,13 @@ class TestDrawStateOpacityOverride:
         Note: Uses 'transcribing' state since 'recording' state uses animated
         bars with fixed opacity.
         """
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         mock_window = MagicMock()
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
             indicator = RecordingIndicator()
             indicator._current_state = "transcribing"
 

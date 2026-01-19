@@ -110,17 +110,17 @@ class TestModuleTestMapping:
 
     def test_audio_recorder_mapping(self, verifier):
         """audio_recorder.py maps to its test files."""
-        tests = verifier.map_files_to_tests(["src/handfree/audio_recorder.py"])
+        tests = verifier.map_files_to_tests(["src/context_aware_whisper/audio_recorder.py"])
         assert any("audio_recorder" in t for t in tests)
 
     def test_transcriber_mapping(self, verifier):
         """transcriber.py maps to its test files."""
-        tests = verifier.map_files_to_tests(["src/handfree/transcriber.py"])
+        tests = verifier.map_files_to_tests(["src/context_aware_whisper/transcriber.py"])
         assert any("transcriber" in t for t in tests)
 
     def test_output_handler_mapping(self, verifier):
         """output_handler.py maps to its test files."""
-        tests = verifier.map_files_to_tests(["src/handfree/output_handler.py"])
+        tests = verifier.map_files_to_tests(["src/context_aware_whisper/output_handler.py"])
         assert any("output_handler" in t for t in tests)
 
     def test_test_file_includes_itself(self, verifier):
@@ -136,8 +136,8 @@ class TestModuleTestMapping:
     def test_multiple_files(self, verifier):
         """Multiple files map to multiple test sets."""
         tests = verifier.map_files_to_tests([
-            "src/handfree/audio_recorder.py",
-            "src/handfree/output_handler.py",
+            "src/context_aware_whisper/audio_recorder.py",
+            "src/context_aware_whisper/output_handler.py",
         ])
         has_audio = any("audio_recorder" in t for t in tests)
         has_output = any("output_handler" in t for t in tests)

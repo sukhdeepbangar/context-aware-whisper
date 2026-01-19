@@ -89,24 +89,24 @@ class TestPlatformAbstractionLayer(unittest.TestCase):
 
     def test_platform_module_importable(self):
         """Test platform module can be imported."""
-        from handfree import platform
+        from context_aware_whisper import platform
         self.assertIsNotNone(platform)
 
     def test_base_classes_importable(self):
         """Test base classes can be imported."""
-        from handfree.platform.base import HotkeyDetectorBase, OutputHandlerBase
+        from context_aware_whisper.platform.base import HotkeyDetectorBase, OutputHandlerBase
         self.assertIsNotNone(HotkeyDetectorBase)
         self.assertIsNotNone(OutputHandlerBase)
 
     def test_get_platform_returns_valid_value(self):
         """Test get_platform returns one of the expected values."""
-        from handfree.platform import get_platform
+        from context_aware_whisper.platform import get_platform
         result = get_platform()
         self.assertIn(result, ["macos", "windows", "linux", "unknown"])
 
     def test_factory_functions_exist(self):
         """Test factory functions are exported."""
-        from handfree.platform import (
+        from context_aware_whisper.platform import (
             create_hotkey_detector,
             create_output_handler,
             is_mute_detector_available,
@@ -126,22 +126,22 @@ class TestPlatformSpecificImports(unittest.TestCase):
         if sys.platform != "darwin":
             self.skipTest("Only runs on macOS")
 
-        from handfree.platform.macos.hotkey_detector import MacOSHotkeyDetector
-        from handfree.platform.macos.output_handler import MacOSOutputHandler
+        from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
+        from context_aware_whisper.platform.macos.output_handler import MacOSOutputHandler
         self.assertIsNotNone(MacOSHotkeyDetector)
         self.assertIsNotNone(MacOSOutputHandler)
 
     def test_windows_modules_importable_via_pynput(self):
         """Test Windows modules can be imported (pynput is available)."""
-        from handfree.platform.windows.hotkey_detector import WindowsHotkeyDetector
-        from handfree.platform.windows.output_handler import WindowsOutputHandler
+        from context_aware_whisper.platform.windows.hotkey_detector import WindowsHotkeyDetector
+        from context_aware_whisper.platform.windows.output_handler import WindowsOutputHandler
         self.assertIsNotNone(WindowsHotkeyDetector)
         self.assertIsNotNone(WindowsOutputHandler)
 
     def test_linux_modules_importable_via_pynput(self):
         """Test Linux modules can be imported (pynput is available)."""
-        from handfree.platform.linux.hotkey_detector import LinuxHotkeyDetector
-        from handfree.platform.linux.output_handler import LinuxOutputHandler
+        from context_aware_whisper.platform.linux.hotkey_detector import LinuxHotkeyDetector
+        from context_aware_whisper.platform.linux.output_handler import LinuxOutputHandler
         self.assertIsNotNone(LinuxHotkeyDetector)
         self.assertIsNotNone(LinuxOutputHandler)
 
@@ -174,8 +174,8 @@ class TestFactoryGracefulDegradation(unittest.TestCase):
     @patch.object(sys, 'platform', 'freebsd')
     def test_hotkey_detector_factory_unsupported_platform(self):
         """Test factory raises clear error on unsupported platform."""
-        from handfree.platform import create_hotkey_detector
-        from handfree.exceptions import PlatformNotSupportedError
+        from context_aware_whisper.platform import create_hotkey_detector
+        from context_aware_whisper.exceptions import PlatformNotSupportedError
 
         with self.assertRaises(PlatformNotSupportedError) as context:
             create_hotkey_detector(lambda: None, lambda: None)
@@ -186,8 +186,8 @@ class TestFactoryGracefulDegradation(unittest.TestCase):
     @patch.object(sys, 'platform', 'freebsd')
     def test_output_handler_factory_unsupported_platform(self):
         """Test factory raises clear error on unsupported platform."""
-        from handfree.platform import create_output_handler
-        from handfree.exceptions import PlatformNotSupportedError
+        from context_aware_whisper.platform import create_output_handler
+        from context_aware_whisper.exceptions import PlatformNotSupportedError
 
         with self.assertRaises(PlatformNotSupportedError) as context:
             create_output_handler()
@@ -284,17 +284,17 @@ class TestExceptionHierarchy(unittest.TestCase):
 
     def test_platform_not_supported_error_exists(self):
         """Test PlatformNotSupportedError exists."""
-        from handfree.exceptions import PlatformNotSupportedError
+        from context_aware_whisper.exceptions import PlatformNotSupportedError
         self.assertIsNotNone(PlatformNotSupportedError)
 
-    def test_platform_not_supported_error_inherits_handfree_error(self):
-        """Test PlatformNotSupportedError inherits from HandFreeError."""
-        from handfree.exceptions import HandFreeError, PlatformNotSupportedError
-        self.assertTrue(issubclass(PlatformNotSupportedError, HandFreeError))
+    def test_platform_not_supported_error_inherits_caw_error(self):
+        """Test PlatformNotSupportedError inherits from Context-Aware WhisperError."""
+        from context_aware_whisper.exceptions import Context-Aware WhisperError, PlatformNotSupportedError
+        self.assertTrue(issubclass(PlatformNotSupportedError, Context-Aware WhisperError))
 
     def test_platform_not_supported_error_inherits_exception(self):
         """Test PlatformNotSupportedError inherits from Exception."""
-        from handfree.exceptions import PlatformNotSupportedError
+        from context_aware_whisper.exceptions import PlatformNotSupportedError
         self.assertTrue(issubclass(PlatformNotSupportedError, Exception))
 
 
@@ -307,7 +307,7 @@ class TestPropertyBasedPlatformDetection(unittest.TestCase):
     def test_known_platforms_return_valid_result(self, platform_str):
         """Test that known platform strings return valid platform names."""
         with patch.object(sys, 'platform', platform_str):
-            from handfree.platform import get_platform
+            from context_aware_whisper.platform import get_platform
             result = get_platform()
             self.assertIn(result, ["macos", "windows", "linux"])
 
@@ -318,7 +318,7 @@ class TestPropertyBasedPlatformDetection(unittest.TestCase):
     def test_unknown_platforms_return_unknown(self, platform_str):
         """Test that unknown platform strings return 'unknown'."""
         with patch.object(sys, 'platform', platform_str):
-            from handfree.platform import get_platform
+            from context_aware_whisper.platform import get_platform
             result = get_platform()
             self.assertEqual(result, "unknown")
 
@@ -332,7 +332,7 @@ class TestPropertyBasedHotkeyDescription(unittest.TestCase):
     def test_hotkey_description_never_empty(self, platform_str):
         """Test hotkey description is never empty for known platforms."""
         with patch.object(sys, 'platform', platform_str):
-            from handfree.platform import get_default_hotkey_description
+            from context_aware_whisper.platform import get_default_hotkey_description
             result = get_default_hotkey_description()
             self.assertIsInstance(result, str)
             self.assertGreater(len(result), 0)
@@ -342,7 +342,7 @@ class TestPropertyBasedHotkeyDescription(unittest.TestCase):
     def test_hotkey_description_is_readable(self, platform_str):
         """Test hotkey description contains readable characters."""
         with patch.object(sys, 'platform', platform_str):
-            from handfree.platform import get_default_hotkey_description
+            from context_aware_whisper.platform import get_default_hotkey_description
             result = get_default_hotkey_description()
             # Should contain letters or known symbols
             self.assertTrue(any(c.isalpha() for c in result),
@@ -354,7 +354,7 @@ class TestOutputHandlerConsistency(unittest.TestCase):
 
     def test_all_output_handlers_have_same_methods(self):
         """Test all output handlers implement the same interface."""
-        from handfree.platform.base import OutputHandlerBase
+        from context_aware_whisper.platform.base import OutputHandlerBase
 
         required_methods = [
             'copy_to_clipboard',
@@ -370,7 +370,7 @@ class TestOutputHandlerConsistency(unittest.TestCase):
 
     def test_all_hotkey_detectors_have_same_methods(self):
         """Test all hotkey detectors implement the same interface."""
-        from handfree.platform.base import HotkeyDetectorBase
+        from context_aware_whisper.platform.base import HotkeyDetectorBase
 
         required_methods = [
             'start',

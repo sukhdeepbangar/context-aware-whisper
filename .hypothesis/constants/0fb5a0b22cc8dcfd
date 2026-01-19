@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/src/handfree/ui/indicator.py
+# hypothesis_version: 6.150.2
+
+[0.3, 0.35, 0.55, 0.75, 0.85, 0.95, 100, 1500, '#1C1C1E', '#333333', '#34C759', '#FF3B30', '#FF6B5B', '#FF9500', '#FFFFFF', '-alpha', '-topmost', '-transparentcolor', '-type', '...', 'Arial', 'ERR', 'OK', 'REC', 'all', 'bold', 'bottom-center', 'bottom-left', 'bottom-right', 'center', 'darwin', 'error', 'help', 'idle', 'linux', 'macos', 'noActivates', 'notification', 'recording', 'right', 'setCanBecomeKey_', 'setCanBecomeMain_', 'setLevel_', 'splash', 'style', 'success', 'top', 'top-center', 'top-left', 'top-right', 'transcribing', 'unknown', 'white', 'win32', 'windows']

@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 from scipy.io import wavfile
 
-from handfree.audio_recorder import AudioRecorder
+from context_aware_whisper.audio_recorder import AudioRecorder
 
 
 class TestAudioRecorderInitialization:

@@ -20,9 +20,9 @@ import numpy as np
 from hypothesis import given, settings, strategies as st
 from scipy.io import wavfile
 
-from handfree.transcriber import Transcriber
-from handfree.local_transcriber import LocalTranscriber
-from handfree.exceptions import TranscriptionError, LocalTranscriptionError
+from context_aware_whisper.transcriber import Transcriber
+from context_aware_whisper.local_transcriber import LocalTranscriber
+from context_aware_whisper.exceptions import TranscriptionError, LocalTranscriptionError
 
 
 @runtime_checkable
@@ -62,7 +62,7 @@ class TestTranscriberInterfaceCompatibility(unittest.TestCase):
                 self.assertIsInstance(result, str)
 
         # Test Local transcriber with mock
-        with patch("handfree.local_transcriber.Model") as mock_model_class:
+        with patch("context_aware_whisper.local_transcriber.Model") as mock_model_class:
             mock_model = MagicMock()
             mock_model_class.return_value = mock_model
             segment = MagicMock()
@@ -98,7 +98,7 @@ class TestTranscriberInterfaceCompatibility(unittest.TestCase):
                 # Should not raise
 
         # Local transcriber
-        with patch("handfree.local_transcriber.Model") as mock_model_class:
+        with patch("context_aware_whisper.local_transcriber.Model") as mock_model_class:
             mock_model = MagicMock()
             mock_model_class.return_value = mock_model
             segment = MagicMock()
@@ -123,7 +123,7 @@ class TestTranscriberInterfaceCompatibility(unittest.TestCase):
 class TestLatencyComparison(unittest.TestCase):
     """Tests comparing latency characteristics of both transcribers."""
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_local_transcription_latency_measurable(self, mock_model_class):
         """Local transcription latency can be measured."""
         mock_model = MagicMock()
@@ -162,7 +162,7 @@ class TestLatencyComparison(unittest.TestCase):
                 self.assertGreater(elapsed, 0)
                 self.assertEqual(result, "Test transcription")
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_local_latency_consistent_across_calls(self, mock_model_class):
         """Local transcription latency is consistent across multiple calls."""
         mock_model = MagicMock()
@@ -203,7 +203,7 @@ class TestLatencyComparison(unittest.TestCase):
 class TestAudioDurationScaling(unittest.TestCase):
     """Tests for how transcription behaves with different audio durations."""
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_local_handles_variable_duration(self, mock_model_class):
         """Local transcriber handles audio of varying durations."""
         mock_model = MagicMock()
@@ -253,7 +253,7 @@ class TestAudioDurationScaling(unittest.TestCase):
 class TestErrorHandlingComparison(unittest.TestCase):
     """Tests comparing error handling between transcribers."""
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_local_raises_proper_exception_type(self, mock_model_class):
         """Local transcriber raises LocalTranscriptionError on failure."""
         mock_model = MagicMock()
@@ -279,7 +279,7 @@ class TestErrorHandlingComparison(unittest.TestCase):
                 with self.assertRaises(TranscriptionError):
                     transcriber.transcribe(audio_bytes)
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_both_handle_corrupted_audio(self, mock_model_class):
         """Both transcribers handle corrupted audio data."""
         # Local transcriber
@@ -325,7 +325,7 @@ class TestModelComparison(unittest.TestCase):
             transcriber = LocalTranscriber(model_name=model)
             self.assertEqual(transcriber.model_name, model)
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_different_models_produce_output(self, mock_model_class):
         """Different local models all produce valid output."""
         mock_model = MagicMock()
@@ -375,7 +375,7 @@ class TestMemoryUsageComparison(unittest.TestCase):
         transcriber.unload_model()
         self.assertFalse(transcriber.model_loaded)
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_local_transcriber_model_load_on_demand(self, mock_model_class):
         """Local transcriber loads model only when needed."""
         mock_model = MagicMock()
@@ -419,7 +419,7 @@ class TestMemoryUsageComparison(unittest.TestCase):
 class TestTranscriberSwitching(unittest.TestCase):
     """Tests for switching between transcription backends."""
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_can_use_both_transcribers_in_sequence(self, mock_model_class):
         """Both transcribers can be used sequentially in the same session."""
         mock_model = MagicMock()
@@ -446,7 +446,7 @@ class TestTranscriberSwitching(unittest.TestCase):
                 cloud_result = cloud_transcriber.transcribe(audio_bytes)
                 self.assertEqual(cloud_result, "Cloud transcription")
 
-    @patch("handfree.local_transcriber.Model")
+    @patch("context_aware_whisper.local_transcriber.Model")
     def test_transcribers_are_independent(self, mock_model_class):
         """Transcribers don't share state or interfere with each other."""
         mock_model = MagicMock()

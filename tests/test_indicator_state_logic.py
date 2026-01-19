@@ -63,9 +63,9 @@ def create_indicator_with_mocks(position="top-center", width=60, height=24):
     """Create a RecordingIndicator with mocked tkinter."""
     mock_window, mock_canvas = create_mock_tkinter()
 
-    with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-         patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
-        from handfree.ui.indicator import RecordingIndicator
+    with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+         patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        from context_aware_whisper.ui.indicator import RecordingIndicator
         indicator = RecordingIndicator(width=width, height=height, position=position)
         return indicator, mock_window, mock_canvas
 
@@ -81,7 +81,7 @@ class TestStateConfigurationProperties:
     @settings(max_examples=20)
     def test_all_states_have_valid_config(self, state):
         """Property: Every valid state has a complete configuration tuple."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         config = RecordingIndicator.STATE_CONFIG
         assert state in config
@@ -112,7 +112,7 @@ class TestStateConfigurationProperties:
     @settings(max_examples=20)
     def test_active_states_are_more_opaque_than_idle(self, state):
         """Property: All active states (non-idle) should be more opaque than idle."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         config = RecordingIndicator.STATE_CONFIG
         idle_opacity = config["idle"][3]
@@ -125,7 +125,7 @@ class TestStateConfigurationProperties:
 
     def test_all_colors_are_unique_except_error_recording(self):
         """Property: Background colors should be unique, except error uses same as recording."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         config = RecordingIndicator.STATE_CONFIG
         colors = {state: config[state][0] for state in config}
@@ -212,7 +212,7 @@ class TestAnimationProperties:
 
     def test_flash_timing_is_consistent(self):
         """Property: Flash animation timing should be internally consistent."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         # Animation step time should fit within total duration
         total_animation_time = RecordingIndicator.FLASH_STEPS * RecordingIndicator.FLASH_INTERVAL_MS
@@ -311,7 +311,7 @@ class TestPositionProperties:
         self, screen_width, screen_height, indicator_width, indicator_height
     ):
         """Property: Positioned indicator always stays within screen bounds."""
-        from handfree.ui.indicator import VALID_POSITIONS
+        from context_aware_whisper.ui.indicator import VALID_POSITIONS
 
         mock_window = MagicMock()
         mock_window.winfo_screenwidth.return_value = screen_width
@@ -320,10 +320,10 @@ class TestPositionProperties:
         mock_window.winfo_vrooty.return_value = 0
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
 
-            from handfree.ui.indicator import RecordingIndicator
+            from context_aware_whisper.ui.indicator import RecordingIndicator
 
             for position in VALID_POSITIONS:
                 indicator = RecordingIndicator(
@@ -376,7 +376,7 @@ class TestTransparencyProperties:
     @settings(max_examples=20)
     def test_draw_state_uses_config_opacity_by_default(self, state):
         """Property: Without override, _draw_state uses config opacity."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         indicator, mock_window, _ = create_indicator_with_mocks()
         indicator._current_state = state
@@ -473,7 +473,7 @@ class TestMultiMonitorProperties:
     @settings(max_examples=20)
     def test_display_offset_is_applied_to_position(self, offset_x, offset_y):
         """Property: Display offset is always applied to window position."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         mock_window = MagicMock()
         mock_window.winfo_screenwidth.return_value = 1920
@@ -482,8 +482,8 @@ class TestMultiMonitorProperties:
         mock_window.winfo_vrooty.return_value = offset_y
         mock_canvas = MagicMock()
 
-        with patch('handfree.ui.indicator.tk.Toplevel', return_value=mock_window), \
-             patch('handfree.ui.indicator.tk.Canvas', return_value=mock_canvas):
+        with patch('context_aware_whisper.ui.indicator.tk.Toplevel', return_value=mock_window), \
+             patch('context_aware_whisper.ui.indicator.tk.Canvas', return_value=mock_canvas):
 
             indicator = RecordingIndicator(position="top-center")
 
@@ -552,7 +552,7 @@ class TestStateTextProperties:
 
     def test_active_states_have_non_empty_text(self):
         """Property: All active (non-idle) states have non-empty display text."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         active_states = ["recording", "transcribing", "success", "error"]
 
@@ -562,14 +562,14 @@ class TestStateTextProperties:
 
     def test_idle_state_has_empty_text(self):
         """Property: Idle state has empty display text."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         text = RecordingIndicator.STATE_CONFIG["idle"][2]
         assert text == "", "Idle state should have empty text"
 
     def test_state_texts_are_short(self):
         """Property: All state texts should be short (for compact display)."""
-        from handfree.ui.indicator import RecordingIndicator
+        from context_aware_whisper.ui.indicator import RecordingIndicator
 
         max_length = 5  # Maximum reasonable length for indicator text
 

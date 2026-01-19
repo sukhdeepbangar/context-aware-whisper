@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/src/handfree/local_transcriber.py
+# hypothesis_version: 6.150.2
+
+['.wav', 'base', 'base.en', 'large-v1', 'large-v2', 'large-v3', 'medium', 'medium.en', 'small', 'small.en', 'tiny', 'tiny.en', '~/.cache/whisper']

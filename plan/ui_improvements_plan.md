@@ -21,7 +21,7 @@ Execute changes in this order to minimize integration issues:
 
 ### Step 1.1: Add `type_text_instant()` to macOS output handler
 
-**File:** `src/handfree/platform/macos/output_handler.py`
+**File:** `src/context_aware_whisper/platform/macos/output_handler.py`
 
 **Tasks:**
 - [x] Add `import time` at top of file
@@ -90,7 +90,7 @@ def type_text_instant(self, text: str) -> None:
 
 ### Step 1.2: Modify `output()` in base handler
 
-**File:** `src/handfree/platform/base.py`
+**File:** `src/context_aware_whisper/platform/base.py`
 
 **Tasks:**
 - [x] Remove the `copy_to_clipboard()` call on line 156
@@ -124,7 +124,7 @@ def output(self, text: str, use_paste: bool = False) -> None:
 
 ### Step 1.3: Add abstract method to base class
 
-**File:** `src/handfree/platform/base.py`
+**File:** `src/context_aware_whisper/platform/base.py`
 
 **Tasks:**
 - [x] Add `type_text_instant()` abstract method after `type_text_via_paste()`
@@ -147,8 +147,8 @@ def type_text_instant(self, text: str) -> None:
 ### Step 1.4: Implement for Windows/Linux
 
 **Files:**
-- `src/handfree/platform/windows/output_handler.py`
-- `src/handfree/platform/linux/output_handler.py`
+- `src/context_aware_whisper/platform/windows/output_handler.py`
+- `src/context_aware_whisper/platform/linux/output_handler.py`
 
 **Tasks:**
 - [x] Add `type_text_instant()` method with full clipboard save/restore functionality
@@ -159,7 +159,7 @@ def type_text_instant(self, text: str) -> None:
 
 ### Step 2.1: Remove notification method and calls
 
-**File:** `src/handfree/hotkey_detector.py` (non-platform-specific detector)
+**File:** `src/context_aware_whisper/hotkey_detector.py` (non-platform-specific detector)
 
 **Note:** The `_show_indicator()` method was in the non-platform-specific `HotkeyDetector`
 class, not in the platform-specific `MacOSHotkeyDetector`.
@@ -186,7 +186,7 @@ class, not in the platform-specific `MacOSHotkeyDetector`.
 
 ### Step 3.1: Update hotkey detection ✅
 
-**File:** `src/handfree/platform/macos/hotkey_detector.py`
+**File:** `src/context_aware_whisper/platform/macos/hotkey_detector.py`
 
 **Completed Tasks:**
 - [x] Added SHIFT_FLAG constant after CMD_FLAG (line 31):
@@ -214,7 +214,7 @@ class, not in the platform-specific `MacOSHotkeyDetector`.
 
 ### Step 3.2: Update history panel UI ✅
 
-**File:** `src/handfree/ui/history.py`
+**File:** `src/context_aware_whisper/ui/history.py`
 
 **Completed Tasks:**
 - [x] Updated hints array in `_create_footer_hints()` (lines 140-144):
@@ -247,7 +247,7 @@ class, not in the platform-specific `MacOSHotkeyDetector`.
 
 ### Step 4.1: Add animation constants
 
-**File:** `src/handfree/ui/indicator.py`
+**File:** `src/context_aware_whisper/ui/indicator.py`
 
 **Tasks:**
 - [x] Add constants after FLASH_INTERVAL_MS (around line 54):
@@ -268,7 +268,7 @@ BAR_BG_COLOR = "#1C1C1E"
 
 ### Step 4.2: Add instance variables ✅
 
-**File:** `src/handfree/ui/indicator.py`
+**File:** `src/context_aware_whisper/ui/indicator.py`
 
 **Tasks:**
 - [x] Add to `__init__()` after `self._transparency_supported = True` (around line 79):
@@ -285,7 +285,7 @@ self._bar_directions: List[int] = [1, -1, 1, -1]  # Alternating up/down
 
 ### Step 4.3: Add bar drawing method ✅
 
-**File:** `src/handfree/ui/indicator.py`
+**File:** `src/context_aware_whisper/ui/indicator.py`
 
 **Tasks:**
 - [x] Add method after `_draw_state()`:
@@ -322,7 +322,7 @@ def _draw_recording_bars(self) -> None:
 
 ### Step 4.4: Add animation method ✅
 
-**File:** `src/handfree/ui/indicator.py`
+**File:** `src/context_aware_whisper/ui/indicator.py`
 
 **Tasks:**
 - [x] Add method after `_draw_recording_bars()`:
@@ -358,7 +358,7 @@ def _animate_bars(self) -> None:
 
 ### Step 4.5: Add stop animation method ✅
 
-**File:** `src/handfree/ui/indicator.py`
+**File:** `src/context_aware_whisper/ui/indicator.py`
 
 **Tasks:**
 - [x] Add method after `_animate_bars()`:
@@ -379,7 +379,7 @@ def _stop_bar_animation(self) -> None:
 
 ### Step 4.6: Modify `_draw_state()` for recording ✅
 
-**File:** `src/handfree/ui/indicator.py`
+**File:** `src/context_aware_whisper/ui/indicator.py`
 
 **Tasks:**
 - [x] Modify `_draw_state()` to handle recording state specially:
@@ -417,7 +417,7 @@ def _draw_state(self, opacity_override: Optional[float] = None) -> None:
 
 ### Step 4.7: Update cleanup methods ✅
 
-**File:** `src/handfree/ui/indicator.py`
+**File:** `src/context_aware_whisper/ui/indicator.py`
 
 **Tasks:**
 - [x] Update `_cancel_animations()` to include bar animation:
@@ -483,7 +483,7 @@ Menu bar icon feature has been fully implemented with the following:
 
 ### Step 5.2: Create menu bar component ✅
 
-**File:** `src/handfree/ui/menubar.py` (NEW)
+**File:** `src/context_aware_whisper/ui/menubar.py` (NEW)
 
 **Completed Tasks:**
 - [x] Created new file with PyObjC-based NSStatusItem implementation
@@ -494,9 +494,9 @@ Menu bar icon feature has been fully implemented with the following:
   - Red circle icon (🔴) for recording state
   - Status menu item showing current state
   - "Show History" menu item
-  - "Quit HandFree" menu item
+  - "Quit Context-Aware Whisper" menu item
 - [x] Added thread-safe set_recording() method
-- [x] Added HANDFREE_DISABLE_MENUBAR environment variable support for tests
+- [x] Added CAW_DISABLE_MENUBAR environment variable support for tests
 - [x] Exported from ui/__init__.py
 
 **Original code from plan (replaced with PyObjC implementation):
@@ -524,7 +524,7 @@ else:
 
 class MenuBarApp:
     """
-    macOS menu bar application for HandFree.
+    macOS menu bar application for Context-Aware Whisper.
 
     Shows a microphone icon that changes color based on recording state.
     Provides menu items for history toggle and quit.
@@ -555,7 +555,7 @@ class MenuBarApp:
 
         # Create the app
         self._app = rumps.App(
-            "HandFree",
+            "Context-Aware Whisper",
             icon=None,
             title=self.ICON_IDLE,
             quit_button=None  # We'll add our own
@@ -568,7 +568,7 @@ class MenuBarApp:
         self._history_item = rumps.MenuItem("Show History")
         self._history_item.set_callback(self._handle_history_click)
 
-        self._quit_item = rumps.MenuItem("Quit HandFree")
+        self._quit_item = rumps.MenuItem("Quit Context-Aware Whisper")
         self._quit_item.set_callback(self._handle_quit_click)
 
         # Build menu
@@ -634,9 +634,9 @@ def create_menubar_app(
         return None
 ```
 
-### Step 5.3: Integrate with HandFreeUI ✅
+### Step 5.3: Integrate with Context-Aware WhisperUI ✅
 
-**File:** `src/handfree/ui/app.py`
+**File:** `src/context_aware_whisper/ui/app.py`
 
 **Completed Tasks:**
 - [x] Added import at top
@@ -652,7 +652,7 @@ def create_menubar_app(
 **File:** `main.py`
 
 **Completed Tasks:**
-- [x] Added `menubar_enabled=True` and `on_quit=self._handle_quit_from_menu` to HandFreeUI
+- [x] Added `menubar_enabled=True` and `on_quit=self._handle_quit_from_menu` to Context-Aware WhisperUI
 - [x] Added `_handle_quit_from_menu()` method
 - [x] Updated `_print_banner()` to show menu bar hint
 - [x] Menu bar state updates automatically via `set_state()` in `handle_start()` and `handle_stop()`
@@ -667,8 +667,8 @@ def create_menubar_app(
 - [x] Tests for MenuBarDelegate callback handling
 - [x] Tests for create_menubar_app factory function
 - [x] Property-based tests using Hypothesis
-- [x] Integration tests with HandFreeUI
-- [x] Added HANDFREE_DISABLE_MENUBAR=1 to conftest.py for test safety
+- [x] Integration tests with Context-Aware WhisperUI
+- [x] Added CAW_DISABLE_MENUBAR=1 to conftest.py for test safety
 
 **Test Results:** All 1015 tests pass (19 passed, 6 skipped for menu bar tests)
 
@@ -736,7 +736,7 @@ Focus preservation has been fully implemented with the following mechanisms:
 
 ### Step 6.2: Indicator Window Focus Prevention ✅
 
-**File:** `src/handfree/ui/indicator.py`
+**File:** `src/context_aware_whisper/ui/indicator.py`
 
 **Completed Tasks:**
 - [x] `overrideredirect(True)` set on line 89
@@ -768,7 +768,7 @@ def _setup_focus_prevention(self) -> None:
 
 ### Step 6.3: Quartz Event Tap Verified ✅
 
-**File:** `src/handfree/platform/macos/hotkey_detector.py`
+**File:** `src/context_aware_whisper/platform/macos/hotkey_detector.py`
 
 **Completed Tasks:**
 - [x] Event tap uses `kCGEventTapOptionListenOnly` on line 91 ✓

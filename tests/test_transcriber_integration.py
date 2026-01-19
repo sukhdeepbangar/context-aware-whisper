@@ -11,9 +11,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from handfree.config import Config
-from handfree.transcriber import Transcriber
-from handfree.local_transcriber import LocalTranscriber
+from context_aware_whisper.config import Config
+from context_aware_whisper.transcriber import Transcriber
+from context_aware_whisper.local_transcriber import LocalTranscriber
 from main import get_transcriber
 
 
@@ -225,7 +225,7 @@ class TestConfigTranscriberValidation:
         )
         with pytest.raises(ValueError) as exc_info:
             config.validate()
-        assert "HANDFREE_TRANSCRIBER" in str(exc_info.value)
+        assert "CAW_TRANSCRIBER" in str(exc_info.value)
 
     def test_config_requires_groq_key_for_groq_transcriber(self):
         """Config requires GROQ_API_KEY when transcriber is groq."""
@@ -245,7 +245,7 @@ class TestConfigTranscriberValidation:
         )
         with pytest.raises(ValueError) as exc_info:
             config.validate()
-        assert "HANDFREE_WHISPER_MODEL" in str(exc_info.value)
+        assert "CAW_WHISPER_MODEL" in str(exc_info.value)
 
 
 if __name__ == "__main__":

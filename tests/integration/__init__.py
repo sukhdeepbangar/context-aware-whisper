@@ -1,1 +1,1 @@
-"""Integration tests for HandFree application."""
+"""Integration tests for Context-Aware Whisper application."""

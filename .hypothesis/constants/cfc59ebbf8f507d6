@@ -1,0 +1,4 @@
+# file: /Users/sukhdeepsingh/projects/ClaudeProjects/handfree/src/handfree/platform/macos/output_handler.py
+# hypothesis_version: 6.150.2
+
+[0.05, '"', '-e', 'AXFocusedUIElement', 'AXSelectedText', 'AXSelectedTextRange', 'AXValue', '\\', '\\"', '\\\\', 'osascript']
