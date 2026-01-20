@@ -21,6 +21,13 @@ import pytest
 from hypothesis import given, strategies as st, settings, assume
 
 
+# Skip marker for macOS-specific tests
+macos_only = pytest.mark.skipif(
+    sys.platform != "darwin",
+    reason="macOS-specific hotkey tests"
+)
+
+
 # Mock Quartz constants and functions
 class MockQuartz:
     """Mock Quartz module for testing."""
@@ -57,6 +64,7 @@ CMD_FLAG = 0x100000  # kCGEventFlagMaskCommand
 SHIFT_FLAG = 0x20000  # kCGEventFlagMaskShift
 
 
+@macos_only
 class TestHistoryHotkeyDescription(unittest.TestCase):
     """Tests for updated history hotkey description."""
 
@@ -87,6 +95,7 @@ class TestHistoryHotkeyDescription(unittest.TestCase):
         )
 
 
+@macos_only
 class TestHistoryHotkeyDetection(unittest.TestCase):
     """Tests for history hotkey detection with Cmd+Shift+H."""
 
@@ -192,6 +201,7 @@ class TestHistoryHotkeyDetection(unittest.TestCase):
         detector._event_callback(None, kCGEventKeyDown, event, None)
 
 
+@macos_only
 class TestHistoryHotkeyConstants(unittest.TestCase):
     """Test that SHIFT_FLAG constant exists and is correct."""
 
@@ -216,6 +226,7 @@ class TestHistoryHotkeyConstants(unittest.TestCase):
         )
 
 
+@macos_only
 class TestHistoryHotkeyPropertyBased:
     """Property-based tests using Hypothesis for modifier combinations."""
 
@@ -308,6 +319,7 @@ class TestHistoryPanelUIHints(unittest.TestCase):
             self.assertEqual(modifier, "Ctrl")
 
 
+@macos_only
 class TestHistoryHotkeyNotConflictWithSystem(unittest.TestCase):
     """Tests verifying Cmd+Shift+H doesn't conflict with system shortcuts."""
 
@@ -332,6 +344,7 @@ class TestHistoryHotkeyNotConflictWithSystem(unittest.TestCase):
         self.assertEqual(result, event)
 
 
+@macos_only
 class TestHistoryHotkeyIntegration(unittest.TestCase):
     """Integration tests for the complete hotkey change."""
 

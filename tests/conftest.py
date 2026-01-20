@@ -108,6 +108,19 @@ def _setup_global_mocks():
             mock_rumps.clicked = MagicMock()
             sys.modules['rumps'] = mock_rumps
 
+    # Mock pynput if DISPLAY not available (headless CI on Linux)
+    if sys.platform.startswith('linux') and not os.environ.get('DISPLAY'):
+        if 'pynput' not in sys.modules:
+            mock_keyboard = MagicMock()
+            mock_keyboard.Listener = MagicMock()
+            mock_keyboard.Key = MagicMock()
+            mock_keyboard.Key.ctrl_l = MagicMock(name='ctrl_l')
+            mock_keyboard.Key.ctrl_r = MagicMock(name='ctrl_r')
+            mock_keyboard.Key.shift = MagicMock(name='shift')
+            mock_keyboard.Key.space = MagicMock(name='space')
+            sys.modules['pynput'] = MagicMock()
+            sys.modules['pynput.keyboard'] = mock_keyboard
+
 
 # Run mocks setup immediately when conftest is loaded
 _setup_global_mocks()

@@ -270,6 +270,12 @@ def get_default_hotkey_description() -> str:
         return "Unknown"
 
 
+# Export platform submodules for patching in tests
+# These are imported lazily to avoid importing platform-specific code on all platforms
+from context_aware_whisper.platform import linux
+from context_aware_whisper.platform import windows
+from context_aware_whisper.platform import macos
+
 __all__ = [
     "get_platform",
     "get_platform_error_message",
@@ -280,4 +286,7 @@ __all__ = [
     "HotkeyDetectorBase",
     "OutputHandlerBase",
     "PLATFORM_ERROR_MESSAGES",
+    "linux",
+    "windows",
+    "macos",
 ]
