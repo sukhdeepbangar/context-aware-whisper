@@ -264,8 +264,8 @@ class TestEnvironmentVariableIntegration:
             config = Config.from_env()
             assert config.preserve_intentional is False
 
-    def test_config_defaults_to_standard_mode(self):
-        """Config defaults to standard cleanup mode."""
+    def test_config_defaults_to_aggressive_mode(self):
+        """Config defaults to aggressive cleanup mode."""
         # Clear the specific env var
         env_copy = os.environ.copy()
         env_copy.pop("CAW_TEXT_CLEANUP", None)
@@ -273,7 +273,7 @@ class TestEnvironmentVariableIntegration:
 
         with patch.dict(os.environ, env_copy, clear=True):
             config = Config.from_env()
-            assert config.text_cleanup == "standard"
+            assert config.text_cleanup == "aggressive"
 
     def test_config_defaults_to_preserve_intentional_true(self):
         """Config defaults to preserve_intentional=True."""

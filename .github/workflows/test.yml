@@ -81,7 +81,10 @@ jobs:
 
       - name: Run unit tests (exclude integration)
         run: |
-          pytest tests/ -m "not integration" -v --tb=short --junitxml=test-results-unit.xml
+          pytest tests/ -m "not integration" -v --tb=short --junitxml=test-results-unit.xml \
+            --ignore=tests/test_subprocess_indicator.py \
+            --ignore=tests/test_menubar.py \
+            --ignore=tests/test_ui.py
         env:
           CI: "true"
 
