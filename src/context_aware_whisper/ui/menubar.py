@@ -12,6 +12,9 @@ from typing import Callable, Optional
 
 # Only import PyObjC on macOS
 MENUBAR_AVAILABLE = False
+NSObject = object  # Default base class for non-macOS
+objc = None
+
 if sys.platform == "darwin":
     try:
         import objc
@@ -37,7 +40,8 @@ class MenuBarDelegate(NSObject):
     _quit_callback = None
 
     def init(self):
-        self = objc.super(MenuBarDelegate, self).init()
+        if objc is not None:
+            self = objc.super(MenuBarDelegate, self).init()
         return self
 
     def setHistoryCallback_(self, callback):
