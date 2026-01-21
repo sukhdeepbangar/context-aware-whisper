@@ -64,11 +64,16 @@ Output only the corrected text, nothing else:"""
     # Default local model for aggressive mode
     DEFAULT_MODEL = "mlx-community/Phi-3-mini-4k-instruct-4bit"
 
+    # Default chunk size for batch processing (characters)
+    # ~500 chars = ~100-125 tokens, safe for most models
+    DEFAULT_CHUNK_SIZE = 500
+
     def __init__(
         self,
         mode: CleanupMode = CleanupMode.STANDARD,
         model_name: Optional[str] = None,
         preserve_intentional: bool = True,
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
     ):
         """
         Initialize text cleaner.
@@ -78,10 +83,13 @@ Output only the corrected text, nothing else:"""
             model_name: Local model name for AGGRESSIVE mode (MLX model).
                        Default: mlx-community/Phi-3-mini-4k-instruct-4bit
             preserve_intentional: Preserve intentional patterns
+            chunk_size: Max characters per chunk for batch processing in
+                       AGGRESSIVE mode. Default: 500 (~100-125 tokens)
         """
         self.mode = mode
         self.model_name = model_name or self.DEFAULT_MODEL
         self.preserve_intentional = preserve_intentional
+        self.chunk_size = chunk_size
 
         # Pre-compile regex patterns for performance
         self._compile_patterns()
@@ -93,6 +101,8 @@ Output only the corrected text, nothing else:"""
             re.IGNORECASE
         )
         self._ellipsis_pattern = re.compile(r'\.{2,}')
+        # Sentence boundary pattern for chunk splitting
+        self._sentence_boundary = re.compile(r'(?<=[.!?])\s+')
 
     def clean(self, text: str) -> str:
         """
@@ -151,34 +161,143 @@ Output only the corrected text, nothing else:"""
         return self._normalize_whitespace(result)
 
     def clean_aggressive(self, text: str) -> str:
-        """Use local LLM for intelligent cleanup with grammar correction."""
+        """
+        Use local LLM for intelligent cleanup with grammar correction.
+
+        For texts longer than chunk_size, splits into sentence-boundary
+        chunks and processes them in batches for better performance.
+        """
         if not text:
             return text
 
         try:
-            from context_aware_whisper.local_llm import generate, is_available
+            from context_aware_whisper.local_llm import is_available
 
             if not is_available():
                 logger.warning("MLX not available, falling back to standard cleanup")
                 return self.clean_standard(text)
 
-            cleaned = generate(
-                prompt=self.LLM_PROMPT.format(text=text),
-                max_tokens=len(text) * 2,
-                temperature=0.1,
-                model_name=self.model_name,
-            )
+            # Use batch processing for long texts
+            if len(text) > self.chunk_size:
+                return self._process_in_batches(text)
 
-            # Sanity check: if too much removed, fall back
-            if len(cleaned) < len(text) * 0.3:
-                logger.warning("LLM removed too much text, falling back to standard")
-                return self.clean_standard(text)
-
-            return cleaned
+            return self._clean_single_chunk(text)
 
         except Exception as e:
             logger.warning(f"Local LLM cleanup failed, using rule-based: {e}")
             return self.clean_standard(text)
+
+    def _split_into_chunks(self, text: str) -> List[str]:
+        """
+        Split text into chunks at sentence boundaries.
+
+        Attempts to keep chunks under chunk_size while respecting
+        sentence boundaries. If a single sentence exceeds chunk_size,
+        it will be kept as its own chunk.
+
+        Args:
+            text: Text to split into chunks.
+
+        Returns:
+            List of text chunks.
+        """
+        if len(text) <= self.chunk_size:
+            return [text]
+
+        # Split at sentence boundaries
+        sentences = self._sentence_boundary.split(text)
+        chunks: List[str] = []
+        current_chunk: List[str] = []
+        current_length = 0
+
+        for sentence in sentences:
+            sentence = sentence.strip()
+            if not sentence:
+                continue
+
+            sentence_len = len(sentence)
+
+            # If adding this sentence would exceed chunk_size
+            if current_length + sentence_len + 1 > self.chunk_size:
+                # Save current chunk if not empty
+                if current_chunk:
+                    chunks.append(' '.join(current_chunk))
+                    current_chunk = []
+                    current_length = 0
+
+                # If single sentence exceeds chunk_size, add it as its own chunk
+                if sentence_len > self.chunk_size:
+                    chunks.append(sentence)
+                else:
+                    current_chunk.append(sentence)
+                    current_length = sentence_len
+            else:
+                current_chunk.append(sentence)
+                current_length += sentence_len + 1  # +1 for space
+
+        # Add remaining sentences
+        if current_chunk:
+            chunks.append(' '.join(current_chunk))
+
+        return chunks if chunks else [text]
+
+    def _clean_single_chunk(self, text: str) -> str:
+        """
+        Clean a single chunk of text using the LLM.
+
+        Args:
+            text: Text chunk to clean.
+
+        Returns:
+            Cleaned text, or standard-cleaned text on failure.
+        """
+        from context_aware_whisper.local_llm import generate
+
+        cleaned = generate(
+            prompt=self.LLM_PROMPT.format(text=text),
+            max_tokens=len(text) * 2,
+            temperature=0.1,
+            model_name=self.model_name,
+        )
+
+        # Sanity check: if too much removed, fall back
+        if len(cleaned) < len(text) * 0.3:
+            logger.warning("LLM removed too much text, falling back to standard")
+            return self.clean_standard(text)
+
+        return cleaned
+
+    def _process_in_batches(self, text: str) -> str:
+        """
+        Process long text by splitting into chunks and cleaning each.
+
+        This approach:
+        1. Splits text at sentence boundaries into manageable chunks
+        2. Processes each chunk with the LLM
+        3. Joins the cleaned chunks back together
+
+        Args:
+            text: Long text to process.
+
+        Returns:
+            Cleaned text with all chunks processed.
+        """
+        chunks = self._split_into_chunks(text)
+        logger.debug(f"Processing {len(chunks)} chunks for text of length {len(text)}")
+
+        cleaned_chunks: List[str] = []
+        for i, chunk in enumerate(chunks):
+            try:
+                cleaned = self._clean_single_chunk(chunk)
+                cleaned_chunks.append(cleaned)
+                logger.debug(f"Chunk {i+1}/{len(chunks)}: {len(chunk)} -> {len(cleaned)} chars")
+            except Exception as e:
+                # On failure for a chunk, fall back to standard cleanup for that chunk
+                logger.warning(f"Chunk {i+1} failed, using standard: {e}")
+                cleaned_chunks.append(self.clean_standard(chunk))
+
+        result = ' '.join(cleaned_chunks)
+        return self._normalize_whitespace(result)
 
     def _remove_false_starts(self, text: str) -> str:
         """Remove text before correction markers."""

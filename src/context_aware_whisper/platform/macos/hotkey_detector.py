@@ -6,6 +6,7 @@ Hold Fn to record, release to transcribe.
 Also detects Cmd+Shift+H for history panel toggle.
 """
 
+import queue
 import threading
 from typing import Callable, Optional
 
@@ -52,9 +53,43 @@ class MacOSHotkeyDetector(HotkeyDetectorBase):
         self._tap = None
         self._running = False
         self._thread: Optional[threading.Thread] = None
+        self._callback_queue: queue.Queue = queue.Queue()
+        self._callback_thread: Optional[threading.Thread] = None
+
+    def _callback_worker(self) -> None:
+        """Process callbacks from queue in a separate thread.
+
+        This prevents blocking the CFRunLoop callback, which can cause
+        trace traps when doing heavy work (subprocess, SQLite, etc.).
+        """
+        while self._running:
+            try:
+                callback = self._callback_queue.get(timeout=0.1)
+                if callback is not None:
+                    callback()
+            except queue.Empty:
+                continue
+            except Exception as e:
+                print(f"Callback error: {e}")
+
+    def _dispatch_callback(self, callback: Callable[[], None]) -> None:
+        """Dispatch callback to worker thread or call directly.
+
+        If the callback worker is running, queue the callback for async processing.
+        Otherwise (e.g., in tests), call the callback directly.
+        """
+        if self._callback_thread and self._callback_thread.is_alive():
+            self._callback_queue.put(callback)
+        else:
+            # Worker not running (e.g., in tests) - call directly
+            callback()
 
     def _event_callback(self, proxy, event_type, event, refcon):
-        """Handle CGEvent callback for Fn key and Cmd+H detection."""
+        """Handle CGEvent callback for Fn key and Cmd+H detection.
+
+        Dispatches actual callbacks to a worker thread to avoid blocking
+        the CFRunLoop, which can cause trace traps on macOS.
+        """
         keycode = Quartz.CGEventGetIntegerValueField(
             event, Quartz.kCGKeyboardEventKeycode
         )
@@ -67,18 +102,18 @@ class MacOSHotkeyDetector(HotkeyDetectorBase):
             if fn_pressed and not self._is_recording:
                 # Fn pressed - start recording
                 self._is_recording = True
-                self.on_start()
+                self._dispatch_callback(self.on_start)
             elif not fn_pressed and self._is_recording:
                 # Fn released - stop recording
                 self._is_recording = False
-                self.on_stop()
+                self._dispatch_callback(self.on_stop)
 
         # Handle Cmd+Shift+H for history toggle
         elif event_type == kCGEventKeyDown and keycode == H_KEYCODE:
             cmd_pressed = (flags & CMD_FLAG) != 0
             shift_pressed = (flags & SHIFT_FLAG) != 0
             if cmd_pressed and shift_pressed and self.on_history_toggle:
-                self.on_history_toggle()
+                self._dispatch_callback(self.on_history_toggle)
 
         return event
 
@@ -119,6 +154,10 @@ class MacOSHotkeyDetector(HotkeyDetectorBase):
     def start(self) -> None:
         """Start listening for Fn key."""
         self._running = True
+        # Start callback worker thread (processes callbacks outside CFRunLoop)
+        self._callback_thread = threading.Thread(target=self._callback_worker, daemon=True)
+        self._callback_thread.start()
+        # Start event tap thread
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
         self._thread.start()
         print(f"Hotkey detector started. Hold {self.get_hotkey_description()} to record.")

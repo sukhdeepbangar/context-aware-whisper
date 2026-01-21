@@ -37,7 +37,7 @@ class Config:
     groq_api_key: Optional[str] = None
 
     # Transcriber selection
-    transcriber: str = "local"  # "groq" or "local"
+    transcriber: str = "groq"  # "groq" or "local"
 
     # Local transcription settings (whisper.cpp)
     whisper_model: str = "base.en"

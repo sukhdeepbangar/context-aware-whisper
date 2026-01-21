@@ -4,6 +4,7 @@ Captures audio from microphone and stores in memory buffer.
 """
 
 import io
+import threading
 from collections import deque
 from typing import Optional
 
@@ -26,6 +27,7 @@ class AudioRecorder:
         self.sample_rate = sample_rate
         self.channels = channels
         self.buffer: deque = deque()
+        self._lock = threading.Lock()
         self.stream: Optional[sd.InputStream] = None
         self._is_recording = False
 
@@ -34,14 +36,16 @@ class AudioRecorder:
         """Callback for audio stream - appends chunks to buffer."""
         if status:
             print(f"Audio callback status: {status}")
-        self.buffer.append(indata.copy())
+        with self._lock:
+            self.buffer.append(indata.copy())
 
     def start_recording(self) -> None:
         """Begin capturing audio from default input device."""
         if self._is_recording:
             return
 
-        self.buffer.clear()
+        with self._lock:
+            self.buffer.clear()
         self.stream = sd.InputStream(
             samplerate=self.sample_rate,
             channels=self.channels,
@@ -66,11 +70,12 @@ class AudioRecorder:
         self.stream = None
         self._is_recording = False
 
-        if not self.buffer:
-            return b''
+        with self._lock:
+            if not self.buffer:
+                return b''
 
-        # Combine all chunks
-        audio_data = np.concatenate(list(self.buffer))
+            # Combine all chunks
+            audio_data = np.concatenate(list(self.buffer))
 
         # Encode as WAV in memory
         wav_buffer = io.BytesIO()
@@ -81,14 +86,16 @@ class AudioRecorder:
 
     def get_duration(self) -> float:
         """Return current recording duration in seconds."""
-        if not self.buffer:
-            return 0.0
-        total_samples = sum(chunk.shape[0] for chunk in self.buffer)
-        return total_samples / self.sample_rate
+        with self._lock:
+            if not self.buffer:
+                return 0.0
+            total_samples = sum(chunk.shape[0] for chunk in self.buffer)
+            return total_samples / self.sample_rate
 
     def clear_buffer(self) -> None:
         """Discard any recorded audio."""
-        self.buffer.clear()
+        with self._lock:
+            self.buffer.clear()
 
     @property
     def is_recording(self) -> bool:
