@@ -301,6 +301,41 @@ pytest
 
             self.assertEqual(result, "C#, F#")
 
+    def test_windows_line_endings(self):
+        """Handles Windows-style CRLF line endings."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            vocab_file = Path(tmp_dir) / "vocabulary.txt"
+            vocab_file.write_bytes(b"Claude\r\ntmux\r\nkubectl\r\n")
+
+            result = load_vocabulary(vocab_file)
+
+            self.assertEqual(result, "Claude, tmux, kubectl")
+
+    def test_whitespace_only_lines(self):
+        """Ignores whitespace-only lines."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            vocab_file = Path(tmp_dir) / "vocabulary.txt"
+            vocab_file.write_text("Claude\n   \n\t\t\ntmux\n")
+
+            result = load_vocabulary(vocab_file)
+
+            self.assertEqual(result, "Claude, tmux")
+
+    def test_indented_comment(self):
+        """Whitespace before # is stripped, making it a comment."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            vocab_file = Path(tmp_dir) / "vocabulary.txt"
+            vocab_file.write_text("Claude\n  # indented comment\ntmux\n")
+
+            result = load_vocabulary(vocab_file)
+
+            # After strip(), "  # indented comment" becomes "# indented comment"
+            # which starts with #, so it's a comment
+            self.assertEqual(result, "Claude, tmux")
+
 
 def run_tests():
     """Run all tests."""

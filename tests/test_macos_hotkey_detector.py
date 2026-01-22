@@ -334,7 +334,12 @@ class TestMacOSHotkeyDetectorLifecycle(unittest.TestCase):
     @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
     @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')
     def test_start_sets_running_flag(self, mock_tap_create):
-        """Test start() sets running flag and creates thread."""
+        """Test start() sets running flag and creates threads.
+
+        The start() method creates two threads:
+        1. Callback worker thread (processes callbacks outside CFRunLoop)
+        2. Event tap thread (runs the CGEvent tap loop)
+        """
         from context_aware_whisper.platform.macos.hotkey_detector import MacOSHotkeyDetector
 
         detector = MacOSHotkeyDetector(lambda: None, lambda: None)
@@ -347,8 +352,9 @@ class TestMacOSHotkeyDetectorLifecycle(unittest.TestCase):
             detector.start()
 
             self.assertTrue(detector._running)
-            mock_threading.Thread.assert_called_once()
-            mock_thread.start.assert_called_once()
+            # Two threads created: callback worker and event tap
+            self.assertEqual(mock_threading.Thread.call_count, 2)
+            self.assertEqual(mock_thread.start.call_count, 2)
 
     @patch('context_aware_whisper.platform.macos.hotkey_detector.Quartz', MockQuartz)
     @patch('context_aware_whisper.platform.macos.hotkey_detector.CGEventTapCreate')

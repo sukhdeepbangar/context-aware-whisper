@@ -43,6 +43,32 @@ python main.py
 2. **Speak**
 3. **Release** - text appears at your cursor
 
+## Custom Vocabulary
+
+Improve transcription accuracy for domain-specific terms, proper nouns, and technical jargon by creating a vocabulary file:
+
+```bash
+mkdir -p ~/.config/context-aware-whisper
+cat > ~/.config/context-aware-whisper/vocabulary.txt << 'EOF'
+# Add words that are often misrecognized
+Claude
+Anthropic
+tmux
+kubectl
+pytest
+EOF
+```
+
+**Format:**
+- One word or phrase per line
+- Lines starting with `#` are comments
+- Empty lines are ignored
+- Changes take effect on the next transcription (no restart needed)
+
+**Custom location:** Set `CAW_VOCABULARY_FILE` environment variable to use a different path.
+
+See [examples/vocabulary.txt](examples/vocabulary.txt) for a starter template.
+
 ## Requirements
 
 - Python 3.10+

@@ -356,8 +356,8 @@ Add vocabulary spec to the quick links table.
 | 4.1 | Create vocabulary tests | `tests/test_vocabulary.py` | [x] |
 | 4.2 | Update transcriber tests | `tests/test_*.py` | [x] |
 | 5.1 | Create example vocabulary file | `examples/vocabulary.txt` | [x] |
-| 5.2 | Update README | `README.md` | [ ] |
-| 5.3 | Update spec README | `spec/README.md` | [ ] |
+| 5.2 | Update README | `README.md` | [x] |
+| 5.3 | Update spec README | `spec/README.md` | [x] |
 
 ## Verification Steps
 
