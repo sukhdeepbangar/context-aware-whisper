@@ -167,6 +167,58 @@ class TestTranscriberUnit(unittest.TestCase):
 
         self.assertEqual(result, "Text from object")
 
+    @patch('context_aware_whisper.transcriber.Groq')
+    def test_transcribe_with_prompt(self, mock_groq_class):
+        """Test transcription with vocabulary prompt."""
+        mock_client = MagicMock()
+        mock_groq_class.return_value = mock_client
+        mock_client.audio.transcriptions.create.return_value = "Claude and tmux"
+
+        transcriber = Transcriber()
+        audio_bytes = self._create_test_audio()
+        result = transcriber.transcribe(audio_bytes, prompt="Claude, tmux")
+
+        # Verify prompt was passed
+        call_kwargs = mock_client.audio.transcriptions.create.call_args[1]
+        self.assertEqual(call_kwargs['prompt'], "Claude, tmux")
+        self.assertEqual(result, "Claude and tmux")
+
+    @patch('context_aware_whisper.transcriber.Groq')
+    def test_transcribe_with_none_prompt(self, mock_groq_class):
+        """Test transcription with None prompt (default)."""
+        mock_client = MagicMock()
+        mock_groq_class.return_value = mock_client
+        mock_client.audio.transcriptions.create.return_value = "Hello world"
+
+        transcriber = Transcriber()
+        audio_bytes = self._create_test_audio()
+        result = transcriber.transcribe(audio_bytes)
+
+        # Verify prompt was passed as None
+        call_kwargs = mock_client.audio.transcriptions.create.call_args[1]
+        self.assertIsNone(call_kwargs['prompt'])
+
+    @patch('context_aware_whisper.transcriber.Groq')
+    def test_transcribe_with_all_parameters(self, mock_groq_class):
+        """Test transcription with language, prompt, and max_retries."""
+        mock_client = MagicMock()
+        mock_groq_class.return_value = mock_client
+        mock_client.audio.transcriptions.create.return_value = "Bonjour Claude"
+
+        transcriber = Transcriber()
+        audio_bytes = self._create_test_audio()
+        result = transcriber.transcribe(
+            audio_bytes,
+            language="fr",
+            prompt="Claude, Anthropic",
+            max_retries=5
+        )
+
+        call_kwargs = mock_client.audio.transcriptions.create.call_args[1]
+        self.assertEqual(call_kwargs['language'], "fr")
+        self.assertEqual(call_kwargs['prompt'], "Claude, Anthropic")
+        self.assertEqual(result, "Bonjour Claude")
+
     def _create_test_audio(self, duration_sec=1, sample_rate=16000):
         """Helper to create test audio bytes."""
         # Generate simple sine wave

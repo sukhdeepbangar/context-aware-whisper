@@ -1,0 +1,30 @@
+# Example vocabulary file for Context-Aware Whisper
+# Copy to: ~/.config/context-aware-whisper/vocabulary.txt
+#
+# Add words/phrases that are often misrecognized.
+# One entry per line. Lines starting with # are comments.
+
+# AI/ML terms
+Claude
+Anthropic
+OpenAI
+GPT
+LLM
+MLX
+
+# Development tools
+tmux
+kubectl
+pytest
+nginx
+Redis
+Docker
+
+# Programming
+async
+await
+TypeScript
+JavaScript
+Python
+
+# Add your custom terms below:

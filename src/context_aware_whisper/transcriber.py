@@ -29,14 +29,20 @@ class Transcriber:
         self.client = Groq(api_key=self.api_key)
         self.model = "whisper-large-v3-turbo"
 
-    def transcribe(self, audio_bytes: bytes, language: Optional[str] = None,
-                   max_retries: int = 3) -> str:
+    def transcribe(
+        self,
+        audio_bytes: bytes,
+        language: Optional[str] = None,
+        prompt: Optional[str] = None,
+        max_retries: int = 3
+    ) -> str:
         """
         Transcribe audio to text.
 
         Args:
             audio_bytes: WAV audio file as bytes
             language: Optional language code (e.g., "en"). Auto-detected if None.
+            prompt: Optional vocabulary hints (comma-separated words/phrases).
             max_retries: Maximum number of retry attempts on failure.
 
         Returns:
@@ -55,6 +61,7 @@ class Transcriber:
                     file=("audio.wav", audio_bytes),
                     model=self.model,
                     language=language,
+                    prompt=prompt,
                     response_format="text"
                 )
                 # The response is the text directly when response_format="text"

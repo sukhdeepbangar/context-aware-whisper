@@ -66,6 +66,9 @@ class Config:
     # Local LLM settings (for aggressive text cleanup on Apple Silicon)
     local_model: str = "mlx-community/Phi-3-mini-4k-instruct-4bit"
 
+    # Vocabulary file path (optional override)
+    vocabulary_file: Optional[str] = None
+
     @classmethod
     def from_env(cls) -> "Config":
         """
@@ -90,6 +93,8 @@ class Config:
             CAW_TEXT_CLEANUP: Optional. Text cleanup mode: off, light, standard, aggressive (default: standard).
             CAW_PRESERVE_INTENTIONAL: Optional. Preserve intentional patterns like emphasis (default: true).
             CAW_LOCAL_MODEL: Optional. Local MLX model for aggressive cleanup (default: mlx-community/Phi-3-mini-4k-instruct-4bit).
+            CAW_VOCABULARY_FILE: Optional. Custom vocabulary file path
+                                 (default: ~/.config/context-aware-whisper/vocabulary.txt).
 
         Returns:
             Config instance with loaded values.
@@ -140,6 +145,7 @@ class Config:
                 "CAW_LOCAL_MODEL",
                 "mlx-community/Phi-3-mini-4k-instruct-4bit"
             ),
+            vocabulary_file=os.environ.get("CAW_VOCABULARY_FILE"),
         )
 
     def validate(self) -> List[str]:

@@ -11,7 +11,7 @@ Design documentation for Context-Aware Whisper, a speech-to-text application for
 | [cross_platform_ui_spec.md](./cross_platform_ui_spec.md) | **Implemented** | Cross-platform support & UI framework |
 | [ui_improvements_spec.md](./ui_improvements_spec.md) | Partial | UI/UX enhancements |
 | [subprocess_indicator_spec.md](./subprocess_indicator_spec.md) | **Implemented** | Focus-preserving recording indicator |
-| [vocabulary_spec.md](./vocabulary_spec.md) | Planned | Custom vocabulary hints for transcription |
+| [vocabulary_spec.md](./vocabulary_spec.md) | **Implemented** | Custom vocabulary hints for transcription |
 
 ---
 

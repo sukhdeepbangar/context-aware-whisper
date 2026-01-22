@@ -11,7 +11,7 @@ Add vocabulary hints feature to improve transcription of domain-specific terms l
 ## Prerequisites
 
 - [x] Groq API supports `prompt` parameter
-- [ ] Verify pywhispercpp supports `initial_prompt` parameter
+- [x] Verify pywhispercpp supports `initial_prompt` parameter (confirmed via documentation)
 
 ## Implementation Tasks
 
@@ -348,14 +348,14 @@ Add vocabulary spec to the quick links table.
 
 | # | Task | File | Status |
 |---|------|------|--------|
-| 1.1 | Create vocabulary.py module | `src/.../vocabulary.py` | [ ] |
-| 2.1 | Update Groq transcriber | `src/.../transcriber.py` | [ ] |
-| 2.2 | Update local transcriber | `src/.../local_transcriber.py` | [ ] |
-| 3.1 | Update main.py integration | `src/.../main.py` | [ ] |
-| 3.2 | Update config.py (optional) | `src/.../config.py` | [ ] |
-| 4.1 | Create vocabulary tests | `tests/test_vocabulary.py` | [ ] |
-| 4.2 | Update transcriber tests | `tests/test_*.py` | [ ] |
-| 5.1 | Create example vocabulary file | `examples/vocabulary.txt` | [ ] |
+| 1.1 | Create vocabulary.py module | `src/.../vocabulary.py` | [x] |
+| 2.1 | Update Groq transcriber | `src/.../transcriber.py` | [x] |
+| 2.2 | Update local transcriber | `src/.../local_transcriber.py` | [x] |
+| 3.1 | Update main.py integration | `src/.../main.py` | N/A (no main.py, transcriber called directly) |
+| 3.2 | Update config.py (optional) | `src/.../config.py` | [x] |
+| 4.1 | Create vocabulary tests | `tests/test_vocabulary.py` | [x] |
+| 4.2 | Update transcriber tests | `tests/test_*.py` | [x] |
+| 5.1 | Create example vocabulary file | `examples/vocabulary.txt` | [x] |
 | 5.2 | Update README | `README.md` | [ ] |
 | 5.3 | Update spec README | `spec/README.md` | [ ] |
 

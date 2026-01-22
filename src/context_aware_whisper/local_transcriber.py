@@ -60,13 +60,19 @@ class LocalTranscriber:
                     f"Failed to load whisper model '{self.model_name}': {e}"
                 )
 
-    def transcribe(self, audio_bytes: bytes, language: Optional[str] = None) -> str:
+    def transcribe(
+        self,
+        audio_bytes: bytes,
+        language: Optional[str] = None,
+        prompt: Optional[str] = None
+    ) -> str:
         """
         Transcribe audio to text locally.
 
         Args:
             audio_bytes: WAV audio file as bytes (16kHz, mono, 16-bit)
             language: Language code (default None, uses model default)
+            prompt: Optional vocabulary hints (comma-separated words/phrases).
 
         Returns:
             Transcribed text string.
@@ -85,7 +91,11 @@ class LocalTranscriber:
                 temp_path = f.name
 
             try:
-                segments = self._model.transcribe(temp_path)
+                # Pass initial_prompt if vocabulary hints provided
+                if prompt:
+                    segments = self._model.transcribe(temp_path, initial_prompt=prompt)
+                else:
+                    segments = self._model.transcribe(temp_path)
                 text = " ".join(
                     segment.text.strip()
                     for segment in segments

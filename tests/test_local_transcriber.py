@@ -191,6 +191,64 @@ class TestLocalTranscriberUnit(unittest.TestCase):
         transcriber.unload_model()
         self.assertFalse(transcriber.model_loaded)
 
+    @patch('context_aware_whisper.local_transcriber.Model')
+    def test_transcribe_with_prompt(self, mock_model_class):
+        """Test transcription with vocabulary prompt."""
+        mock_model = MagicMock()
+        mock_model_class.return_value = mock_model
+
+        mock_segment = MagicMock()
+        mock_segment.text = "Claude and tmux"
+        mock_model.transcribe.return_value = [mock_segment]
+
+        transcriber = LocalTranscriber()
+        audio_bytes = self._create_test_audio()
+        result = transcriber.transcribe(audio_bytes, prompt="Claude, tmux")
+
+        # Verify initial_prompt was passed
+        call_args = mock_model.transcribe.call_args
+        self.assertIn('initial_prompt', call_args[1])
+        self.assertEqual(call_args[1]['initial_prompt'], "Claude, tmux")
+        self.assertEqual(result, "Claude and tmux")
+
+    @patch('context_aware_whisper.local_transcriber.Model')
+    def test_transcribe_without_prompt(self, mock_model_class):
+        """Test transcription without prompt doesn't pass initial_prompt."""
+        mock_model = MagicMock()
+        mock_model_class.return_value = mock_model
+
+        mock_segment = MagicMock()
+        mock_segment.text = "Hello world"
+        mock_model.transcribe.return_value = [mock_segment]
+
+        transcriber = LocalTranscriber()
+        audio_bytes = self._create_test_audio()
+        result = transcriber.transcribe(audio_bytes)
+
+        # Verify initial_prompt was NOT passed
+        call_args = mock_model.transcribe.call_args
+        self.assertNotIn('initial_prompt', call_args[1] if call_args[1] else {})
+        self.assertEqual(result, "Hello world")
+
+    @patch('context_aware_whisper.local_transcriber.Model')
+    def test_transcribe_with_none_prompt(self, mock_model_class):
+        """Test transcription with None prompt doesn't pass initial_prompt."""
+        mock_model = MagicMock()
+        mock_model_class.return_value = mock_model
+
+        mock_segment = MagicMock()
+        mock_segment.text = "Hello world"
+        mock_model.transcribe.return_value = [mock_segment]
+
+        transcriber = LocalTranscriber()
+        audio_bytes = self._create_test_audio()
+        result = transcriber.transcribe(audio_bytes, prompt=None)
+
+        # Verify initial_prompt was NOT passed
+        call_args = mock_model.transcribe.call_args
+        self.assertNotIn('initial_prompt', call_args[1] if call_args[1] else {})
+        self.assertEqual(result, "Hello world")
+
     def test_get_model_path(self):
         """Test get_model_path returns correct path."""
         transcriber = LocalTranscriber(model_name="base.en")
